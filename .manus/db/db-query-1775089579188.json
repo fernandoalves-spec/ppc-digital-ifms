@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `audit_logs` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int,\n\t`userEmail` varchar(320),\n\t`userName` varchar(255),\n\t`action` varchar(100) NOT NULL,\n\t`entity` varchar(100) NOT NULL,\n\t`entityId` int,\n\t`oldValue` json,\n\t`newValue` json,\n\t`ipAddress` varchar(45),\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `audit_logs_id` PRIMARY KEY(`id`)\n)",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ponF24KmxzA34f5.731a9001c1d3 --database VoUWC39FjZQeKuchCU6ewM --execute CREATE TABLE `audit_logs` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int,\n\t`userEmail` varchar(320),\n\t`userName` varchar(255),\n\t`action` varchar(100) NOT NULL,\n\t`entity` varchar(100) NOT NULL,\n\t`entityId` int,\n\t`oldValue` json,\n\t`newValue` json,\n\t`ipAddress` varchar(45),\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `audit_logs_id` PRIMARY KEY(`id`)\n)",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 411
+}
