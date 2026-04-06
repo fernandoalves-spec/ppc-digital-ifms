@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Building2, Plus, Pencil, Trash2, MapPin, Tags, CheckCircle2, XCircle } from "lucide-react";
+import { Building2, Plus, Pencil, Trash2, MapPin, Tags, Search } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
 
@@ -23,6 +24,7 @@ export default function CampusPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState({ name: "", city: "", state: "" });
   const [managingAreas, setManagingAreas] = useState<{ id: number; name: string } | null>(null);
+  const [areaSearch, setAreaSearch] = useState("");
 
   const { data: campusAreas = [] } = trpc.campus.getAreas.useQuery(
     { campusId: managingAreas?.id ?? 0 },
@@ -88,6 +90,19 @@ export default function CampusPage() {
 
   const campusAreaIds = new Set(campusAreas.map((a: any) => a.id));
 
+  const handleToggleArea = (areaId: number) => {
+    if (!isAdmin || !managingAreas) return;
+    if (campusAreaIds.has(areaId)) {
+      removeAreaMutation.mutate({ campusId: managingAreas.id, areaId });
+    } else {
+      addAreaMutation.mutate({ campusId: managingAreas.id, areaId });
+    }
+  };
+
+  const filteredAreas = (allAreas as any[]).filter((a: any) =>
+    a.name.toLowerCase().includes(areaSearch.toLowerCase())
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -151,7 +166,7 @@ export default function CampusPage() {
                   variant="outline"
                   size="sm"
                   className="w-full mt-3 text-xs"
-                  onClick={() => setManagingAreas({ id: campus.id, name: campus.name })}
+                  onClick={() => { setManagingAreas({ id: campus.id, name: campus.name }); setAreaSearch(""); }}
                 >
                   <Tags className="w-3.5 h-3.5 mr-1.5" />
                   Gerenciar Áreas Vinculadas
@@ -193,106 +208,81 @@ export default function CampusPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Modal: Gerenciar Áreas do Campus */}
+      {/* Modal: Gerenciar Áreas do Campus — CHECKLIST */}
       <Dialog open={!!managingAreas} onOpenChange={(v) => { if (!v) setManagingAreas(null); }}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Tags className="w-5 h-5 text-primary" />
               Áreas de Ensino — {managingAreas?.name}
             </DialogTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              Vincule as áreas de ensino disponíveis neste campus. A IA usará <strong>apenas estas áreas</strong> ao importar PPCs deste campus.
+              Marque as áreas de ensino disponíveis neste campus. A IA usará <strong>apenas estas áreas</strong> ao importar PPCs.
             </p>
           </DialogHeader>
 
-          <Tabs defaultValue="vinculadas">
-            <TabsList className="w-full">
-              <TabsTrigger value="vinculadas" className="flex-1">
-                Vinculadas ({campusAreas.length})
-              </TabsTrigger>
-              <TabsTrigger value="disponiveis" className="flex-1">
-                Todas as Áreas ({allAreas.length})
-              </TabsTrigger>
-            </TabsList>
+          {/* Barra de busca */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              placeholder="Buscar área..."
+              value={areaSearch}
+              onChange={(e) => setAreaSearch(e.target.value)}
+              className="pl-9 h-9"
+            />
+          </div>
 
-            <TabsContent value="vinculadas" className="mt-4 min-h-[120px]">
-              {campusAreas.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Tags className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                  <p className="text-sm">Nenhuma área vinculada a este campus.</p>
-                  <p className="text-xs mt-1">Vá para "Todas as Áreas" e clique para vincular.</p>
-                </div>
-              ) : (
-                <div className="flex flex-wrap gap-2 max-h-56 overflow-y-auto p-1">
-                  {campusAreas.map((area: any) => (
-                    <Badge
-                      key={area.id}
-                      variant="secondary"
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-sm"
-                      style={{ borderLeft: `3px solid ${area.color ?? "#6366f1"}` }}
-                    >
-                      <span>{area.name}</span>
-                      {isAdmin && (
-                        <button
-                          className="ml-1 hover:text-destructive transition-colors"
-                          onClick={() => removeAreaMutation.mutate({ campusId: managingAreas!.id, areaId: area.id })}
-                          title="Desvincular área"
-                        >
-                          <XCircle className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </TabsContent>
+          {/* Resumo */}
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-slate-600">
+              <strong className="text-green-700">{campusAreaIds.size}</strong> de {allAreas.length} áreas vinculadas
+            </span>
+          </div>
 
-            <TabsContent value="disponiveis" className="mt-4 min-h-[120px]">
-              {allAreas.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <p className="text-sm">Nenhuma área cadastrada no sistema.</p>
-                  <p className="text-xs mt-1">Cadastre áreas em "Áreas de Ensino" primeiro.</p>
-                </div>
-              ) : (
-                <>
-                  <div className="flex flex-wrap gap-2 max-h-56 overflow-y-auto p-1">
-                    {(allAreas as any[]).map((area: any) => {
-                      const isLinked = campusAreaIds.has(area.id);
-                      return (
-                        <Badge
-                          key={area.id}
-                          variant={isLinked ? "default" : "outline"}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-sm cursor-pointer hover:opacity-80 transition-opacity select-none"
-                          style={isLinked
-                            ? { backgroundColor: area.color ?? "#6366f1", color: "#fff", border: "none" }
-                            : { borderLeft: `3px solid ${area.color ?? "#6366f1"}` }
-                          }
-                          onClick={() => {
-                            if (!isAdmin || !managingAreas) return;
-                            if (isLinked) {
-                              removeAreaMutation.mutate({ campusId: managingAreas.id, areaId: area.id });
-                            } else {
-                              addAreaMutation.mutate({ campusId: managingAreas.id, areaId: area.id });
-                            }
-                          }}
-                          title={isAdmin ? (isLinked ? "Clique para desvincular" : "Clique para vincular") : ""}
-                        >
-                          {isLinked && <CheckCircle2 className="w-3.5 h-3.5" />}
-                          <span>{area.name}</span>
-                        </Badge>
-                      );
-                    })}
-                  </div>
-                  {isAdmin && (
-                    <p className="text-xs text-muted-foreground mt-3">
-                      Clique em uma área para vincular (verde) ou desvincular deste campus.
-                    </p>
-                  )}
-                </>
-              )}
-            </TabsContent>
-          </Tabs>
+          {/* Checklist com scroll */}
+          {allAreas.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Tags className="w-8 h-8 mx-auto mb-2 opacity-30" />
+              <p className="text-sm">Nenhuma área cadastrada no sistema.</p>
+              <p className="text-xs mt-1">Cadastre áreas em "Áreas de Ensino" primeiro.</p>
+            </div>
+          ) : (
+            <ScrollArea className="h-[350px] border rounded-lg">
+              <div className="p-1">
+                {filteredAreas.length === 0 ? (
+                  <p className="text-center text-sm text-slate-400 py-8">Nenhuma área encontrada para "{areaSearch}"</p>
+                ) : (
+                  filteredAreas.map((area: any) => {
+                    const isLinked = campusAreaIds.has(area.id);
+                    return (
+                      <label
+                        key={area.id}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer transition-colors hover:bg-slate-50 ${isLinked ? "bg-green-50/70" : ""}`}
+                      >
+                        <Checkbox
+                          checked={isLinked}
+                          onCheckedChange={() => handleToggleArea(area.id)}
+                          disabled={!isAdmin}
+                        />
+                        <div
+                          className="w-3 h-3 rounded-full shrink-0"
+                          style={{ backgroundColor: area.color ?? "#6366f1" }}
+                        />
+                        <span className={`text-sm ${isLinked ? "font-medium text-slate-800" : "text-slate-600"}`}>
+                          {area.name}
+                        </span>
+                        {isLinked && (
+                          <Badge variant="outline" className="ml-auto text-[10px] text-green-700 border-green-200 bg-green-50">
+                            Vinculada
+                          </Badge>
+                        )}
+                      </label>
+                    );
+                  })
+                )}
+              </div>
+            </ScrollArea>
+          )}
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setManagingAreas(null)}>Fechar</Button>

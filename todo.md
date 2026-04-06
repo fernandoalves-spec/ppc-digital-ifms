@@ -98,13 +98,18 @@
 - [x] Testes automatizados (20 testes passando)
 
 ## v1.5 — Reestruturação de Áreas por Campus
-- [ ] Criar tabela `campus_areas` (vínculo N:N entre campus e área)
-- [ ] Aplicar migração SQL
-- [ ] Backend: CRUD de campus_areas (vincular/desvincular áreas a um campus)
-- [ ] Backend: endpoint para listar áreas de um campus específico
-- [ ] Backend: remover auto-criação de áreas na extração IA
-- [ ] Backend: extração IA usa apenas áreas vinculadas ao campus, deixa sem área se indecisa
-- [ ] Frontend: página Áreas — gestão global sem vínculo com campus
-- [ ] Frontend: página Campus — seção para vincular áreas disponíveis naquele campus
-- [ ] Frontend: extração IA passa lista de áreas do campus para o prompt
-- [ ] Testes atualizados (20+ testes passando)
+- [x] Criar tabela `campus_areas` (vínculo N:N entre campus e área)
+- [x] Aplicar migração SQL
+- [x] Backend: CRUD de campus_areas (vincular/desvincular áreas a um campus)
+- [x] Backend: endpoint para listar áreas de um campus específico
+- [x] Backend: remover auto-criação de áreas na extração IA
+- [x] Backend: extração IA usa apenas áreas vinculadas ao campus, deixa sem área se indecisa
+- [x] Frontend: página Áreas — gestão global sem vínculo com campus
+- [x] Frontend: página Campus — seção para vincular áreas disponíveis naquele campus
+- [x] Frontend: extração IA passa lista de áreas do campus para o prompt
+- [x] Testes atualizados (20 testes passando)
+
+## v1.6 — Redesign: Checklist para Revisão PPC e Vinculação de Áreas
+- [x] Redesenhar revisão pós-extração PPC como checklist com scroll (em vez de modal pesado)
+- [x] Redesenhar vinculação de áreas ao campus como checklist com checkboxes
+- [x] Garantir barra de rolagem visível em ambas as interfaces

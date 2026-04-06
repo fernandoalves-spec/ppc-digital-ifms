@@ -7,13 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Upload, FileText, Loader2, Sparkles, BookOpen, Clock,
   Pencil, Check, X, ChevronDown, ChevronUp, Building2, GraduationCap,
-  AlertCircle, CheckCircle2, Tag
+  AlertCircle, CheckCircle2, Tag, Trash2
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -45,8 +44,6 @@ type ExtractedData = {
   subjects: ExtractedSubject[];
 };
 
-type EditingSubject = ExtractedSubject & { _idx: number };
-
 export default function PpcUploadPage() {
   const utils = trpc.useUtils();
   const { data: documents = [], isLoading } = trpc.ppc.list.useQuery();
@@ -68,6 +65,10 @@ export default function PpcUploadPage() {
       const d = data.data as ExtractedData;
       toast.success(`Extração concluída! ${d.subjects?.length ?? 0} disciplinas encontradas.`);
       setEditedData(JSON.parse(JSON.stringify(d)));
+      // Marcar todas as disciplinas como selecionadas por padrão
+      const selected = new Set<number>();
+      d.subjects.forEach((_, i) => selected.add(i));
+      setSelectedSubjects(selected);
       setShowReview(true);
     },
     onError: (e) => toast.error(`Erro na extração: ${e.message}`),
@@ -76,10 +77,11 @@ export default function PpcUploadPage() {
   const applyMutation = trpc.ppc.applyExtraction.useMutation({
     onSuccess: () => {
       utils.ppc.list.invalidate();
-      toast.success("Importação concluída! Campus, curso e disciplinas cadastrados com sucesso.");
+      toast.success("Importação concluída! Campus, curso e disciplinas cadastrados.");
       setShowReview(false);
       setEditedData(null);
       setApplyDocId(null);
+      setSelectedSubjects(new Set());
     },
     onError: (e) => toast.error(e.message),
   });
@@ -89,8 +91,9 @@ export default function PpcUploadPage() {
   const [editedData, setEditedData] = useState<ExtractedData | null>(null);
   const [applyDocId, setApplyDocId] = useState<number | null>(null);
   const [showReview, setShowReview] = useState(false);
-  const [editingSubject, setEditingSubject] = useState<EditingSubject | null>(null);
+  const [selectedSubjects, setSelectedSubjects] = useState<Set<number>>(new Set());
   const [expandedSubject, setExpandedSubject] = useState<number | null>(null);
+  const [editingIdx, setEditingIdx] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (f: File) => {
@@ -115,11 +118,7 @@ export default function PpcUploadPage() {
       return;
     }
     setApplyDocId(doc.id);
-    extractMutation.mutate({
-      documentId: doc.id,
-      fileUrl: doc.fileUrl,
-      campusId: selectedCampusId,
-    });
+    extractMutation.mutate({ documentId: doc.id, fileUrl: doc.fileUrl, campusId: selectedCampusId });
   };
 
   const handleOpenReview = (doc: any) => {
@@ -127,38 +126,65 @@ export default function PpcUploadPage() {
     if (!d) return toast.error("Dados de extração não encontrados.");
     setEditedData(JSON.parse(JSON.stringify(d)));
     setApplyDocId(doc.id);
+    const selected = new Set<number>();
+    d.subjects.forEach((_, i) => selected.add(i));
+    setSelectedSubjects(selected);
     setShowReview(true);
   };
 
   const handleApply = () => {
     if (!applyDocId || !editedData) return;
+    // Filtrar apenas as disciplinas selecionadas
+    const filteredSubjects = editedData.subjects.filter((_, i) => selectedSubjects.has(i));
+    if (filteredSubjects.length === 0) return toast.error("Selecione ao menos uma disciplina para importar.");
     applyMutation.mutate({
       documentId: applyDocId,
       campusName: editedData.campusName,
       courseName: editedData.courseName,
       courseType: editedData.courseType,
       duration: editedData.duration,
-      subjects: editedData.subjects,
+      subjects: filteredSubjects,
     });
   };
 
-  const updateEditedField = (field: keyof ExtractedData, value: any) => {
-    if (!editedData) return;
-    setEditedData({ ...editedData, [field]: value });
+  const toggleSubject = (idx: number) => {
+    const next = new Set(selectedSubjects);
+    if (next.has(idx)) next.delete(idx); else next.add(idx);
+    setSelectedSubjects(next);
   };
 
-  const openSubjectEdit = (idx: number) => {
+  const toggleAll = () => {
     if (!editedData) return;
-    setEditingSubject({ ...editedData.subjects[idx], _idx: idx });
+    if (selectedSubjects.size === editedData.subjects.length) {
+      setSelectedSubjects(new Set());
+    } else {
+      const all = new Set<number>();
+      editedData.subjects.forEach((_, i) => all.add(i));
+      setSelectedSubjects(all);
+    }
   };
 
-  const saveSubjectEdit = () => {
-    if (!editingSubject || !editedData) return;
+  const updateSubjectField = (idx: number, field: keyof ExtractedSubject, value: any) => {
+    if (!editedData) return;
     const newSubjects = [...editedData.subjects];
-    const { _idx, ...subjectData } = editingSubject;
-    newSubjects[_idx] = subjectData;
+    newSubjects[idx] = { ...newSubjects[idx], [field]: value };
     setEditedData({ ...editedData, subjects: newSubjects });
-    setEditingSubject(null);
+  };
+
+  const removeSubject = (idx: number) => {
+    if (!editedData) return;
+    const newSubjects = editedData.subjects.filter((_, i) => i !== idx);
+    setEditedData({ ...editedData, subjects: newSubjects });
+    // Recalcular seleção
+    const newSelected = new Set<number>();
+    let offset = 0;
+    for (let i = 0; i < editedData.subjects.length; i++) {
+      if (i === idx) { offset = 1; continue; }
+      if (selectedSubjects.has(i)) newSelected.add(i - offset);
+    }
+    setSelectedSubjects(newSelected);
+    setExpandedSubject(null);
+    setEditingIdx(null);
   };
 
   const semesterGroups = editedData
@@ -201,14 +227,14 @@ export default function PpcUploadPage() {
               </Select>
             </div>
             {selectedCampusId && campusAreas.length > 0 && (
-              <div className="text-xs text-slate-500 shrink-0">
-                <span className="font-semibold text-green-700">{campusAreas.length}</span> áreas disponíveis
-              </div>
+              <Badge variant="outline" className="text-xs text-green-700 border-green-200 bg-green-50 shrink-0">
+                {campusAreas.length} áreas vinculadas
+              </Badge>
             )}
             {selectedCampusId && campusAreas.length === 0 && (
-              <div className="text-xs text-amber-600 shrink-0">
-                ⚠ Nenhuma área vinculada a este campus
-              </div>
+              <Badge variant="outline" className="text-xs text-amber-700 border-amber-200 bg-amber-50 shrink-0">
+                Nenhuma área vinculada
+              </Badge>
             )}
           </div>
         </CardContent>
@@ -252,30 +278,6 @@ export default function PpcUploadPage() {
         </CardContent>
       </Card>
 
-      {/* Como funciona */}
-      <Card className="border-blue-100 bg-blue-50/50">
-        <CardContent className="pt-4 pb-4">
-          <div className="flex items-start gap-3">
-            <Sparkles className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
-            <div className="w-full">
-              <p className="text-sm font-semibold text-blue-900 mb-2">Como funciona a extração inteligente</p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {[
-                  { icon: <FileText className="w-4 h-4" />, title: "1. Upload do PDF", desc: "Envie o arquivo do PPC" },
-                  { icon: <Sparkles className="w-4 h-4" />, title: "2. Extração por IA", desc: "A IA lê e extrai curso, campus, disciplinas, ementas, referências e sugere a área de ensino de cada disciplina automaticamente" },
-                  { icon: <BookOpen className="w-4 h-4" />, title: "3. Revisão e Aplicação", desc: "Revise e edite tudo antes de importar. Campus e curso são criados automaticamente se não existirem" },
-                ].map((step, i) => (
-                  <div key={i} className="bg-white rounded-lg p-3 border border-blue-100">
-                    <div className="flex items-center gap-2 text-blue-700 mb-1">{step.icon}<span className="text-xs font-semibold">{step.title}</span></div>
-                    <p className="text-xs text-slate-600">{step.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Lista de Documentos */}
       <Card className="border-slate-100">
         <CardHeader className="pb-3">
@@ -308,7 +310,7 @@ export default function PpcUploadPage() {
                     )}
                     {doc.status === "extracted" && (
                       <Button size="sm" onClick={() => handleOpenReview(doc)} className="shrink-0 bg-amber-600 hover:bg-amber-700 text-white">
-                        <Pencil className="w-3 h-3 mr-1" />Revisar e Aplicar
+                        <Pencil className="w-3 h-3 mr-1" />Revisar
                       </Button>
                     )}
                     {doc.status === "approved" && <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />}
@@ -320,225 +322,252 @@ export default function PpcUploadPage() {
         </CardContent>
       </Card>
 
-      {/* Modal de Revisão Completa */}
-      <Dialog open={showReview} onOpenChange={setShowReview}>
-        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0">
-          <DialogHeader className="px-6 pt-6 pb-4 border-b">
-            <DialogTitle className="flex items-center gap-2 text-lg">
-              <Sparkles className="w-5 h-5 text-green-600" />
-              Revisar Dados Extraídos pela IA
-            </DialogTitle>
-            <p className="text-sm text-slate-500 mt-1">
-              Revise e edite todos os campos antes de importar. Campus e curso serão criados automaticamente se não existirem.
+      {/* ===== REVISÃO INLINE (CHECKLIST) ===== */}
+      {showReview && editedData && (
+        <Card className="border-green-200 bg-green-50/30">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg font-bold flex items-center gap-2 text-green-800">
+                <Sparkles className="w-5 h-5" /> Revisão dos Dados Extraídos
+              </CardTitle>
+              <Button variant="ghost" size="sm" onClick={() => { setShowReview(false); setEditedData(null); }}>
+                <X className="w-4 h-4 mr-1" /> Cancelar
+              </Button>
+            </div>
+            <p className="text-sm text-slate-600 mt-1">
+              Revise as informações extraídas pela IA. Marque/desmarque disciplinas e edite os campos necessários antes de importar.
             </p>
-          </DialogHeader>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {/* Informações do Curso */}
+            <div className="bg-white rounded-lg border border-slate-200 p-4 space-y-3">
+              <h3 className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                <GraduationCap className="w-4 h-4 text-green-600" /> Informações do Curso
+              </h3>
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5 flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+                <p className="text-xs text-amber-800">
+                  Se o campus ou curso não existirem no sistema, serão <strong>criados automaticamente</strong> ao aplicar.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs text-slate-500">Campus</Label>
+                  <Input value={editedData.campusName} onChange={(e) => setEditedData({ ...editedData, campusName: e.target.value })} className="h-9" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-slate-500">Curso</Label>
+                  <Input value={editedData.courseName} onChange={(e) => setEditedData({ ...editedData, courseName: e.target.value })} className="h-9" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-slate-500">Tipo</Label>
+                  <Select value={editedData.courseType} onValueChange={(v) => setEditedData({ ...editedData, courseType: v })}>
+                    <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {["Técnico", "Subsequente", "Graduação", "FIC", "Pós-graduação"].map(t => (
+                        <SelectItem key={t} value={t}>{t}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-slate-500">Duração (sem.)</Label>
+                  <Input type="number" min={1} max={12} value={editedData.duration} onChange={(e) => setEditedData({ ...editedData, duration: Number(e.target.value) })} className="h-9" />
+                </div>
+              </div>
+            </div>
 
-          {editedData && (
-            <ScrollArea className="flex-1 px-6 py-4">
-              <Tabs defaultValue="info">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="info" className="flex items-center gap-1.5">
-                    <GraduationCap className="w-3.5 h-3.5" />Informações do Curso
-                  </TabsTrigger>
-                  <TabsTrigger value="subjects" className="flex items-center gap-1.5">
-                    <BookOpen className="w-3.5 h-3.5" />
-                    Disciplinas ({editedData.subjects.length})
-                  </TabsTrigger>
-                </TabsList>
+            {/* Checklist de Disciplinas */}
+            <div className="bg-white rounded-lg border border-slate-200 p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-green-600" /> Disciplinas Extraídas
+                </h3>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-slate-500">
+                    {selectedSubjects.size} de {editedData.subjects.length} selecionadas
+                  </span>
+                  <Button variant="outline" size="sm" className="h-7 text-xs" onClick={toggleAll}>
+                    {selectedSubjects.size === editedData.subjects.length ? "Desmarcar Todas" : "Selecionar Todas"}
+                  </Button>
+                </div>
+              </div>
 
-                <TabsContent value="info" className="space-y-4">
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
-                    <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
-                    <p className="text-xs text-amber-800">
-                      Se o campus ou curso não existirem no sistema, serão <strong>criados automaticamente</strong> ao aplicar. Você poderá editar os dados depois.
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <Label className="flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5 text-slate-500" />Campus / Unidade</Label>
-                      <Input value={editedData.campusName} onChange={(e) => updateEditedField("campusName", e.target.value)} placeholder="Nome do campus" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="flex items-center gap-1.5"><GraduationCap className="w-3.5 h-3.5 text-slate-500" />Nome do Curso</Label>
-                      <Input value={editedData.courseName} onChange={(e) => updateEditedField("courseName", e.target.value)} placeholder="Nome do curso" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Tipo do Curso</Label>
-                      <Select value={editedData.courseType} onValueChange={(v) => updateEditedField("courseType", v)}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {["Técnico", "Subsequente", "Graduação", "FIC", "Pós-graduação"].map(t => (
-                            <SelectItem key={t} value={t}>{t}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Duração (semestres)</Label>
-                      <Input type="number" min={1} max={12} value={editedData.duration} onChange={(e) => updateEditedField("duration", Number(e.target.value))} />
-                    </div>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="subjects" className="space-y-3">
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-start gap-2">
-                    <Tag className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
-                    <p className="text-xs text-green-800">
-                      A IA sugeriu automaticamente a <strong>área de ensino</strong> de cada disciplina. Clique em <strong>Editar</strong> para ajustar nome, ementa, referências ou área. Expanda para visualizar ementa e referências.
-                    </p>
-                  </div>
+              <ScrollArea className="max-h-[500px] pr-1" style={{ maxHeight: "500px" }}>
+                <div className="space-y-4">
                   {Object.entries(semesterGroups)
                     .sort(([a], [b]) => Number(a) - Number(b))
                     .map(([sem, subs]) => (
                       <div key={sem}>
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 mb-2 sticky top-0 bg-white z-10 py-1">
                           <div className="h-px flex-1 bg-slate-200" />
-                          <span className="text-xs font-bold text-slate-500 px-2">{sem}º SEMESTRE</span>
+                          <span className="text-xs font-bold text-slate-500 bg-white px-2">{sem}º SEMESTRE</span>
                           <div className="h-px flex-1 bg-slate-200" />
                         </div>
-                        <div className="space-y-2">
-                          {subs.map((s) => (
-                            <div key={s._idx} className="border border-slate-100 rounded-lg bg-white overflow-hidden">
-                              <div
-                                className="flex items-center gap-3 p-3 cursor-pointer hover:bg-slate-50"
-                                onClick={() => setExpandedSubject(expandedSubject === s._idx ? null : s._idx)}
-                              >
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium text-slate-800">{s.name}</p>
-                                  <div className="flex flex-wrap items-center gap-2 mt-0.5">
-                                    <span className="text-xs text-slate-500 flex items-center gap-1"><Clock className="w-3 h-3" />{s.weeklyClasses} aulas/sem</span>
-                                    {s.totalHours && <span className="text-xs text-slate-500">{s.totalHours}h total</span>}
-                                    {s.suggestedArea && s.suggestedArea !== "Não identificada" && (
-                                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-green-700 border-green-200 bg-green-50">
-                                        <Tag className="w-2.5 h-2.5 mr-1" />{s.suggestedArea}
-                                      </Badge>
-                                    )}
-                                    {s.isElective && <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-purple-600 border-purple-200">Optativa</Badge>}
-                                    {s.isRemote && <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-blue-600 border-blue-200">EaD</Badge>}
+                        <div className="space-y-1">
+                          {subs.map((s) => {
+                            const isSelected = selectedSubjects.has(s._idx);
+                            const isEditing = editingIdx === s._idx;
+                            const isExpanded = expandedSubject === s._idx;
+                            return (
+                              <div key={s._idx} className={`rounded-lg border transition-all ${isSelected ? "border-green-200 bg-green-50/50" : "border-slate-100 bg-slate-50/50 opacity-60"}`}>
+                                {/* Linha principal: checkbox + nome + badges + ações */}
+                                <div className="flex items-center gap-3 px-3 py-2.5">
+                                  <Checkbox
+                                    checked={isSelected}
+                                    onCheckedChange={() => toggleSubject(s._idx)}
+                                    className="shrink-0"
+                                  />
+                                  <div
+                                    className="flex-1 min-w-0 cursor-pointer"
+                                    onClick={() => setExpandedSubject(isExpanded ? null : s._idx)}
+                                  >
+                                    <p className={`text-sm font-medium ${isSelected ? "text-slate-800" : "text-slate-500 line-through"}`}>
+                                      {s.name}
+                                    </p>
+                                    <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                                      <span className="text-[11px] text-slate-500 flex items-center gap-0.5">
+                                        <Clock className="w-3 h-3" />{s.weeklyClasses} aulas/sem
+                                      </span>
+                                      {s.totalHours && <span className="text-[11px] text-slate-500">{s.totalHours}h</span>}
+                                      {s.suggestedArea && s.suggestedArea !== "Não identificada" && (
+                                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-green-700 border-green-200 bg-green-50">
+                                          {s.suggestedArea}
+                                        </Badge>
+                                      )}
+                                      {(!s.suggestedArea || s.suggestedArea === "Não identificada") && (
+                                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-amber-600 border-amber-200 bg-amber-50">
+                                          Sem área
+                                        </Badge>
+                                      )}
+                                      {s.isElective && <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-purple-600 border-purple-200">Optativa</Badge>}
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-1 shrink-0">
+                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-blue-600" onClick={() => setEditingIdx(isEditing ? null : s._idx)}>
+                                      <Pencil className="w-3.5 h-3.5" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-red-600" onClick={() => removeSubject(s._idx)}>
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </Button>
+                                    <button onClick={() => setExpandedSubject(isExpanded ? null : s._idx)} className="text-slate-400 hover:text-slate-600 p-1">
+                                      {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                    </button>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-2 shrink-0">
-                                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={(e) => { e.stopPropagation(); openSubjectEdit(s._idx); }}>
-                                    <Pencil className="w-3 h-3 mr-1" />Editar
-                                  </Button>
-                                  {expandedSubject === s._idx ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
-                                </div>
+
+                                {/* Edição inline */}
+                                {isEditing && (
+                                  <div className="px-3 pb-3 pt-1 border-t border-slate-100 bg-white space-y-3">
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                      <div className="space-y-1">
+                                        <Label className="text-[11px] text-slate-500">Nome</Label>
+                                        <Input value={s.name} onChange={(e) => updateSubjectField(s._idx, "name", e.target.value)} className="h-8 text-sm" />
+                                      </div>
+                                      <div className="space-y-1">
+                                        <Label className="text-[11px] text-slate-500">Semestre</Label>
+                                        <Input type="number" min={1} max={12} value={s.semester} onChange={(e) => updateSubjectField(s._idx, "semester", Number(e.target.value))} className="h-8 text-sm" />
+                                      </div>
+                                      <div className="space-y-1">
+                                        <Label className="text-[11px] text-slate-500">Aulas/sem</Label>
+                                        <Input type="number" min={1} value={s.weeklyClasses} onChange={(e) => updateSubjectField(s._idx, "weeklyClasses", Number(e.target.value))} className="h-8 text-sm" />
+                                      </div>
+                                      <div className="space-y-1">
+                                        <Label className="text-[11px] text-slate-500">Carga Horária</Label>
+                                        <Input type="number" min={0} value={s.totalHours ?? ""} onChange={(e) => updateSubjectField(s._idx, "totalHours", e.target.value ? Number(e.target.value) : null)} className="h-8 text-sm" placeholder="h" />
+                                      </div>
+                                    </div>
+                                    <div className="space-y-1">
+                                      <Label className="text-[11px] text-slate-500">Área de Ensino</Label>
+                                      {campusAreas.length > 0 ? (
+                                        <Select
+                                          value={s.suggestedArea || "__none__"}
+                                          onValueChange={(v) => updateSubjectField(s._idx, "suggestedArea", v === "__none__" ? "" : v)}
+                                        >
+                                          <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="__none__">Sem área definida</SelectItem>
+                                            {(campusAreas as any[]).map((a: any) => (
+                                              <SelectItem key={a.id} value={a.name}>{a.name}</SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      ) : (
+                                        <Input value={s.suggestedArea} onChange={(e) => updateSubjectField(s._idx, "suggestedArea", e.target.value)} className="h-8 text-sm" placeholder="Sem áreas vinculadas ao campus" />
+                                      )}
+                                    </div>
+                                    <div className="flex gap-3">
+                                      <label className="flex items-center gap-1.5 cursor-pointer text-xs">
+                                        <input type="checkbox" checked={s.isElective} onChange={(e) => updateSubjectField(s._idx, "isElective", e.target.checked)} className="rounded" />
+                                        Optativa
+                                      </label>
+                                      <label className="flex items-center gap-1.5 cursor-pointer text-xs">
+                                        <input type="checkbox" checked={s.isRemote} onChange={(e) => updateSubjectField(s._idx, "isRemote", e.target.checked)} className="rounded" />
+                                        EaD
+                                      </label>
+                                    </div>
+                                    <div className="space-y-1">
+                                      <Label className="text-[11px] text-slate-500">Ementa</Label>
+                                      <Textarea value={s.syllabus ?? ""} onChange={(e) => updateSubjectField(s._idx, "syllabus", e.target.value || null)} rows={3} className="text-xs resize-none" />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <Label className="text-[11px] text-slate-500">Referências Bibliográficas</Label>
+                                      <Textarea value={s.bibliography ?? ""} onChange={(e) => updateSubjectField(s._idx, "bibliography", e.target.value || null)} rows={3} className="text-xs resize-none" />
+                                    </div>
+                                    <div className="flex justify-end">
+                                      <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setEditingIdx(null)}>
+                                        <Check className="w-3 h-3 mr-1" /> Fechar Edição
+                                      </Button>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Expandir ementa/referências (somente visualização) */}
+                                {isExpanded && !isEditing && (
+                                  <div className="px-3 pb-3 pt-1 border-t border-slate-100 bg-slate-50/50 space-y-2">
+                                    {s.syllabus ? (
+                                      <div>
+                                        <p className="text-[11px] font-semibold text-slate-500 mb-0.5">Ementa</p>
+                                        <p className="text-xs text-slate-700 bg-white rounded p-2 border border-slate-100 whitespace-pre-wrap">{s.syllabus}</p>
+                                      </div>
+                                    ) : <p className="text-xs text-slate-400 italic">Ementa não extraída</p>}
+                                    {s.bibliography ? (
+                                      <div>
+                                        <p className="text-[11px] font-semibold text-slate-500 mb-0.5">Referências</p>
+                                        <p className="text-xs text-slate-700 bg-white rounded p-2 border border-slate-100 whitespace-pre-wrap">{s.bibliography}</p>
+                                      </div>
+                                    ) : <p className="text-xs text-slate-400 italic">Referências não extraídas</p>}
+                                  </div>
+                                )}
                               </div>
-                              {expandedSubject === s._idx && (
-                                <div className="px-3 pb-3 space-y-2 border-t border-slate-100 pt-3 bg-slate-50">
-                                  {s.syllabus ? (
-                                    <div>
-                                      <p className="text-xs font-semibold text-slate-600 mb-1">Ementa</p>
-                                      <p className="text-xs text-slate-700 bg-white rounded p-2 border border-slate-100 whitespace-pre-wrap">{s.syllabus}</p>
-                                    </div>
-                                  ) : <p className="text-xs text-slate-400 italic">Ementa não extraída — clique em Editar para adicionar manualmente.</p>}
-                                  {s.bibliography ? (
-                                    <div>
-                                      <p className="text-xs font-semibold text-slate-600 mb-1">Referências Bibliográficas</p>
-                                      <p className="text-xs text-slate-700 bg-white rounded p-2 border border-slate-100 whitespace-pre-wrap">{s.bibliography}</p>
-                                    </div>
-                                  ) : <p className="text-xs text-slate-400 italic">Referências não extraídas — clique em Editar para adicionar manualmente.</p>}
-                                </div>
-                              )}
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     ))}
-                </TabsContent>
-              </Tabs>
-            </ScrollArea>
-          )}
+                </div>
+              </ScrollArea>
+            </div>
 
-          <DialogFooter className="px-6 py-4 border-t bg-slate-50 rounded-b-lg">
-            <Button variant="outline" onClick={() => setShowReview(false)}>Cancelar</Button>
-            <Button onClick={handleApply} disabled={applyMutation.isPending} className="bg-green-600 hover:bg-green-700">
-              {applyMutation.isPending
-                ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Importando...</>
-                : <><BookOpen className="w-4 h-4 mr-2" />Aplicar e Importar</>}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Modal de Edição de Disciplina */}
-      <Dialog open={!!editingSubject} onOpenChange={(open) => { if (!open) setEditingSubject(null); }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Pencil className="w-4 h-4 text-green-600" />Editar Disciplina
-            </DialogTitle>
-          </DialogHeader>
-          {editingSubject && (
-            <ScrollArea className="flex-1">
-              <div className="space-y-4 pr-2">
-                <div className="space-y-1.5">
-                  <Label>Nome da Disciplina *</Label>
-                  <Input value={editingSubject.name} onChange={(e) => setEditingSubject({ ...editingSubject, name: e.target.value })} />
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="space-y-1.5">
-                    <Label>Semestre</Label>
-                    <Input type="number" min={1} max={12} value={editingSubject.semester} onChange={(e) => setEditingSubject({ ...editingSubject, semester: Number(e.target.value) })} />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Aulas/Semana</Label>
-                    <Input type="number" min={1} value={editingSubject.weeklyClasses} onChange={(e) => setEditingSubject({ ...editingSubject, weeklyClasses: Number(e.target.value) })} />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Carga Horária (h)</Label>
-                    <Input type="number" min={0} value={editingSubject.totalHours ?? ""} onChange={(e) => setEditingSubject({ ...editingSubject, totalHours: e.target.value ? Number(e.target.value) : null })} placeholder="Ex: 80" />
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="flex items-center gap-1.5"><Tag className="w-3.5 h-3.5 text-slate-500" />Área de Ensino</Label>
-                  {campusAreas.length > 0 ? (
-                    <Select
-                      value={editingSubject.suggestedArea || "__none__"}
-                      onValueChange={(v) => setEditingSubject({ ...editingSubject, suggestedArea: v === "__none__" ? "" : v })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione a área..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__none__">Sem área definida</SelectItem>
-                        {(campusAreas as any[]).map((a: any) => (
-                          <SelectItem key={a.id} value={a.name}>{a.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Input value={editingSubject.suggestedArea} onChange={(e) => setEditingSubject({ ...editingSubject, suggestedArea: e.target.value })} placeholder="Nenhuma área vinculada ao campus — deixe em branco" />
-                  )}
-                  <p className="text-xs text-slate-400">Apenas áreas vinculadas ao campus são sugeridas pela IA.</p>
-                </div>
-                <div className="flex gap-4">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={editingSubject.isElective} onChange={(e) => setEditingSubject({ ...editingSubject, isElective: e.target.checked })} className="rounded" />
-                    <span className="text-sm text-slate-700">Disciplina Optativa/Eletiva</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={editingSubject.isRemote} onChange={(e) => setEditingSubject({ ...editingSubject, isRemote: e.target.checked })} className="rounded" />
-                    <span className="text-sm text-slate-700">Modalidade EaD/Remota</span>
-                  </label>
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Ementa</Label>
-                  <Textarea value={editingSubject.syllabus ?? ""} onChange={(e) => setEditingSubject({ ...editingSubject, syllabus: e.target.value || null })} placeholder="Descreva os conteúdos da disciplina..." rows={5} className="resize-none" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Referências Bibliográficas</Label>
-                  <Textarea value={editingSubject.bibliography ?? ""} onChange={(e) => setEditingSubject({ ...editingSubject, bibliography: e.target.value || null })} placeholder="Liste as referências básicas e complementares..." rows={5} className="resize-none" />
-                </div>
+            {/* Botão de Aplicar */}
+            <div className="flex items-center justify-between bg-white rounded-lg border border-slate-200 p-4">
+              <div className="text-sm text-slate-600">
+                <strong className="text-green-700">{selectedSubjects.size}</strong> disciplinas selecionadas para importação
               </div>
-            </ScrollArea>
-          )}
-          <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setEditingSubject(null)}><X className="w-4 h-4 mr-2" />Cancelar</Button>
-            <Button onClick={saveSubjectEdit} className="bg-green-600 hover:bg-green-700"><Check className="w-4 h-4 mr-2" />Salvar Alterações</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => { setShowReview(false); setEditedData(null); }}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleApply} disabled={applyMutation.isPending || selectedSubjects.size === 0} className="bg-green-600 hover:bg-green-700">
+                  {applyMutation.isPending
+                    ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Importando...</>
+                    : <><CheckCircle2 className="w-4 h-4 mr-2" />Importar {selectedSubjects.size} Disciplinas</>}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
