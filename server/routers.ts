@@ -289,35 +289,46 @@ const ppcRouter = router({
     .mutation(async ({ input, ctx }) => {
       await updatePpcDocument(input.documentId, { status: "processing" });
       try {
+        // Baixar o PDF e extrair texto com pdf-parse v2
+        const pdfResponse = await fetch(input.fileUrl);
+        if (!pdfResponse.ok) throw new Error(`Falha ao baixar PDF: ${pdfResponse.status}`);
+        const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
+        const { PDFParse } = await import("pdf-parse");
+        const parser = new PDFParse({ data: pdfBuffer });
+        const textResult = await parser.getText();
+        const pdfText = textResult.pages.map((p: any) => p.text || "").join("\n");
+
+        if (!pdfText || pdfText.trim().length < 100) {
+          throw new Error("O PDF não contém texto extraível suficiente. Verifique se o arquivo é um PPC válido.");
+        }
+
+        // Truncar texto se muito longo (limite seguro para o LLM)
+        const maxChars = 120000;
+        const truncatedText = pdfText.length > maxChars ? pdfText.substring(0, maxChars) + "\n[... texto truncado ...]" : pdfText;
+
         const response = await invokeLLM({
           messages: [
             {
               role: "system",
               content: `Você é um especialista em análise de Projetos Pedagógicos de Curso (PPC) de institutos federais brasileiros.
-Analise o documento PDF fornecido e extraia TODAS as informações em formato JSON estruturado.
+Analise o texto extraído do documento PPC e extraia TODAS as informações em formato JSON estruturado.
 
 Para cada disciplina/unidade curricular, extraia:
 1. name: nome completo da disciplina
-2. semester: semestre em que é ofertada (inteiro, 1 a 10)
-3. weeklyClasses: número de aulas semanais (inteiro)
+2. semester: semestre em que é ofertada (inteiro, 1 a 12)
+3. weeklyClasses: número de aulas semanais (inteiro). Se não encontrar explicitamente, calcule dividindo a carga horária semanal ou estime com base na carga horária total e semanas letivas (tipicamente 20 semanas). Se não for possível, use 2.
 4. totalHours: carga horária total em horas (inteiro ou null)
 5. isElective: se é optativa/eletiva (boolean)
 6. isRemote: se é EaD/remota (boolean)
-7. suggestedArea: área de conhecimento. Classifique baseado no conteúdo. Use nomes como: "Matemática", "Língua Portuguesa", "Informática", "Administração", "Ciências Naturais", "Educação Física", "Arte", "História", "Geografia", "Física", "Química", "Biologia", "Sociologia", "Filosofia", "Inglês", "Espanhol", "Contabilidade", "Direito", "Saúde", "Agropecuária", "Eletrotécnica", "Mecânica", "Eletrônica", "Construção Civil", "Logística", "Turismo", "Gastronomia". Se não identificar, use "Não identificada".
-8. syllabus: ementa completa da disciplina (texto exato do PPC, ou null se não encontrar)
-9. bibliography: referências bibliográficas completas (básica e complementar, texto exato do PPC, ou null se não encontrar)
+7. suggestedArea: área de conhecimento. Classifique baseado no conteúdo da disciplina. Use nomes como: "Matemática", "Língua Portuguesa", "Informática", "Administração", "Ciências Naturais", "Educação Física", "Arte", "História", "Geografia", "Física", "Química", "Biologia", "Sociologia", "Filosofia", "Inglês", "Espanhol", "Contabilidade", "Direito", "Saúde", "Agropecuária", "Eletrotécnica", "Mecânica", "Eletrônica", "Construção Civil", "Logística", "Turismo", "Gastronomia", "Meio Ambiente", "Segurança do Trabalho", "Pedagogia". Se não identificar, use "Não identificada".
+8. syllabus: ementa completa da disciplina (texto do PPC, ou null se não encontrar)
+9. bibliography: referências bibliográficas (básica e complementar, texto do PPC, ou null se não encontrar)
 
-Retorne APENAS o JSON válido, sem texto adicional.`,
+IMPORTANTE: Retorne APENAS o JSON válido, sem texto adicional, sem markdown.`,
             },
             {
               role: "user",
-              content: [
-                {
-                  type: "file_url",
-                  file_url: { url: input.fileUrl, mime_type: "application/pdf" },
-                },
-                { type: "text", text: "Extraia TODAS as informações do PPC: curso, campus, e para cada disciplina extraia também a ementa e referências bibliográficas completas." },
-              ],
+              content: `Extraia TODAS as informações do PPC abaixo: curso, campus, e para cada disciplina extraia também a ementa e referências bibliográficas completas.\n\n--- TEXTO DO PPC ---\n${truncatedText}`,
             },
           ],
           response_format: {
@@ -368,6 +379,7 @@ Retorne APENAS o JSON válido, sem texto adicional.`,
         await audit(ctx, "EXTRACT", "ppc_document", input.documentId, null, { courseName: extractedData.courseName });
         return { success: true, data: extractedData };
       } catch (error: any) {
+        console.error("[PPC Extract Error]", error);
         await updatePpcDocument(input.documentId, { status: "rejected" });
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: `Erro na extração: ${error.message}` });
       }

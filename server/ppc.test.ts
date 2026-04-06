@@ -282,3 +282,82 @@ describe("audit.list (admin only)", () => {
     await expect(caller.audit.list({})).rejects.toThrow();
   });
 });
+
+// ── Mock do pdf-parse ──────────────────────────────────────────────────────
+vi.mock("pdf-parse", () => ({
+  PDFParse: vi.fn().mockImplementation((opts: any) => ({
+    getText: vi.fn().mockResolvedValue({
+      pages: opts?._testEmpty
+        ? [{ text: "" }]
+        : [
+            { text: "PROJETO PEDAGÓGICO DO CURSO TÉCNICO EM INFORMÁTICA\nCampus Campo Grande\nDuração: 6 semestres\n" },
+            { text: "1º Semestre\nAlgoritmos - 80h - 4 aulas semanais\nEmenta: Lógica de programação\nReferências: CORMEN, T.\n" },
+          ],
+    }),
+  })),
+}));
+
+// ── Mock do invokeLLM ──────────────────────────────────────────────────────
+vi.mock("./_core/llm", () => ({
+  invokeLLM: vi.fn().mockResolvedValue({
+    choices: [{
+      message: {
+        content: JSON.stringify({
+          courseName: "Técnico em Informática",
+          courseType: "Técnico",
+          campusName: "Campus Campo Grande",
+          duration: 6,
+          subjects: [{
+            name: "Algoritmos",
+            semester: 1,
+            weeklyClasses: 4,
+            totalHours: 80,
+            isElective: false,
+            isRemote: false,
+            suggestedArea: "Informática",
+            syllabus: "Lógica de programação, estruturas de dados",
+            bibliography: "CORMEN, T. Algoritmos. 3ª ed.",
+          }],
+        }),
+      },
+    }],
+  }),
+}));
+
+// ── Mock do fetch global para download do PDF ──────────────────────────────
+const originalFetch = globalThis.fetch;
+beforeEach(() => {
+  globalThis.fetch = vi.fn().mockResolvedValue({
+    ok: true,
+    arrayBuffer: () => Promise.resolve(new ArrayBuffer(100)),
+  }) as any;
+});
+
+describe("ppc.extract", () => {
+  it("extrai dados do PDF com sucesso via pdf-parse + LLM", async () => {
+    const caller = appRouter.createCaller(makeAdminCtx());
+    const result = await caller.ppc.extract({
+      documentId: 1,
+      fileUrl: "https://s3.example.com/ppc-test.pdf",
+    });
+    expect(result.success).toBe(true);
+    expect(result.data).toHaveProperty("courseName");
+    expect(result.data).toHaveProperty("subjects");
+    expect(result.data.courseName).toBe("Técnico em Informática");
+    expect(result.data.subjects.length).toBeGreaterThan(0);
+    expect(result.data.subjects[0]).toHaveProperty("syllabus");
+    expect(result.data.subjects[0]).toHaveProperty("bibliography");
+    expect(result.data.subjects[0]).toHaveProperty("suggestedArea");
+  });
+
+  it("falha quando o PDF não pode ser baixado", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 404,
+    }) as any;
+    const caller = appRouter.createCaller(makeAdminCtx());
+    await expect(
+      caller.ppc.extract({ documentId: 1, fileUrl: "https://s3.example.com/not-found.pdf" })
+    ).rejects.toThrow();
+  });
+});

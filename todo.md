@@ -79,3 +79,8 @@
 - [x] Limpar banco de dados (remover dados de teste)
 - [x] Corrigir problemas encontrados na auditoria
 - [x] Rodar testes e garantir 100% passando
+
+## v1.3 — Correção de Bug na Extração
+- [x] Corrigir erro 500 na extração de PDF via LLM (bad response from upstream) — convertido para pdf-parse v2 + texto
+- [x] Adicionar teste automatizado do router ppc.extract com mock de PDFParse e invokeLLM
+- [x] Adicionar teste de erro para ppc.extract quando PDF não pode ser baixado
