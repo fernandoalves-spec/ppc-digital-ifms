@@ -61,3 +61,14 @@
 - [x] Testes de aprovações e relatórios
 - [x] Testes de controle de acesso (admin only)
 - [x] 18 testes passando em 2 arquivos de teste
+
+## Melhorias v1.1 — Extração IA Completa
+- [x] Adicionar campos `syllabus` (ementa) e `bibliography` (referências bibliográficas) na tabela `subjects`
+- [x] Gerar e aplicar migração SQL dos novos campos
+- [x] Aprimorar prompt da IA para extrair: área de ensino sugerida, ementa e referências por disciplina
+- [x] Auto-cadastro de campus: se não existir no banco, criar automaticamente durante applyExtraction
+- [x] Auto-cadastro de curso: se não existir no banco, criar automaticamente durante applyExtraction
+- [x] Edição completa de disciplinas: nome, semestre, aulas semanais, carga horária, área, ementa, referências
+- [x] Página/modal de revisão pós-extração com todos os campos editáveis antes de aplicar
+- [x] Atualizar CourseDetail para exibir ementa e referências de cada disciplina
+- [x] Atualizar router subjects.update para aceitar syllabus e bibliography

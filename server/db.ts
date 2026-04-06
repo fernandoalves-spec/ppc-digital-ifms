@@ -188,6 +188,53 @@ export async function getSubjectsByCourse(courseId: number) {
     .orderBy(subjects.semester, subjects.name);
 }
 
+export async function findOrCreateCampus(name: string): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const existing = await db.select().from(campuses).where(eq(campuses.name, name)).limit(1);
+  if (existing.length > 0) return existing[0].id;
+  const [result] = await db.insert(campuses).values({ name }).$returningId();
+  return result.id;
+}
+
+export async function findOrCreateCourse(data: {
+  name: string;
+  type: string;
+  campusId: number;
+  duration?: number;
+}): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const existing = await db
+    .select()
+    .from(courses)
+    .where(and(eq(courses.name, data.name), eq(courses.campusId, data.campusId)))
+    .limit(1);
+  if (existing.length > 0) return existing[0].id;
+  const validTypes = ["T\u00e9cnico", "Subsequente", "Gradua\u00e7\u00e3o", "FIC", "P\u00f3s-gradua\u00e7\u00e3o"] as const;
+  const courseType = validTypes.includes(data.type as any) ? (data.type as typeof validTypes[number]) : "T\u00e9cnico";
+  const [result] = await db.insert(courses).values({
+    name: data.name,
+    type: courseType,
+    campusId: data.campusId,
+    duration: data.duration ?? 6,
+  }).$returningId();
+  return result.id;
+}
+
+export async function findOrCreateTeachingArea(name: string): Promise<number | null> {
+  if (!name || name.trim() === "" || name.toLowerCase() === "n\u00e3o identificada" || name.toLowerCase() === "desconhecida") return null;
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const existing = await db.select().from(teachingAreas).where(eq(teachingAreas.name, name)).limit(1);
+  if (existing.length > 0) return existing[0].id;
+  const colors = ["#16a34a","#2563eb","#d97706","#9333ea","#dc2626","#0891b2","#65a30d","#c026d3","#ea580c","#0284c7"];
+  const allAreas = await db.select().from(teachingAreas);
+  const color = colors[allAreas.length % colors.length];
+  const [result] = await db.insert(teachingAreas).values({ name, color }).$returningId();
+  return result.id;
+}
+
 export async function createSubject(data: {
   courseId: number;
   name: string;
@@ -197,6 +244,8 @@ export async function createSubject(data: {
   areaId?: number;
   isElective?: boolean;
   isRemote?: boolean;
+  syllabus?: string;
+  bibliography?: string;
 }) {
   const db = await getDb();
   if (!db) throw new Error("DB unavailable");

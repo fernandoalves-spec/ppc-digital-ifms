@@ -71,6 +71,8 @@ export const subjects = mysqlTable("subjects", {
   areaId: int("areaId"),
   isElective: boolean("isElective").default(false).notNull(),
   isRemote: boolean("isRemote").default(false).notNull(),
+  syllabus: text("syllabus"),
+  bibliography: text("bibliography"),
   active: boolean("active").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

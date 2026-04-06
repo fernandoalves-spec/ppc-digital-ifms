@@ -15,6 +15,13 @@
       "when": 1775089550495,
       "tag": "0001_tiresome_vulcan",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1775360206946,
+      "tag": "0002_freezing_magus",
+      "breakpoints": true
     }
   ]
 }

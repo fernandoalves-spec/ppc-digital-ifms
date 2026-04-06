@@ -17,6 +17,9 @@ import {
   deleteCourse,
   deleteSubject,
   deleteTeachingArea,
+  findOrCreateCampus,
+  findOrCreateCourse,
+  findOrCreateTeachingArea,
   getApprovalRequests,
   getAuditLogs,
   getCampuses,
@@ -208,6 +211,8 @@ const subjectsRouter = router({
       areaId: z.number().optional(),
       isElective: z.boolean().optional(),
       isRemote: z.boolean().optional(),
+      syllabus: z.string().optional(),
+      bibliography: z.string().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
       await createSubject(input);
@@ -221,11 +226,13 @@ const subjectsRouter = router({
       name: z.string().optional(),
       semester: z.number().optional(),
       weeklyClasses: z.number().optional(),
-      totalHours: z.number().optional(),
-      areaId: z.number().optional(),
+      totalHours: z.number().nullable().optional(),
+      areaId: z.number().nullable().optional(),
       isElective: z.boolean().optional(),
       isRemote: z.boolean().optional(),
       active: z.boolean().optional(),
+      syllabus: z.string().nullable().optional(),
+      bibliography: z.string().nullable().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
       const { id, ...data } = input;
@@ -276,25 +283,24 @@ const ppcRouter = router({
     .input(z.object({ documentId: z.number(), fileUrl: z.string() }))
     .mutation(async ({ input, ctx }) => {
       await updatePpcDocument(input.documentId, { status: "processing" });
-
       try {
         const response = await invokeLLM({
           messages: [
             {
               role: "system",
-              content: `Você é um especialista em análise de Projetos Pedagógicos de Curso (PPC) do IFMS.
-Analise o documento PDF fornecido e extraia as seguintes informações em formato JSON estruturado:
-- courseName: nome completo do curso
-- courseType: tipo do curso (Técnico, Subsequente, Graduação, FIC ou Pós-graduação)
-- campusName: nome do campus/unidade
-- duration: duração em semestres (número inteiro)
-- subjects: array de disciplinas com os campos:
-  - name: nome da disciplina
-  - semester: semestre em que é ofertada (número inteiro)
-  - weeklyClasses: aulas semanais (número inteiro)
-  - totalHours: carga horária total (número inteiro, se disponível)
-  - isElective: se é optativa/eletiva (boolean)
-  - isRemote: se é EaD/remota (boolean)
+              content: `Você é um especialista em análise de Projetos Pedagógicos de Curso (PPC) de institutos federais brasileiros.
+Analise o documento PDF fornecido e extraia TODAS as informações em formato JSON estruturado.
+
+Para cada disciplina/unidade curricular, extraia:
+1. name: nome completo da disciplina
+2. semester: semestre em que é ofertada (inteiro, 1 a 10)
+3. weeklyClasses: número de aulas semanais (inteiro)
+4. totalHours: carga horária total em horas (inteiro ou null)
+5. isElective: se é optativa/eletiva (boolean)
+6. isRemote: se é EaD/remota (boolean)
+7. suggestedArea: área de conhecimento. Classifique baseado no conteúdo. Use nomes como: "Matemática", "Língua Portuguesa", "Informática", "Administração", "Ciências Naturais", "Educação Física", "Arte", "História", "Geografia", "Física", "Química", "Biologia", "Sociologia", "Filosofia", "Inglês", "Espanhol", "Contabilidade", "Direito", "Saúde", "Agropecuária", "Eletrotécnica", "Mecânica", "Eletrônica", "Construção Civil", "Logística", "Turismo", "Gastronomia". Se não identificar, use "Não identificada".
+8. syllabus: ementa completa da disciplina (texto exato do PPC, ou null se não encontrar)
+9. bibliography: referências bibliográficas completas (básica e complementar, texto exato do PPC, ou null se não encontrar)
 
 Retorne APENAS o JSON válido, sem texto adicional.`,
             },
@@ -305,7 +311,7 @@ Retorne APENAS o JSON válido, sem texto adicional.`,
                   type: "file_url",
                   file_url: { url: input.fileUrl, mime_type: "application/pdf" },
                 },
-                { type: "text", text: "Extraia as informações do PPC deste documento." },
+                { type: "text", text: "Extraia TODAS as informações do PPC: curso, campus, e para cada disciplina extraia também a ementa e referências bibliográficas completas." },
               ],
             },
           ],
@@ -317,10 +323,10 @@ Retorne APENAS o JSON válido, sem texto adicional.`,
               schema: {
                 type: "object",
                 properties: {
-                  courseName: { type: "string" },
-                  courseType: { type: "string" },
-                  campusName: { type: "string" },
-                  duration: { type: "integer" },
+                  courseName: { type: "string", description: "Nome completo do curso" },
+                  courseType: { type: "string", description: "Tipo: Técnico, Subsequente, Graduação, FIC ou Pós-graduação" },
+                  campusName: { type: "string", description: "Nome do campus/unidade" },
+                  duration: { type: "integer", description: "Duração em semestres" },
                   subjects: {
                     type: "array",
                     items: {
@@ -332,8 +338,11 @@ Retorne APENAS o JSON válido, sem texto adicional.`,
                         totalHours: { type: ["integer", "null"] },
                         isElective: { type: "boolean" },
                         isRemote: { type: "boolean" },
+                        suggestedArea: { type: "string" },
+                        syllabus: { type: ["string", "null"] },
+                        bibliography: { type: ["string", "null"] },
                       },
-                      required: ["name", "semester", "weeklyClasses", "isElective", "isRemote"],
+                      required: ["name", "semester", "weeklyClasses", "isElective", "isRemote", "suggestedArea", "syllabus", "bibliography"],
                       additionalProperties: false,
                     },
                   },
@@ -344,16 +353,13 @@ Retorne APENAS o JSON válido, sem texto adicional.`,
             },
           },
         });
-
         const content = response.choices[0]?.message?.content;
         const extractedData = typeof content === "string" ? JSON.parse(content) : content;
-
         await updatePpcDocument(input.documentId, {
           status: "extracted",
           extractedData,
           processedAt: new Date(),
         });
-
         await audit(ctx, "EXTRACT", "ppc_document", input.documentId, null, { courseName: extractedData.courseName });
         return { success: true, data: extractedData };
       } catch (error: any) {
@@ -361,11 +367,13 @@ Retorne APENAS o JSON válido, sem texto adicional.`,
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: `Erro na extração: ${error.message}` });
       }
     }),
-
   applyExtraction: adminProcedure
     .input(z.object({
       documentId: z.number(),
-      courseId: z.number(),
+      campusName: z.string(),
+      courseName: z.string(),
+      courseType: z.string(),
+      duration: z.number().optional(),
       subjects: z.array(z.object({
         name: z.string(),
         semester: z.number(),
@@ -373,23 +381,49 @@ Retorne APENAS o JSON válido, sem texto adicional.`,
         totalHours: z.number().optional().nullable(),
         isElective: z.boolean(),
         isRemote: z.boolean(),
+        suggestedArea: z.string().optional(),
+        syllabus: z.string().optional().nullable(),
+        bibliography: z.string().optional().nullable(),
       })),
     }))
     .mutation(async ({ input, ctx }) => {
+      // Auto-cadastrar campus se não existir
+      const campusId = await findOrCreateCampus(input.campusName);
+      // Auto-cadastrar curso se não existir
+      const courseId = await findOrCreateCourse({
+        name: input.courseName,
+        type: input.courseType,
+        campusId,
+        duration: input.duration,
+      });
+      // Criar disciplinas com área automática, ementa e referências
+      let createdCount = 0;
       for (const subject of input.subjects) {
+        const areaId = subject.suggestedArea
+          ? await findOrCreateTeachingArea(subject.suggestedArea)
+          : null;
         await createSubject({
-          courseId: input.courseId,
+          courseId,
           name: subject.name,
           semester: subject.semester,
           weeklyClasses: subject.weeklyClasses,
           totalHours: subject.totalHours ?? undefined,
           isElective: subject.isElective,
           isRemote: subject.isRemote,
+          areaId: areaId ?? undefined,
+          syllabus: subject.syllabus ?? undefined,
+          bibliography: subject.bibliography ?? undefined,
         });
+        createdCount++;
       }
-      await updatePpcDocument(input.documentId, { status: "approved", courseId: input.courseId });
-      await audit(ctx, "APPLY_EXTRACTION", "ppc_document", input.documentId, null, { courseId: input.courseId, subjectCount: input.subjects.length });
-      return { success: true };
+      await updatePpcDocument(input.documentId, { status: "approved", courseId });
+      await audit(ctx, "APPLY_EXTRACTION", "ppc_document", input.documentId, null, {
+        campusName: input.campusName,
+        courseName: input.courseName,
+        subjectCount: createdCount,
+        autoCreated: true,
+      });
+      return { success: true, campusId, courseId };
     }),
 });
 
