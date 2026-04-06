@@ -136,6 +136,14 @@ export const auditLogs = mysqlTable("audit_logs", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
+// ─── Vínculo Campus ↔ Áreas de Ensino ────────────────────────────────────────
+export const campusAreas = mysqlTable("campus_areas", {
+  id: int("id").autoincrement().primaryKey(),
+  campusId: int("campusId").notNull(),
+  areaId: int("areaId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
 // ─── Quadro de Oferta (Turmas ofertadas por semestre) ──────────────────────────────
 export const courseOfferings = mysqlTable("course_offerings", {
   id: int("id").autoincrement().primaryKey(),
@@ -172,3 +180,5 @@ export type AuditLog = typeof auditLogs.$inferSelect;
 export type UserCourseRole = typeof userCourseRoles.$inferSelect;
 export type CourseOffering = typeof courseOfferings.$inferSelect;
 export type InsertCourseOffering = typeof courseOfferings.$inferInsert;
+export type CampusArea = typeof campusAreas.$inferSelect;
+export type InsertCampusArea = typeof campusAreas.$inferInsert;

@@ -43,8 +43,12 @@ export default function CourseDetailPage() {
 
   const { data: course } = trpc.courses.get.useQuery({ id: courseId });
   const { data: subjects = [], isLoading } = trpc.subjects.listByCourse.useQuery({ courseId });
-  const { data: areas = [] } = trpc.areas.list.useQuery();
   const { data: campuses = [] } = trpc.campus.list.useQuery();
+  // Buscar áreas vinculadas ao campus do curso (somente após ter o curso carregado)
+  const { data: areas = [] } = trpc.campus.getAreas.useQuery(
+    { campusId: course?.campusId ?? 0 },
+    { enabled: !!course?.campusId }
+  );
 
   const createSubjectMutation = trpc.subjects.create.useMutation({
     onSuccess: () => { utils.subjects.listByCourse.invalidate({ courseId }); toast.success("Disciplina adicionada!"); setShowForm(false); setForm(emptyForm); },

@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/mysql2";
 import {
   approvalRequests,
   auditLogs,
+  campusAreas,
   campuses,
   courseOfferings,
   courses,
@@ -224,18 +225,64 @@ export async function findOrCreateCourse(data: {
   return result.id;
 }
 
-export async function findOrCreateTeachingArea(name: string): Promise<number | null> {
-  const trimmedName = name?.trim();
-  if (!trimmedName || trimmedName.toLowerCase() === "não identificada" || trimmedName.toLowerCase() === "desconhecida" || trimmedName.toLowerCase() === "geral") return null;
+// Removida: findOrCreateTeachingArea — áreas agora são pré-cadastradas pelo admin
+
+// ─── Campus Areas (Vínculo Campus ↔ Áreas) ────────────────────────────────────
+export async function getCampusAreas(campusId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({ area: teachingAreas })
+    .from(campusAreas)
+    .innerJoin(teachingAreas, eq(campusAreas.areaId, teachingAreas.id))
+    .where(and(eq(campusAreas.campusId, campusId), eq(teachingAreas.active, true)))
+    .orderBy(teachingAreas.name);
+  return rows.map(r => r.area);
+}
+
+export async function addAreaToCampus(campusId: number, areaId: number) {
   const db = await getDb();
   if (!db) throw new Error("DB unavailable");
-  const existing = await db.select().from(teachingAreas).where(sql`LOWER(${teachingAreas.name}) = LOWER(${trimmedName})`).limit(1);
-  if (existing.length > 0) return existing[0].id;
-  const colors = ["#16a34a","#2563eb","#d97706","#9333ea","#dc2626","#0891b2","#65a30d","#c026d3","#ea580c","#0284c7"];
-  const allAreas = await db.select().from(teachingAreas);
-  const color = colors[allAreas.length % colors.length];
-  const [result] = await db.insert(teachingAreas).values({ name: trimmedName, color }).$returningId();
-  return result.id;
+  // Evitar duplicata
+  const existing = await db.select().from(campusAreas)
+    .where(and(eq(campusAreas.campusId, campusId), eq(campusAreas.areaId, areaId))).limit(1);
+  if (existing.length > 0) return; // já vinculado
+  await db.insert(campusAreas).values({ campusId, areaId });
+}
+
+export async function removeAreaFromCampus(campusId: number, areaId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.delete(campusAreas)
+    .where(and(eq(campusAreas.campusId, campusId), eq(campusAreas.areaId, areaId)));
+}
+
+export async function setCampusAreas(campusId: number, areaIds: number[]) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  // Remove todos os vínculos atuais e recria
+  await db.delete(campusAreas).where(eq(campusAreas.campusId, campusId));
+  if (areaIds.length > 0) {
+    await db.insert(campusAreas).values(areaIds.map(areaId => ({ campusId, areaId })));
+  }
+}
+
+/** Busca área por nome dentro das áreas vinculadas ao campus (case-insensitive). Retorna null se não encontrar. */
+export async function findAreaInCampus(campusId: number, name: string): Promise<number | null> {
+  if (!name?.trim()) return null;
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db
+    .select({ id: teachingAreas.id })
+    .from(campusAreas)
+    .innerJoin(teachingAreas, eq(campusAreas.areaId, teachingAreas.id))
+    .where(and(
+      eq(campusAreas.campusId, campusId),
+      eq(teachingAreas.active, true),
+      sql`LOWER(${teachingAreas.name}) = LOWER(${name.trim()})`
+    ))
+    .limit(1);
+  return rows.length > 0 ? rows[0].id : null;
 }
 
 export async function createSubject(data: {

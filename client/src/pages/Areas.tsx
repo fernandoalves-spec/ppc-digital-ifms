@@ -53,7 +53,9 @@ export default function AreasPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Áreas de Ensino</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Gerencie as áreas de conhecimento dos docentes</p>
+          <p className="text-sm text-slate-500 mt-0.5">
+            Áreas de ensino são <strong>globais</strong> — cadastre aqui e depois vincule cada área aos campi desejados em <strong>Campus</strong>.
+          </p>
         </div>
         <Button onClick={() => { resetForm(); setEditingId(null); setShowForm(true); }} className="bg-green-600 hover:bg-green-700">
           <Plus className="w-4 h-4 mr-2" /> Nova Área

@@ -19,7 +19,11 @@ import {
   deleteTeachingArea,
   findOrCreateCampus,
   findOrCreateCourse,
-  findOrCreateTeachingArea,
+  findAreaInCampus,
+  getCampusAreas,
+  addAreaToCampus,
+  removeAreaFromCampus,
+  setCampusAreas,
   getApprovalRequests,
   getAuditLogs,
   getCampuses,
@@ -105,15 +109,39 @@ const campusRouter = router({
       return { success: true };
     }),
 
-  delete: adminProcedure
+   delete: adminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
       await deleteCampus(input.id);
       await audit(ctx, "DELETE", "campus", input.id);
       return { success: true };
     }),
+  // ─── Vínculo Campus ↔ Áreas
+  getAreas: publicProcedure
+    .input(z.object({ campusId: z.number() }))
+    .query(({ input }) => getCampusAreas(input.campusId)),
+  setAreas: adminProcedure
+    .input(z.object({ campusId: z.number(), areaIds: z.array(z.number()) }))
+    .mutation(async ({ input, ctx }) => {
+      await setCampusAreas(input.campusId, input.areaIds);
+      await audit(ctx, "SET_AREAS", "campus", input.campusId, null, { areaIds: input.areaIds });
+      return { success: true };
+    }),
+  addArea: adminProcedure
+    .input(z.object({ campusId: z.number(), areaId: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      await addAreaToCampus(input.campusId, input.areaId);
+      await audit(ctx, "ADD_AREA", "campus", input.campusId, null, { areaId: input.areaId });
+      return { success: true };
+    }),
+  removeArea: adminProcedure
+    .input(z.object({ campusId: z.number(), areaId: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      await removeAreaFromCampus(input.campusId, input.areaId);
+      await audit(ctx, "REMOVE_AREA", "campus", input.campusId, null, { areaId: input.areaId });
+      return { success: true };
+    }),
 });
-
 // ─── Teaching Areas Router ────────────────────────────────────────────────────
 const areasRouter = router({
   list: publicProcedure.query(() => getTeachingAreas()),
@@ -291,10 +319,16 @@ const ppcRouter = router({
     }),
 
   extract: adminProcedure
-    .input(z.object({ documentId: z.number(), fileUrl: z.string() }))
+    .input(z.object({ documentId: z.number(), fileUrl: z.string(), campusId: z.number().optional() }))
     .mutation(async ({ input, ctx }) => {
       await updatePpcDocument(input.documentId, { status: "processing" });
       try {
+        // Buscar áreas vinculadas ao campus (se informado) para guiar a IA
+        let campusAreaNames: string[] = [];
+        if (input.campusId) {
+          const areas = await getCampusAreas(input.campusId);
+          campusAreaNames = areas.map(a => a.name);
+        }
         // Baixar o PDF e extrair texto com pdf-parse v2
         const pdfResponse = await fetch(input.fileUrl);
         if (!pdfResponse.ok) throw new Error(`Falha ao baixar PDF: ${pdfResponse.status}`);
@@ -326,7 +360,7 @@ Para cada disciplina/unidade curricular, extraia:
 4. totalHours: carga horária total em horas (inteiro ou null)
 5. isElective: se é optativa/eletiva (boolean)
 6. isRemote: se é EaD/remota (boolean)
-7. suggestedArea: área de conhecimento. Classifique baseado no conteúdo da disciplina. Use nomes como: "Matemática", "Língua Portuguesa", "Informática", "Administração", "Ciências Naturais", "Educação Física", "Arte", "História", "Geografia", "Física", "Química", "Biologia", "Sociologia", "Filosofia", "Inglês", "Espanhol", "Contabilidade", "Direito", "Saúde", "Agropecuária", "Eletrotécnica", "Mecânica", "Eletrônica", "Construção Civil", "Logística", "Turismo", "Gastronomia", "Meio Ambiente", "Segurança do Trabalho", "Pedagogia". Se não identificar, use "Não identificada".
+7. suggestedArea: área de conhecimento da disciplina. ${campusAreaNames.length > 0 ? `IMPORTANTE: Use APENAS um dos seguintes nomes de área (exatamente como escrito): ${campusAreaNames.map(n => `"${n}"`).join(", ")}. Se a disciplina não se encaixar claramente em nenhuma dessas áreas, use "Não identificada".` : `Classifique baseado no conteúdo. Se não identificar, use "Não identificada".`}
 8. syllabus: ementa completa da disciplina (texto do PPC, ou null se não encontrar)
 9. bibliography: referências bibliográficas (básica e complementar, texto do PPC, ou null se não encontrar)
 
@@ -419,11 +453,12 @@ IMPORTANTE: Retorne APENAS o JSON válido, sem texto adicional, sem markdown.`,
         campusId,
         duration: input.duration,
       });
-      // Criar disciplinas com área automática, ementa e referências
+      // Criar disciplinas com área automática (apenas áreas vinculadas ao campus), ementa e referências
       let createdCount = 0;
       for (const subject of input.subjects) {
+        // Busca a área apenas entre as vinculadas ao campus; se não encontrar, deixa sem área
         const areaId = subject.suggestedArea
-          ? await findOrCreateTeachingArea(subject.suggestedArea)
+          ? await findAreaInCampus(campusId, subject.suggestedArea)
           : null;
         await createSubject({
           courseId,

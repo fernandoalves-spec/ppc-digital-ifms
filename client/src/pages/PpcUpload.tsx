@@ -50,6 +50,12 @@ type EditingSubject = ExtractedSubject & { _idx: number };
 export default function PpcUploadPage() {
   const utils = trpc.useUtils();
   const { data: documents = [], isLoading } = trpc.ppc.list.useQuery();
+  const { data: campuses = [] } = trpc.campus.list.useQuery();
+  const [selectedCampusId, setSelectedCampusId] = useState<number | null>(null);
+  const { data: campusAreas = [] } = trpc.campus.getAreas.useQuery(
+    { campusId: selectedCampusId ?? 0 },
+    { enabled: !!selectedCampusId }
+  );
 
   const uploadMutation = trpc.ppc.upload.useMutation({
     onSuccess: () => { utils.ppc.list.invalidate(); toast.success("PDF enviado com sucesso!"); setFile(null); },
@@ -104,8 +110,16 @@ export default function PpcUploadPage() {
   };
 
   const handleExtract = (doc: any) => {
+    if (!selectedCampusId) {
+      toast.error("Selecione o campus antes de extrair.");
+      return;
+    }
     setApplyDocId(doc.id);
-    extractMutation.mutate({ documentId: doc.id, fileUrl: doc.fileUrl });
+    extractMutation.mutate({
+      documentId: doc.id,
+      fileUrl: doc.fileUrl,
+      campusId: selectedCampusId,
+    });
   };
 
   const handleOpenReview = (doc: any) => {
@@ -164,6 +178,41 @@ export default function PpcUploadPage() {
           Envie um PDF de PPC — a IA extrai automaticamente curso, campus, disciplinas, ementas, referências e áreas de ensino
         </p>
       </div>
+
+      {/* Seleção de Campus */}
+      <Card className="border-slate-100">
+        <CardContent className="pt-4 pb-4">
+          <div className="flex items-center gap-3">
+            <Building2 className="w-5 h-5 text-slate-500 shrink-0" />
+            <div className="flex-1">
+              <Label className="text-sm font-semibold text-slate-700 mb-1.5 block">Campus do PPC *</Label>
+              <Select
+                value={selectedCampusId ? String(selectedCampusId) : ""}
+                onValueChange={(v) => setSelectedCampusId(Number(v))}
+              >
+                <SelectTrigger className="max-w-sm">
+                  <SelectValue placeholder="Selecione o campus..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {(campuses as any[]).map((c: any) => (
+                    <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {selectedCampusId && campusAreas.length > 0 && (
+              <div className="text-xs text-slate-500 shrink-0">
+                <span className="font-semibold text-green-700">{campusAreas.length}</span> áreas disponíveis
+              </div>
+            )}
+            {selectedCampusId && campusAreas.length === 0 && (
+              <div className="text-xs text-amber-600 shrink-0">
+                ⚠ Nenhuma área vinculada a este campus
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Upload Area */}
       <Card className="border-slate-100">
@@ -443,8 +492,25 @@ export default function PpcUploadPage() {
                 </div>
                 <div className="space-y-1.5">
                   <Label className="flex items-center gap-1.5"><Tag className="w-3.5 h-3.5 text-slate-500" />Área de Ensino</Label>
-                  <Input value={editingSubject.suggestedArea} onChange={(e) => setEditingSubject({ ...editingSubject, suggestedArea: e.target.value })} placeholder="Ex: Matemática, Informática, Língua Portuguesa..." />
-                  <p className="text-xs text-slate-400">Se a área não existir, será criada automaticamente ao aplicar.</p>
+                  {campusAreas.length > 0 ? (
+                    <Select
+                      value={editingSubject.suggestedArea || "__none__"}
+                      onValueChange={(v) => setEditingSubject({ ...editingSubject, suggestedArea: v === "__none__" ? "" : v })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a área..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">Sem área definida</SelectItem>
+                        {(campusAreas as any[]).map((a: any) => (
+                          <SelectItem key={a.id} value={a.name}>{a.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input value={editingSubject.suggestedArea} onChange={(e) => setEditingSubject({ ...editingSubject, suggestedArea: e.target.value })} placeholder="Nenhuma área vinculada ao campus — deixe em branco" />
+                  )}
+                  <p className="text-xs text-slate-400">Apenas áreas vinculadas ao campus são sugeridas pela IA.</p>
                 </div>
                 <div className="flex gap-4">
                   <label className="flex items-center gap-2 cursor-pointer">
