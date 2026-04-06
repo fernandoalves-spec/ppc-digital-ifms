@@ -139,12 +139,14 @@ export default function PpcUploadPage() {
 
   const handleApply = () => {
     if (!applyDocId || !editedData) return;
+    if (!selectedCampusId) return toast.error("Campus não selecionado. Volte e selecione o campus.");
     // Filtrar apenas as disciplinas selecionadas
     const filteredSubjects = editedData.subjects.filter((_, i) => selectedSubjects.has(i));
     if (filteredSubjects.length === 0) return toast.error("Selecione ao menos uma disciplina para importar.");
     applyMutation.mutate({
       documentId: applyDocId,
-      campusName: editedData.campusName,
+      // Campus é imutável: usa sempre o campusId definido pelo usuário
+      campusId: selectedCampusId,
       courseName: editedData.courseName,
       courseType: editedData.courseType,
       duration: editedData.duration,
@@ -349,18 +351,22 @@ export default function PpcUploadPage() {
               <h3 className="text-sm font-bold text-slate-700 flex items-center gap-2">
                 <GraduationCap className="w-4 h-4 text-green-600" /> Informações do Curso
               </h3>
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5 flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
-                <p className="text-xs text-amber-800">
-                  Se o campus ou curso não existirem no sistema, serão <strong>criados automaticamente</strong> ao aplicar.
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5 flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
+                <p className="text-xs text-blue-800">
+                  O <strong>campus foi definido por você</strong> e não pode ser alterado. Se o curso não existir no sistema, será <strong>criado automaticamente</strong> ao aplicar.
                 </p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs text-slate-500">Campus</Label>
                   <div className="flex items-center gap-2">
-                    <Input value={editedData.campusName} readOnly className="h-9 bg-slate-50 text-slate-600 cursor-not-allowed" />
-                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-green-700 border-green-200 bg-green-50 shrink-0 whitespace-nowrap">Fixo</Badge>
+                    <Input
+                      value={(campuses as any[]).find((c: any) => c.id === selectedCampusId)?.name ?? editedData.campusName}
+                      readOnly
+                      className="h-9 bg-green-50 text-green-800 cursor-not-allowed font-medium border-green-200"
+                    />
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-green-700 border-green-200 bg-green-50 shrink-0 whitespace-nowrap">Definido por você</Badge>
                   </div>
                 </div>
                 <div className="space-y-1">

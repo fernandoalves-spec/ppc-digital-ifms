@@ -58,6 +58,10 @@ vi.mock("./db", () => ({
   findOrCreateCampus: vi.fn().mockResolvedValue(1),
   findOrCreateCourse: vi.fn().mockResolvedValue(1),
   findOrCreateTeachingArea: vi.fn().mockResolvedValue(1),
+  findAreaInCampus: vi.fn().mockResolvedValue(1),
+  getCampusAreas: vi.fn().mockResolvedValue([
+    { id: 1, name: "Informática", color: "#16a34a", description: null, createdAt: new Date(), updatedAt: new Date() },
+  ]),
   getAuditLogs: vi.fn().mockResolvedValue([
     { id: 1, action: "CREATE", entity: "campus", entityId: 1, oldValue: null, newValue: { name: "Campus Campo Grande" }, userId: 1, userEmail: "admin@ifms.edu.br", userName: "Admin", createdAt: new Date() },
   ]),
@@ -305,7 +309,6 @@ vi.mock("./_core/llm", () => ({
         content: JSON.stringify({
           courseName: "Técnico em Informática",
           courseType: "Técnico",
-          campusName: "Campus Campo Grande",
           duration: 6,
           subjects: [{
             name: "Algoritmos",
@@ -359,5 +362,32 @@ describe("ppc.extract", () => {
     await expect(
       caller.ppc.extract({ documentId: 1, fileUrl: "https://s3.example.com/not-found.pdf" })
     ).rejects.toThrow();
+  });
+});
+
+describe("ppc.applyExtraction", () => {
+  it("usa sempre o campusId fornecido pelo usuário, ignorando qualquer dado da IA", async () => {
+    const caller = appRouter.createCaller(makeAdminCtx());
+    const result = await caller.ppc.applyExtraction({
+      documentId: 1,
+      campusId: 1, // campus definido pelo usuário
+      courseName: "Técnico em Informática",
+      courseType: "Técnico",
+      duration: 6,
+      subjects: [{
+        name: "Algoritmos",
+        semester: 1,
+        weeklyClasses: 4,
+        totalHours: 80,
+        isElective: false,
+        isRemote: false,
+        suggestedArea: "Informática",
+        syllabus: "Lógica de programação",
+        bibliography: "CORMEN, T. Algoritmos.",
+      }],
+    });
+    expect(result.success).toBe(true);
+    // O campusId retornado deve ser o mesmo que o usuário forneceu
+    expect(result.campusId).toBe(1);
   });
 });

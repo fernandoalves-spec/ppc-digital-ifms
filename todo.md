@@ -115,12 +115,18 @@
 - [x] Garantir barra de rolagem visível em ambas as interfaces
 
 ## v1.7 — Memória de Cálculo e Correções
-- [ ] PpcUpload: campus selecionado pelo usuário não pode ser alterado pela IA na extração
-- [ ] PpcUpload: corrigir layout do checklist — botão de aceitar sem sobreposição (sticky footer)
-- [ ] Backend: endpoint reports.memoryByArea — aulas por semestre por área por campus
-- [ ] Backend: geração de PDF da memória de cálculo (área, campus, disciplinas, curso, semestre)
-- [ ] Frontend: página Memória de Cálculo com filtros campus + área
-- [ ] Frontend: tabela de aulas por semestre (1º sem, 2º sem, total)
-- [ ] Frontend: lista de disciplinas por área com curso e semestre
-- [ ] Frontend: botão exportar PDF da memória de cálculo
-- [ ] Adicionar link "Memória de Cálculo" no menu lateral
+- [x] PpcUpload: campus selecionado pelo usuário não pode ser alterado pela IA na extração
+- [x] PpcUpload: corrigir layout do checklist — botão de aceitar sem sobreposição (sticky footer)
+- [x] Backend: endpoint reports.memoryByArea — aulas por semestre por área por campus
+- [x] Backend: geração de PDF da memória de cálculo (área, campus, disciplinas, curso, semestre)
+- [x] Frontend: página Memória de Cálculo com filtros campus + área
+- [x] Frontend: tabela de aulas por semestre (1º sem, 2º sem, total)
+- [x] Frontend: lista de disciplinas por área com curso e semestre
+- [x] Frontend: botão exportar PDF da memória de cálculo
+- [x] Adicionar link "Memória de Cálculo" no menu lateral
+
+## v1.8 — Edição de Campus em Cursos e Imutabilidade no PPC Upload
+- [x] Cursos: permitir editar o campus de um curso (campo campus editável no formulário de edição)
+- [x] Backend: router courses.update deve aceitar campusId como campo editável
+- [x] PpcUpload: remover campo campus do prompt enviado à IA (campus já foi definido pelo usuário)
+- [x] PpcUpload: no backend (applyExtraction), ignorar qualquer campusId vindo da IA e usar sempre o campusId do documento PPC

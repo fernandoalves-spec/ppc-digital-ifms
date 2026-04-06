@@ -369,7 +369,7 @@ IMPORTANTE: Retorne APENAS o JSON válido, sem texto adicional, sem markdown.`,
             },
             {
               role: "user",
-              content: `Extraia TODAS as informações do PPC abaixo: curso, campus, e para cada disciplina extraia também a ementa e referências bibliográficas completas.\n\n--- TEXTO DO PPC ---\n${truncatedText}`,
+              content: `Extraia TODAS as informações do PPC abaixo: curso (nome e tipo) e para cada disciplina extraia também a ementa e referências bibliográficas completas. O campus já foi informado pelo usuário, NÃO é necessário extrair o campus.\n\n--- TEXTO DO PPC ---\n${truncatedText}`,
             },
           ],
           response_format: {
@@ -382,7 +382,6 @@ IMPORTANTE: Retorne APENAS o JSON válido, sem texto adicional, sem markdown.`,
                 properties: {
                   courseName: { type: "string", description: "Nome completo do curso" },
                   courseType: { type: "string", description: "Tipo: Técnico, Subsequente, Graduação, FIC ou Pós-graduação" },
-                  campusName: { type: "string", description: "Nome do campus/unidade" },
                   duration: { type: "integer", description: "Duração em semestres" },
                   subjects: {
                     type: "array",
@@ -404,7 +403,7 @@ IMPORTANTE: Retorne APENAS o JSON válido, sem texto adicional, sem markdown.`,
                     },
                   },
                 },
-                required: ["courseName", "courseType", "campusName", "duration", "subjects"],
+                required: ["courseName", "courseType", "duration", "subjects"],
                 additionalProperties: false,
               },
             },
@@ -428,7 +427,8 @@ IMPORTANTE: Retorne APENAS o JSON válido, sem texto adicional, sem markdown.`,
   applyExtraction: adminProcedure
     .input(z.object({
       documentId: z.number(),
-      campusName: z.string(),
+      // campusId é definido pelo usuário e não pode ser alterado pela IA
+      campusId: z.number(),
       courseName: z.string(),
       courseType: z.string(),
       duration: z.number().optional(),
@@ -445,8 +445,8 @@ IMPORTANTE: Retorne APENAS o JSON válido, sem texto adicional, sem markdown.`,
       })),
     }))
     .mutation(async ({ input, ctx }) => {
-      // Auto-cadastrar campus se não existir
-      const campusId = await findOrCreateCampus(input.campusName);
+      // Campus é imutável: usa sempre o campusId definido pelo usuário no upload
+      const campusId = input.campusId;
       // Auto-cadastrar curso se não existir
       const courseId = await findOrCreateCourse({
         name: input.courseName,
@@ -477,7 +477,7 @@ IMPORTANTE: Retorne APENAS o JSON válido, sem texto adicional, sem markdown.`,
       }
       await updatePpcDocument(input.documentId, { status: "approved", courseId });
       await audit(ctx, "APPLY_EXTRACTION", "ppc_document", input.documentId, null, {
-        campusName: input.campusName,
+        campusId: input.campusId,
         courseName: input.courseName,
         subjectCount: createdCount,
         autoCreated: true,
