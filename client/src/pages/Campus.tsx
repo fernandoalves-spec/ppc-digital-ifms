@@ -104,10 +104,10 @@ export default function CampusPage() {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Campus / Unidades</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-slate-900">Campus / Unidades</h1>
           <p className="text-sm text-slate-500 mt-0.5">
             Gerencie as unidades e vincule as áreas de ensino disponíveis em cada campus.
           </p>
@@ -115,7 +115,7 @@ export default function CampusPage() {
         {isAdmin && (
           <Button
             onClick={() => { setForm({ name: "", city: "", state: "" }); setEditingId(null); setShowForm(true); }}
-            className="bg-green-600 hover:bg-green-700"
+            className="bg-green-600 hover:bg-green-700 shrink-0"
           >
             <Plus className="w-4 h-4 mr-2" /> Novo Campus
           </Button>

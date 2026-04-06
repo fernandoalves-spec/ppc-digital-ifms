@@ -803,27 +803,40 @@ export async function getClassesBySemesterFromOfferings() {
 }
 
 /**
- * Memória de Cálculo por Área
- * Retorna, para cada área de um campus, as disciplinas responsáveis,
- * agrupadas por curso e semestre, com total de aulas semanais por semestre.
+ * Memória de Cálculo por Área — Algoritmo Preditivo por Editais
+ *
+ * Implementa o algoritmo de projeção no tempo descrito na documentação:
+ * Para cada edital ativo, calcula em qual semestre do curso a turma estará
+ * no 1º e 2º semestre do ANO ALVO, e soma as aulas das disciplinas da área.
+ *
+ * Fórmula do ciclo de vida:
+ *   S_1º_sem = ((anoAlvo - anoInicioEdital) * 2) + 1 - (semestreInicio === 2 ? 1 : 0)
+ *   S_2º_sem = S_1º_sem + 1
+ *   Se S > duração do curso: turma já se formou, ignorar.
+ *   Se S < 1: turma ainda não começou, ignorar.
  */
-export async function getMemoryByArea(filters: { campusId?: number; areaId?: number }) {
+export async function getMemoryByArea(filters: { campusId?: number; areaId?: number; targetYear?: number }) {
   const db = await getDb();
   if (!db) return [];
 
-  // 1. Buscar IDs dos cursos que têm pelo menos uma oferta ativa cadastrada
-  //    (um curso só é considerado ativo quando tem oferta de vagas)
-  const activeOfferings = await db
-    .selectDistinct({ courseId: courseOfferings.courseId })
+  const targetYear = filters.targetYear ?? new Date().getFullYear();
+
+  // 1. Buscar todos os editais ativos
+  const allOfferings = await db
+    .select({
+      id: courseOfferings.id,
+      courseId: courseOfferings.courseId,
+      campusId: courseOfferings.campusId,
+      academicTerm: courseOfferings.academicTerm,
+      numberOfEntries: courseOfferings.numberOfEntries,
+    })
     .from(courseOfferings)
     .where(eq(courseOfferings.active, true));
-  const activeCourseIds = new Set(activeOfferings.map(o => o.courseId));
-  if (activeCourseIds.size === 0) return [];
 
-  // 2. Buscar disciplinas com área, curso e campus
-  //    Filtra apenas cursos que têm oferta cadastrada
-  //    O cálculo de aulas vem do PPC (weeklyClasses das disciplinas), não do edital
-  const rows = await db
+  if (allOfferings.length === 0) return [];
+
+  // 2. Buscar todos os cursos ativos com suas disciplinas e áreas
+  const allSubjectRows = await db
     .select({
       areaId: teachingAreas.id,
       areaName: teachingAreas.name,
@@ -831,8 +844,7 @@ export async function getMemoryByArea(filters: { campusId?: number; areaId?: num
       courseId: courses.id,
       courseName: courses.name,
       courseType: courses.type,
-      classesFirstHalfYear: courses.classesFirstHalfYear,   // turmas que ingressam no 1º sem. do ano
-      classesSecondHalfYear: courses.classesSecondHalfYear, // turmas que ingressam no 2º sem. do ano
+      courseDuration: courses.duration,
       campusId: campuses.id,
       campusName: campuses.name,
       subjectId: subjects.id,
@@ -853,128 +865,175 @@ export async function getMemoryByArea(filters: { campusId?: number; areaId?: num
         filters.campusId ? eq(campuses.id, filters.campusId) : undefined,
         filters.areaId ? eq(teachingAreas.id, filters.areaId) : undefined,
       )
-    )
-    .orderBy(teachingAreas.name, courses.name, subjects.semester, subjects.name);
+    );
 
-  // 3. Filtrar apenas disciplinas de cursos com oferta ativa
-  const filteredRows = rows.filter(r => activeCourseIds.has(r.courseId));
+  // 3. Indexar disciplinas por courseId → semestre do curso
+  type SubjectInfo = { id: number; name: string; weeklyClasses: number; totalHours: number | null; isElective: boolean };
+  const subjectsByCourseAndSemester = new Map<string, SubjectInfo[]>();
+  const courseMetaMap = new Map<number, { courseName: string; courseType: string | null; courseDuration: number; campusId: number; campusName: string }>();
+  const areaMetaMap = new Map<number, { areaName: string; areaColor: string | null }>();
+  const courseAreaMap = new Map<string, boolean>(); // "courseId-areaId" para saber quais áreas um curso tem
 
-  // Agrupar por área → campus → curso → semestre → disciplinas
-  const areaMap = new Map<number, {
-    areaId: number;
-    areaName: string;
-    areaColor: string | null;
-    campuses: Map<number, {
-      campusId: number;
-      campusName: string;
-      courses: Map<number, {
-        courseId: number;
-        courseName: string;
-        courseType: string | null;
-        classesFirstHalfYear: number;
-        classesSecondHalfYear: number;
-        semesters: Map<number, {
-          semester: number;
-          weeklyClasses: number;
-          subjects: { id: number; name: string; weeklyClasses: number; totalHours: number | null; isElective: boolean }[];
-        }>;
-      }>;
-    }>;
-  }>();
-
-  for (const row of filteredRows) {
-    if (!areaMap.has(row.areaId)) {
-      areaMap.set(row.areaId, {
-        areaId: row.areaId,
-        areaName: row.areaName,
-        areaColor: row.areaColor,
-        campuses: new Map(),
-      });
-    }
-    const area = areaMap.get(row.areaId)!;
-
-    if (!area.campuses.has(row.campusId)) {
-      area.campuses.set(row.campusId, {
-        campusId: row.campusId,
-        campusName: row.campusName,
-        courses: new Map(),
-      });
-    }
-    const campus = area.campuses.get(row.campusId)!;
-
-    if (!campus.courses.has(row.courseId)) {
-      campus.courses.set(row.courseId, {
-        courseId: row.courseId,
-        courseName: row.courseName,
-        courseType: row.courseType,
-        classesFirstHalfYear: row.classesFirstHalfYear ?? 0,
-        classesSecondHalfYear: row.classesSecondHalfYear ?? 0,
-        semesters: new Map(),
-      });
-    }
-    const course = campus.courses.get(row.courseId)!;
-
-    if (!course.semesters.has(row.semester)) {
-      course.semesters.set(row.semester, {
-        semester: row.semester,
-        weeklyClasses: 0,
-        subjects: [],
-      });
-    }
-    const sem = course.semesters.get(row.semester)!;
-    sem.weeklyClasses += row.weeklyClasses;
-    sem.subjects.push({
+  for (const row of allSubjectRows) {
+    const key = `${row.courseId}-${row.semester}`;
+    if (!subjectsByCourseAndSemester.has(key)) subjectsByCourseAndSemester.set(key, []);
+    subjectsByCourseAndSemester.get(key)!.push({
       id: row.subjectId,
       name: row.subjectName,
       weeklyClasses: row.weeklyClasses,
       totalHours: row.totalHours,
       isElective: row.isElective ?? false,
     });
+    if (!courseMetaMap.has(row.courseId)) {
+      courseMetaMap.set(row.courseId, {
+        courseName: row.courseName,
+        courseType: row.courseType,
+        courseDuration: row.courseDuration,
+        campusId: row.campusId,
+        campusName: row.campusName,
+      });
+    }
+    if (!areaMetaMap.has(row.areaId)) {
+      areaMetaMap.set(row.areaId, { areaName: row.areaName, areaColor: row.areaColor });
+    }
+    courseAreaMap.set(`${row.courseId}-${row.areaId}`, true);
   }
 
-  // Serializar para array
+  // 4. Algoritmo preditivo: para cada edital, calcular S_Atual no 1º e 2º sem. do ano alvo
+  //    Faz o parse do academicTerm (ex: "2026/1" ou "2026/2")
+  type OfferingContrib = {
+    offeringId: number;
+    academicTerm: string;
+    numberOfEntries: number;
+    courseSemester1st: number; // semestre do curso no 1º sem. do ano alvo
+    courseSemester2nd: number; // semestre do curso no 2º sem. do ano alvo
+    firstHalfClasses: number;  // aulas semanais no 1º sem. do ano alvo
+    secondHalfClasses: number; // aulas semanais no 2º sem. do ano alvo
+    subjects1st: SubjectInfo[];
+    subjects2nd: SubjectInfo[];
+  };
+
+  // Estrutura: area → campus → curso → contribuições dos editais
+  type CourseEntry = {
+    courseId: number;
+    courseName: string;
+    courseType: string | null;
+    offerings: OfferingContrib[];
+    firstHalfTotal: number;
+    secondHalfTotal: number;
+  };
+  type CampusEntry = { campusId: number; campusName: string; courses: Map<number, CourseEntry> };
+  type AreaEntry = { areaId: number; areaName: string; areaColor: string | null; campuses: Map<number, CampusEntry> };
+
+  const areaMap = new Map<number, AreaEntry>();
+
+  // Filtrar editais que pertencem a cursos com disciplinas da área filtrada (ou todas as áreas)
+  const relevantCourseIds = new Set(allSubjectRows.map(r => r.courseId));
+
+  for (const offering of allOfferings) {
+    if (!relevantCourseIds.has(offering.courseId)) continue;
+    const courseMeta = courseMetaMap.get(offering.courseId);
+    if (!courseMeta) continue;
+
+    // Aplicar filtro de campus se especificado
+    if (filters.campusId && courseMeta.campusId !== filters.campusId) continue;
+
+    // Parse do academicTerm: "YYYY/H"
+    const parts = offering.academicTerm.split("/");
+    const anoInicio = parseInt(parts[0]);
+    const semestreInicio = parseInt(parts[1]); // 1 ou 2
+
+    // Fases do algoritmo (conforme documentação):
+    // S_1º_sem = ((anoAlvo - anoInicio) * 2) + 1 - (semestreInicio === 2 ? 1 : 0)
+    const s1 = ((targetYear - anoInicio) * 2) + 1 - (semestreInicio === 2 ? 1 : 0);
+    // S_2º_sem = S_1º_sem + 1 (exceto caso especial: edital começa no 2º sem. do próprio ano alvo)
+    const s2 = s1 + 1;
+
+    const duration = courseMeta.courseDuration;
+
+    // Verificar ciclo de vida: se a turma já se formou antes do ano alvo, ignorar
+    // Semestres decorridos até o início do ano alvo:
+    const semDecorridos = ((targetYear - anoInicio) * 2) - (semestreInicio === 2 ? 1 : 0);
+    if (semDecorridos >= duration) continue; // já formou
+
+    // Para cada área que este curso possui disciplinas
+    const areaIdsForCourse = new Set(
+      allSubjectRows.filter(r => r.courseId === offering.courseId).map(r => r.areaId)
+    );
+
+    for (const areaId of Array.from(areaIdsForCourse)) {
+      if (filters.areaId && areaId !== filters.areaId) continue;
+
+      const areaMeta = areaMetaMap.get(areaId)!;
+
+      // Buscar disciplinas da área no semestre s1 e s2
+      const subs1 = (s1 >= 1 && s1 <= duration) ? (subjectsByCourseAndSemester.get(`${offering.courseId}-${s1}`) ?? []).filter(s => {
+        // Verificar se a disciplina pertence a esta área
+        const subRow = allSubjectRows.find(r => r.subjectId === s.id);
+        return subRow?.areaId === areaId;
+      }) : [];
+      const subs2 = (s2 >= 1 && s2 <= duration) ? (subjectsByCourseAndSemester.get(`${offering.courseId}-${s2}`) ?? []).filter(s => {
+        const subRow = allSubjectRows.find(r => r.subjectId === s.id);
+        return subRow?.areaId === areaId;
+      }) : [];
+
+      const first1 = subs1.reduce((acc, s) => acc + s.weeklyClasses, 0) * offering.numberOfEntries;
+      const first2 = subs2.reduce((acc, s) => acc + s.weeklyClasses, 0) * offering.numberOfEntries;
+
+      if (first1 === 0 && first2 === 0) continue;
+
+      // Garantir estrutura na áreaMap
+      if (!areaMap.has(areaId)) {
+        areaMap.set(areaId, { areaId, areaName: areaMeta.areaName, areaColor: areaMeta.areaColor, campuses: new Map() });
+      }
+      const area = areaMap.get(areaId)!;
+      if (!area.campuses.has(courseMeta.campusId)) {
+        area.campuses.set(courseMeta.campusId, { campusId: courseMeta.campusId, campusName: courseMeta.campusName, courses: new Map() });
+      }
+      const campus = area.campuses.get(courseMeta.campusId)!;
+      if (!campus.courses.has(offering.courseId)) {
+        campus.courses.set(offering.courseId, {
+          courseId: offering.courseId,
+          courseName: courseMeta.courseName,
+          courseType: courseMeta.courseType,
+          offerings: [],
+          firstHalfTotal: 0,
+          secondHalfTotal: 0,
+        });
+      }
+      const courseEntry = campus.courses.get(offering.courseId)!;
+      courseEntry.offerings.push({
+        offeringId: offering.id,
+        academicTerm: offering.academicTerm,
+        numberOfEntries: offering.numberOfEntries,
+        courseSemester1st: s1,
+        courseSemester2nd: s2,
+        firstHalfClasses: first1,
+        secondHalfClasses: first2,
+        subjects1st: subs1,
+        subjects2nd: subs2,
+      });
+      courseEntry.firstHalfTotal += first1;
+      courseEntry.secondHalfTotal += first2;
+    }
+  }
+
+  // 5. Serializar para array
   return Array.from(areaMap.values()).map(area => ({
     areaId: area.areaId,
     areaName: area.areaName,
     areaColor: area.areaColor,
     campuses: Array.from(area.campuses.values()).map(campus => {
-      // Calcular aulas totais por semestre do ANO CIVIL para cada curso
-      // Regra (igual ao Quadro de Oferta):
-      //   Turmas do 1º ingresso (classesFirstHalfYear): símpares → 1º sem. ano, pares → 2º sem. ano
-      //   Turmas do 2º ingresso (classesSecondHalfYear): símpares → 2º sem. ano, pares → 1º sem. ano
-      const serializedCourses = Array.from(campus.courses.values()).map(course => {
-        const ingress1st = course.classesFirstHalfYear ?? 0;
-        const ingress2nd = course.classesSecondHalfYear ?? 0;
-        const sortedSemesters = Array.from(course.semesters.values()).sort((a, b) => a.semester - b.semester);
-        let firstHalfTotal = 0;
-        let secondHalfTotal = 0;
-        for (const sem of sortedSemesters) {
-          const isOdd = sem.semester % 2 !== 0;
-          if (ingress1st > 0) {
-            if (isOdd) firstHalfTotal  += sem.weeklyClasses * ingress1st;
-            else       secondHalfTotal += sem.weeklyClasses * ingress1st;
-          }
-          if (ingress2nd > 0) {
-            if (isOdd) secondHalfTotal += sem.weeklyClasses * ingress2nd;
-            else       firstHalfTotal  += sem.weeklyClasses * ingress2nd;
-          }
-        }
-        return {
-          courseId: course.courseId,
-          courseName: course.courseName,
-          courseType: course.courseType,
-          classesFirstHalfYear: ingress1st,
-          classesSecondHalfYear: ingress2nd,
-          firstHalfTotal,
-          secondHalfTotal,
-          totalClasses: firstHalfTotal + secondHalfTotal,
-          semesters: sortedSemesters,
-          totalWeeklyClasses: sortedSemesters.reduce((s, sem) => s + sem.weeklyClasses, 0),
-          totalSubjects: sortedSemesters.reduce((s, sem) => s + sem.subjects.length, 0),
-        };
-      });
+      const serializedCourses = Array.from(campus.courses.values()).map(course => ({
+        courseId: course.courseId,
+        courseName: course.courseName,
+        courseType: course.courseType,
+        firstHalfTotal: course.firstHalfTotal,
+        secondHalfTotal: course.secondHalfTotal,
+        totalClasses: course.firstHalfTotal + course.secondHalfTotal,
+        offerings: course.offerings,
+      }));
 
-      // Resumo do campus: somar aulas totais de todos os cursos por semestre do ano civil
       const campusFirstHalf  = serializedCourses.reduce((s, c) => s + c.firstHalfTotal, 0);
       const campusSecondHalf = serializedCourses.reduce((s, c) => s + c.secondHalfTotal, 0);
 
@@ -982,7 +1041,6 @@ export async function getMemoryByArea(filters: { campusId?: number; areaId?: num
         campusId: campus.campusId,
         campusName: campus.campusName,
         courses: serializedCourses,
-        // Resumo por semestre do ANO CIVIL (considera turmas em oferta — mesma lógica do Quadro de Oferta)
         semesterSummary: [
           { calendarSemester: 1, label: "1º Semestre do Ano", weeklyClasses: campusFirstHalf },
           { calendarSemester: 2, label: "2º Semestre do Ano", weeklyClasses: campusSecondHalf },

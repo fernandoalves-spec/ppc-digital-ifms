@@ -120,21 +120,21 @@ export default function CoursesPage() {
   const isSaving = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Cursos</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-slate-900">Cursos</h1>
           <p className="text-sm text-slate-500 mt-0.5">Gerencie os cursos ofertados pelo IFMS</p>
         </div>
-        <Button onClick={openCreate} className="bg-green-600 hover:bg-green-700">
-          <Plus className="w-4 h-4 mr-2" /> Novo Curso
+        <Button onClick={openCreate} className="bg-green-600 hover:bg-green-700 shrink-0">
+          <Plus className="w-4 h-4 mr-1 md:mr-2" /> <span>Novo Curso</span>
         </Button>
       </div>
 
       {/* Filtros */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-2">
         <Select value={filterCampus} onValueChange={setFilterCampus}>
-          <SelectTrigger className="w-48 bg-white">
+          <SelectTrigger className="w-full sm:w-44 bg-white">
             <SelectValue placeholder="Todos os campus" />
           </SelectTrigger>
           <SelectContent>
@@ -143,7 +143,7 @@ export default function CoursesPage() {
           </SelectContent>
         </Select>
         <Select value={filterType} onValueChange={setFilterType}>
-          <SelectTrigger className="w-44 bg-white">
+          <SelectTrigger className="w-full sm:w-40 bg-white">
             <SelectValue placeholder="Todos os tipos" />
           </SelectTrigger>
           <SelectContent>

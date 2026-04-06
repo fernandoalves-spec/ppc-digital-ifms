@@ -170,12 +170,12 @@ export default function Offerings() {
 
   return (
     <>
-    <div className="space-y-6">
+    <div className="space-y-4 p-3 md:p-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Quadro de Oferta</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-xl md:text-2xl font-bold tracking-tight">Quadro de Oferta</h1>
+            <p className="text-muted-foreground text-sm">
               Registre as turmas ofertadas desde 2020 por campus e curso
             </p>
           </div>

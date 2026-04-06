@@ -27,9 +27,9 @@ export default function SubjectsPage() {
   const withoutArea = filtered.filter((s) => !s.areaId);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Disciplinas</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-slate-900">Disciplinas</h1>
         <p className="text-sm text-slate-500 mt-0.5">Visualize e filtre disciplinas por curso e área</p>
       </div>
 

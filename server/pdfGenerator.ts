@@ -213,46 +213,80 @@ export async function generateMemoryPdf(opts: {
         }
 
         for (const course of campus.courses) {
-          // ── Curso ──────────────────────────────────────────────────────────
+          // ── Curso ──────────────────────────────────────────────────────────────────
           checkPage(30);
           doc.rect(40, y, PAGE_W, 18).fill("#e2e8f0");
           doc.fillColor(DARK).fontSize(9).font("Helvetica-Bold")
-            .text(`Curso: ${course.courseName}  |  ${course.courseType ?? ""}  |  Total: ${course.totalWeeklyClasses} aulas/sem  |  ${course.totalSubjects} disciplinas`, 48, y + 5, { width: PAGE_W - 16, ellipsis: true });
+            .text(`Curso: ${course.courseName}  |  ${course.courseType ?? ""}  |  1º Sem: ${course.firstHalfTotal} aulas/sem  |  2º Sem: ${course.secondHalfTotal} aulas/sem`, 48, y + 5, { width: PAGE_W - 16, ellipsis: true });
           y += 22;
 
-          for (const sem of course.semesters) {
-            // ── Semestre ────────────────────────────────────────────────────
+          for (const off of course.offerings) {
+            // ── Edital ──────────────────────────────────────────────────────────────────
             checkPage(30);
             doc.rect(40, y, PAGE_W, 16).fill("#f8fafc");
             doc.rect(40, y, 4, 16).fill(area.areaColor ?? GREEN);
-            doc.fillColor(DARK).fontSize(9).font("Helvetica-Bold")
-              .text(`${sem.semester}º Semestre  —  ${sem.weeklyClasses} aulas/semana`, 50, y + 4, { width: PAGE_W - 20 });
+            doc.fillColor(DARK).fontSize(8.5).font("Helvetica-Bold")
+              .text(`Edital ${off.academicTerm}  —  ${off.numberOfEntries} turma(s)`, 50, y + 4, { width: PAGE_W - 20 });
             y += 18;
 
-            // Tabela de disciplinas
-            checkPage(20);
-            doc.rect(40, y, PAGE_W, 14).fill("#e2e8f0");
-            doc.fillColor(GRAY).fontSize(7.5).font("Helvetica-Bold")
-              .text("Unidade Curricular", 48, y + 3, { width: 260 });
-            doc.text("Aulas/sem", 310, y + 3, { width: 70, align: "center" });
-            doc.text("C.H. Total", 380, y + 3, { width: 70, align: "center" });
-            doc.text("Tipo", 450, y + 3, { width: 60, align: "center" });
-            y += 16;
-
-            let rowBg = false;
-            for (const sub of sem.subjects) {
-              checkPage(16);
-              doc.rect(40, y, PAGE_W, 14).fill(rowBg ? LIGHT : WHITE);
-              doc.fillColor(DARK).fontSize(8).font("Helvetica")
-                .text(sub.name, 48, y + 3, { width: 258, ellipsis: true });
-              doc.text(String(sub.weeklyClasses), 310, y + 3, { width: 70, align: "center" });
-              doc.text(sub.totalHours ? `${sub.totalHours}h` : "—", 380, y + 3, { width: 70, align: "center" });
-              doc.fillColor(sub.isElective ? BLUE : GREEN).fontSize(7).font("Helvetica-Bold")
-                .text(sub.isElective ? "Optativa" : "Obrigatória", 450, y + 4, { width: 60, align: "center" });
-              y += 14;
-              rowBg = !rowBg;
+            // 1º semestre do ano
+            if (off.subjects1st.length > 0) {
+              checkPage(20);
+              doc.rect(40, y, PAGE_W, 14).fill(BLUE);
+              doc.fillColor(WHITE).fontSize(8).font("Helvetica-Bold")
+                .text(`1º Sem. do Ano — ${off.courseSemester1st}º Sem. do Curso — ${off.firstHalfClasses} aulas/sem`, 48, y + 3, { width: PAGE_W - 16 });
+              y += 16;
+              checkPage(20);
+              doc.rect(40, y, PAGE_W, 14).fill("#e2e8f0");
+              doc.fillColor(GRAY).fontSize(7.5).font("Helvetica-Bold")
+                .text("Unidade Curricular", 48, y + 3, { width: 280 })
+                .text("Aulas/sem", 330, y + 3, { width: 80, align: "center" })
+                .text("Tipo", 420, y + 3, { width: 80, align: "center" });
+              y += 16;
+              let rowBg = false;
+              for (const sub of off.subjects1st) {
+                checkPage(14);
+                doc.rect(40, y, PAGE_W, 13).fill(rowBg ? LIGHT : WHITE);
+                doc.fillColor(DARK).fontSize(8).font("Helvetica")
+                  .text(sub.name, 48, y + 2, { width: 278, ellipsis: true });
+                doc.text(String(sub.weeklyClasses), 330, y + 2, { width: 80, align: "center" });
+                doc.fillColor(sub.isElective ? BLUE : GREEN).fontSize(7).font("Helvetica-Bold")
+                  .text(sub.isElective ? "Optativa" : "Obrigatória", 420, y + 3, { width: 80, align: "center" });
+                y += 13;
+                rowBg = !rowBg;
+              }
+              y += 4;
             }
-            y += 6;
+
+            // 2º semestre do ano
+            if (off.subjects2nd.length > 0) {
+              checkPage(20);
+              doc.rect(40, y, PAGE_W, 14).fill("#7c3aed");
+              doc.fillColor(WHITE).fontSize(8).font("Helvetica-Bold")
+                .text(`2º Sem. do Ano — ${off.courseSemester2nd}º Sem. do Curso — ${off.secondHalfClasses} aulas/sem`, 48, y + 3, { width: PAGE_W - 16 });
+              y += 16;
+              checkPage(20);
+              doc.rect(40, y, PAGE_W, 14).fill("#e2e8f0");
+              doc.fillColor(GRAY).fontSize(7.5).font("Helvetica-Bold")
+                .text("Unidade Curricular", 48, y + 3, { width: 280 })
+                .text("Aulas/sem", 330, y + 3, { width: 80, align: "center" })
+                .text("Tipo", 420, y + 3, { width: 80, align: "center" });
+              y += 16;
+              let rowBg2 = false;
+              for (const sub of off.subjects2nd) {
+                checkPage(14);
+                doc.rect(40, y, PAGE_W, 13).fill(rowBg2 ? LIGHT : WHITE);
+                doc.fillColor(DARK).fontSize(8).font("Helvetica")
+                  .text(sub.name, 48, y + 2, { width: 278, ellipsis: true });
+                doc.text(String(sub.weeklyClasses), 330, y + 2, { width: 80, align: "center" });
+                doc.fillColor(sub.isElective ? BLUE : GREEN).fontSize(7).font("Helvetica-Bold")
+                  .text(sub.isElective ? "Optativa" : "Obrigatória", 420, y + 3, { width: 80, align: "center" });
+                y += 13;
+                rowBg2 = !rowBg2;
+              }
+              y += 4;
+            }
+            y += 8;
           }
           y += 8;
         }

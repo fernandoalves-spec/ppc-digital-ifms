@@ -36,9 +36,9 @@ export default function AuditPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Histórico de Auditoria</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-slate-900">Histórico de Auditoria</h1>
         <p className="text-sm text-slate-500 mt-0.5">Rastreamento completo de todas as alterações realizadas no sistema</p>
       </div>
 

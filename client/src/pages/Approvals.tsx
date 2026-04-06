@@ -72,10 +72,10 @@ export default function ApprovalsPage() {
   const respondingSubject = respondingRequest ? subjectMap.get(respondingRequest.subjectId) : null;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Solicitações de Indicação</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-slate-900">Solicitações de Indicação</h1>
           <p className="text-sm text-slate-500 mt-0.5">
             {isCoordinator ? "Solicitações para você indicar a área do docente" : "Fluxo de aprovação de áreas por disciplina"}
           </p>

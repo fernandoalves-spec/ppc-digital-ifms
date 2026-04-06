@@ -53,13 +53,13 @@ export default function ReportsPage() {
   const currentReportType = REPORT_TYPES.find((r) => r.value === reportType)!;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Relatórios</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-slate-900">Relatórios</h1>
           <p className="text-sm text-slate-500 mt-0.5">Visualize e exporte relatórios analíticos do PPC</p>
         </div>
-        <Button onClick={handleExport} disabled={isExporting} className="bg-green-600 hover:bg-green-700">
+        <Button onClick={handleExport} disabled={isExporting} className="bg-green-600 hover:bg-green-700 shrink-0">
           {isExporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
           Exportar PDF
         </Button>

@@ -206,7 +206,7 @@ export default function CourseDetailPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 p-3 md:p-6">
       {/* Header */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => setLocation("/courses")} className="shrink-0">

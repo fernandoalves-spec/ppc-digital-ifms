@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import {
   Calculator,
@@ -17,20 +16,24 @@ import {
   Loader2,
   BarChart3,
   Clock,
-  Hash,
+  FileText,
+  CalendarDays,
 } from "lucide-react";
 
 export default function MemoryCalc() {
+  const currentYear = new Date().getFullYear();
   const [selectedCampusId, setSelectedCampusId] = useState<number | undefined>();
   const [selectedAreaId, setSelectedAreaId] = useState<number | undefined>();
+  const [targetYear, setTargetYear] = useState<number>(currentYear);
   const [expandedAreas, setExpandedAreas] = useState<Set<number>>(new Set());
+  const [expandedCampuses, setExpandedCampuses] = useState<Set<string>>(new Set());
   const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set());
 
   const { data: campuses = [] } = trpc.campus.list.useQuery();
   const { data: areas = [] } = trpc.areas.list.useQuery();
 
   const { data: memoryData = [], isLoading } = trpc.reports.memoryByArea.useQuery(
-    { campusId: selectedCampusId, areaId: selectedAreaId },
+    { campusId: selectedCampusId, areaId: selectedAreaId, targetYear },
     { enabled: true }
   );
 
@@ -45,8 +48,15 @@ export default function MemoryCalc() {
   const toggleArea = (areaId: number) => {
     setExpandedAreas(prev => {
       const next = new Set(prev);
-      if (next.has(areaId)) next.delete(areaId);
-      else next.add(areaId);
+      if (next.has(areaId)) next.delete(areaId); else next.add(areaId);
+      return next;
+    });
+  };
+
+  const toggleCampus = (key: string) => {
+    setExpandedCampuses(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
       return next;
     });
   };
@@ -54,74 +64,99 @@ export default function MemoryCalc() {
   const toggleCourse = (key: string) => {
     setExpandedCourses(prev => {
       const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
+      if (next.has(key)) next.delete(key); else next.add(key);
       return next;
     });
   };
 
   const expandAll = () => {
-    const areaIds = new Set(memoryData.map(a => a.areaId));
-    setExpandedAreas(areaIds);
+    setExpandedAreas(new Set(memoryData.map(a => a.areaId)));
+    const campusKeys = new Set<string>();
     const courseKeys = new Set<string>();
     memoryData.forEach(area => {
       area.campuses.forEach(campus => {
+        campusKeys.add(`${area.areaId}-${campus.campusId}`);
         campus.courses.forEach(course => {
           courseKeys.add(`${area.areaId}-${campus.campusId}-${course.courseId}`);
         });
       });
     });
+    setExpandedCampuses(campusKeys);
     setExpandedCourses(courseKeys);
   };
 
   const collapseAll = () => {
     setExpandedAreas(new Set());
+    setExpandedCampuses(new Set());
     setExpandedCourses(new Set());
   };
 
-  // Totais gerais
+  // KPIs gerais
   const totals = useMemo(() => {
-    let totalAreas = 0, totalSubjects = 0, totalWeekly = 0;
+    let totalAreas = 0, totalCourses = 0, totalFirst = 0, totalSecond = 0;
     for (const area of memoryData) {
       totalAreas++;
       for (const campus of area.campuses) {
         for (const course of campus.courses) {
-          totalSubjects += course.totalSubjects;
-          totalWeekly += course.totalWeeklyClasses;
+          totalCourses++;
+          totalFirst += course.firstHalfTotal;
+          totalSecond += course.secondHalfTotal;
         }
       }
     }
-    return { totalAreas, totalSubjects, totalWeekly };
+    return { totalAreas, totalCourses, totalFirst, totalSecond };
   }, [memoryData]);
 
+  // Anos disponíveis no seletor (3 anos atrás até 3 anos à frente)
+  const yearOptions = Array.from({ length: 7 }, (_, i) => currentYear - 3 + i);
+
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       {/* Cabeçalho */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <Calculator className="w-6 h-6 text-green-600" />
+          <h1 className="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <Calculator className="w-5 h-5 md:w-6 md:h-6 text-green-600 shrink-0" />
             Memória de Cálculo
           </h1>
-          <p className="text-slate-500 mt-1 text-sm">
-            Aulas semanais por área de ensino — disciplinas responsáveis por campus e curso
+          <p className="text-slate-500 mt-1 text-xs md:text-sm">
+            Projeção de aulas semanais por área — baseada nos editais ativos e no ano alvo
           </p>
         </div>
         <Button
-          onClick={() => exportMutation.mutate({ campusId: selectedCampusId, areaId: selectedAreaId })}
+          onClick={() => exportMutation.mutate({ campusId: selectedCampusId, areaId: selectedAreaId, targetYear })}
           disabled={exportMutation.isPending || memoryData.length === 0}
-          className="bg-green-600 hover:bg-green-700 gap-2"
+          className="bg-green-600 hover:bg-green-700 gap-2 text-sm h-9"
         >
           {exportMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-          Exportar PDF
+          <span className="hidden sm:inline">Exportar PDF</span>
+          <span className="sm:hidden">PDF</span>
         </Button>
       </div>
 
       {/* Filtros */}
       <Card>
-        <CardContent className="pt-4 pb-4">
-          <div className="flex flex-wrap gap-4 items-end">
-            <div className="space-y-1 min-w-[200px]">
+        <CardContent className="pt-3 pb-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-slate-600">Ano Alvo</label>
+              <Select
+                value={String(targetYear)}
+                onValueChange={(v) => setTargetYear(Number(v))}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {yearOptions.map(y => (
+                    <SelectItem key={y} value={String(y)}>
+                      {y} {y === currentYear ? "(atual)" : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
               <label className="text-xs font-medium text-slate-600">Campus</label>
               <Select
                 value={selectedCampusId ? String(selectedCampusId) : "__all__"}
@@ -138,7 +173,7 @@ export default function MemoryCalc() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1 min-w-[200px]">
+            <div className="space-y-1">
               <label className="text-xs font-medium text-slate-600">Área de Ensino</label>
               <Select
                 value={selectedAreaId ? String(selectedAreaId) : "__all__"}
@@ -155,12 +190,12 @@ export default function MemoryCalc() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex gap-2 ml-auto">
-              <Button variant="outline" size="sm" onClick={expandAll} className="text-xs h-9">
-                Expandir Tudo
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={expandAll} className="text-xs h-9 flex-1">
+                Expandir
               </Button>
-              <Button variant="outline" size="sm" onClick={collapseAll} className="text-xs h-9">
-                Recolher Tudo
+              <Button variant="outline" size="sm" onClick={collapseAll} className="text-xs h-9 flex-1">
+                Recolher
               </Button>
             </div>
           </div>
@@ -168,37 +203,48 @@ export default function MemoryCalc() {
       </Card>
 
       {/* KPIs */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card>
-          <CardContent className="pt-4 pb-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
-              <BarChart3 className="w-5 h-5 text-green-700" />
+          <CardContent className="pt-3 pb-3 flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
+              <BarChart3 className="w-4 h-4 text-green-700" />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-slate-900">{totals.totalAreas}</p>
-              <p className="text-xs text-slate-500">Áreas com disciplinas</p>
+            <div className="min-w-0">
+              <p className="text-xl font-bold text-slate-900">{totals.totalAreas}</p>
+              <p className="text-[11px] text-slate-500 leading-tight">Áreas</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-4 pb-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
-              <BookOpen className="w-5 h-5 text-blue-700" />
+          <CardContent className="pt-3 pb-3 flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+              <GraduationCap className="w-4 h-4 text-blue-700" />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-slate-900">{totals.totalSubjects}</p>
-              <p className="text-xs text-slate-500">Unidades curriculares</p>
+            <div className="min-w-0">
+              <p className="text-xl font-bold text-slate-900">{totals.totalCourses}</p>
+              <p className="text-[11px] text-slate-500 leading-tight">Cursos ativos</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-4 pb-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
-              <Clock className="w-5 h-5 text-purple-700" />
+          <CardContent className="pt-3 pb-3 flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+              <Clock className="w-4 h-4 text-blue-700" />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-slate-900">{totals.totalWeekly}</p>
-              <p className="text-xs text-slate-500">Aulas semanais totais</p>
+            <div className="min-w-0">
+              <p className="text-xl font-bold text-slate-900">{totals.totalFirst}</p>
+              <p className="text-[11px] text-slate-500 leading-tight">Aulas 1º Sem/{targetYear}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-3 pb-3 flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
+              <Clock className="w-4 h-4 text-purple-700" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xl font-bold text-slate-900">{totals.totalSecond}</p>
+              <p className="text-[11px] text-slate-500 leading-tight">Aulas 2º Sem/{targetYear}</p>
             </div>
           </CardContent>
         </Card>
@@ -206,56 +252,48 @@ export default function MemoryCalc() {
 
       {/* Conteúdo principal */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-green-600" />
-          <span className="ml-3 text-slate-500">Calculando aulas por área...</span>
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="w-7 h-7 animate-spin text-green-600" />
+          <span className="ml-3 text-slate-500 text-sm">Calculando projeção de aulas...</span>
         </div>
       ) : memoryData.length === 0 ? (
         <Card>
-          <CardContent className="py-16 text-center">
+          <CardContent className="py-14 text-center">
             <Calculator className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500 font-medium">Nenhum dado encontrado</p>
+            <p className="text-slate-500 font-medium">Nenhum dado encontrado para {targetYear}</p>
             <p className="text-slate-400 text-sm mt-1">
-              Vincule áreas às disciplinas nos cursos para visualizar a memória de cálculo.
+              Cadastre editais na Linha do Tempo e vincule áreas às disciplinas para visualizar a memória de cálculo.
             </p>
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {memoryData.map(area => {
             const isAreaExpanded = expandedAreas.has(area.areaId);
-            const areaTotal = area.campuses.reduce((s, c) => s + c.courses.reduce((cs, cr) => cs + cr.totalWeeklyClasses, 0), 0);
-            const areaSubjects = area.campuses.reduce((s, c) => s + c.courses.reduce((cs, cr) => cs + cr.totalSubjects, 0), 0);
+            const areaFirst = area.campuses.reduce((s, c) => s + c.courses.reduce((cs, cr) => cs + cr.firstHalfTotal, 0), 0);
+            const areaSecond = area.campuses.reduce((s, c) => s + c.courses.reduce((cs, cr) => cs + cr.secondHalfTotal, 0), 0);
 
             return (
               <Card key={area.areaId} className="overflow-hidden border-l-4" style={{ borderLeftColor: area.areaColor ?? "#16a34a" }}>
                 {/* Cabeçalho da Área */}
-                <button
-                  className="w-full text-left"
-                  onClick={() => toggleArea(area.areaId)}
-                >
-                  <CardHeader className="py-3 px-4 hover:bg-slate-50 transition-colors">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
+                <button className="w-full text-left" onClick={() => toggleArea(area.areaId)}>
+                  <CardHeader className="py-3 px-3 md:px-4 hover:bg-slate-50 transition-colors">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-2">
                         {isAreaExpanded
-                          ? <ChevronDown className="w-5 h-5 text-slate-400 shrink-0" />
-                          : <ChevronRight className="w-5 h-5 text-slate-400 shrink-0" />}
-                        <div
-                          className="w-3 h-3 rounded-full shrink-0"
-                          style={{ backgroundColor: area.areaColor ?? "#16a34a" }}
-                        />
-                        <CardTitle className="text-base font-bold text-slate-900">
+                          ? <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+                          : <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />}
+                        <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: area.areaColor ?? "#16a34a" }} />
+                        <CardTitle className="text-sm md:text-base font-bold text-slate-900">
                           {area.areaName}
                         </CardTitle>
                       </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <Badge variant="outline" className="text-xs gap-1">
-                          <BookOpen className="w-3 h-3" />
-                          {areaSubjects} disciplinas
+                      <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                        <Badge className="text-[10px] px-2 py-0.5 bg-blue-600 hover:bg-blue-600">
+                          1º sem: {areaFirst} aulas/sem
                         </Badge>
-                        <Badge className="text-xs gap-1 bg-green-600 hover:bg-green-600">
-                          <Clock className="w-3 h-3" />
-                          {areaTotal} aulas/sem
+                        <Badge className="text-[10px] px-2 py-0.5 bg-purple-600 hover:bg-purple-600">
+                          2º sem: {areaSecond} aulas/sem
                         </Badge>
                       </div>
                     </div>
@@ -264,167 +302,206 @@ export default function MemoryCalc() {
 
                 {/* Conteúdo expandido da Área */}
                 {isAreaExpanded && (
-                  <CardContent className="pt-0 pb-4 px-4 space-y-4">
-                    {area.campuses.map(campus => (
-                      <div key={campus.campusId} className="border border-slate-200 rounded-lg overflow-hidden">
-                        {/* Cabeçalho do Campus */}
-                        <div className="bg-slate-800 text-white px-4 py-2 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Building2 className="w-4 h-4 text-slate-300" />
-                            <span className="font-semibold text-sm">{campus.campusName}</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs text-slate-400">Aulas por semestre do ano:</span>
-                            {campus.semesterSummary.map(s => (
-                              <div key={s.calendarSemester} className="flex items-center gap-1">
+                  <CardContent className="pt-0 pb-3 px-3 md:px-4 space-y-3">
+                    {area.campuses.map(campus => {
+                      const campusKey = `${area.areaId}-${campus.campusId}`;
+                      const isCampusExpanded = expandedCampuses.has(campusKey);
+
+                      return (
+                        <div key={campus.campusId} className="border border-slate-200 rounded-lg overflow-hidden">
+                          {/* Cabeçalho do Campus */}
+                          <button
+                            className="w-full text-left bg-slate-800 text-white px-3 md:px-4 py-2.5 flex items-center justify-between gap-2"
+                            onClick={() => toggleCampus(campusKey)}
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              {isCampusExpanded
+                                ? <ChevronDown className="w-4 h-4 text-slate-300 shrink-0" />
+                                : <ChevronRight className="w-4 h-4 text-slate-300 shrink-0" />}
+                              <Building2 className="w-4 h-4 text-slate-300 shrink-0" />
+                              <span className="font-semibold text-sm truncate">{campus.campusName}</span>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+                              {campus.semesterSummary.map(s => (
                                 <Badge
+                                  key={s.calendarSemester}
                                   className={`text-[10px] px-2 py-0.5 ${
                                     s.calendarSemester === 1
                                       ? "bg-blue-600 hover:bg-blue-600"
                                       : "bg-purple-600 hover:bg-purple-600"
                                   }`}
                                 >
-                                  {s.label}: {s.weeklyClasses} aulas/sem
+                                  {s.calendarSemester === 1 ? "1º" : "2º"} sem: {s.weeklyClasses} aulas/sem
                                 </Badge>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
+                              ))}
+                            </div>
+                          </button>
 
-                        {/* Cursos do Campus */}
-                        <div className="divide-y divide-slate-100">
-                          {campus.courses.map(course => {
-                            const courseKey = `${area.areaId}-${campus.campusId}-${course.courseId}`;
-                            const isCourseExpanded = expandedCourses.has(courseKey);
+                          {/* Cursos do Campus */}
+                          {isCampusExpanded && (
+                            <div className="divide-y divide-slate-100">
+                              {campus.courses.map(course => {
+                                const courseKey = `${area.areaId}-${campus.campusId}-${course.courseId}`;
+                                const isCourseExpanded = expandedCourses.has(courseKey);
 
-                            return (
-                              <div key={course.courseId}>
-                                {/* Cabeçalho do Curso */}
-                                <button
-                                  className="w-full text-left bg-slate-50 hover:bg-slate-100 transition-colors px-4 py-2.5 flex items-center justify-between"
-                                  onClick={() => toggleCourse(courseKey)}
-                                >
-                                  <div className="flex items-center gap-2">
-                                    {isCourseExpanded
-                                      ? <ChevronDown className="w-4 h-4 text-slate-400" />
-                                      : <ChevronRight className="w-4 h-4 text-slate-400" />}
-                                    <GraduationCap className="w-4 h-4 text-slate-500" />
-                                    <span className="font-medium text-sm text-slate-800">{course.courseName}</span>
-                                    {course.courseType && (
-                                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">{course.courseType}</Badge>
-                                    )}
-                                  </div>
-                                  <div className="flex items-center gap-2 shrink-0">
-                                    <span className="text-xs text-slate-500">{course.totalSubjects} disciplinas</span>
-                                    {(course as any).classesFirstHalfYear > 0 && (
-                                      <Badge className="text-[10px] px-1.5 py-0 bg-blue-100 text-blue-800 hover:bg-blue-100">
-                                        1º sem: {(course as any).firstHalfTotal} aulas
-                                      </Badge>
-                                    )}
-                                    {(course as any).classesSecondHalfYear > 0 && (
-                                      <Badge className="text-[10px] px-1.5 py-0 bg-purple-100 text-purple-800 hover:bg-purple-100">
-                                        2º sem: {(course as any).secondHalfTotal} aulas
-                                      </Badge>
-                                    )}
-                                    <Badge className="text-xs bg-green-100 text-green-800 hover:bg-green-100">
-                                      {course.totalWeeklyClasses} aulas/sem/turma
-                                    </Badge>
-                                  </div>
-                                </button>
-
-                                {/* Disciplinas por Semestre */}
-                                {isCourseExpanded && (
-                                  <div className="px-4 pb-3 pt-2 space-y-3">
-                                    {course.semesters.map(sem => (
-                                      <div key={sem.semester}>
-                                        {/* Cabeçalho do Semestre */}
-                                        <div className="flex items-center gap-2 mb-1.5">
-                                          <div
-                                            className="w-2 h-2 rounded-full shrink-0"
-                                            style={{ backgroundColor: area.areaColor ?? "#16a34a" }}
-                                          />
-                                          <span className="text-xs font-bold text-slate-700">
-                                            {sem.semester}º Semestre
-                                          </span>
-                                          <Badge className="text-[10px] px-1.5 py-0 bg-blue-600 hover:bg-blue-600">
-                                            {sem.weeklyClasses} aulas/sem
-                                          </Badge>
-                                        </div>
-
-                                        {/* Tabela de Disciplinas */}
-                                        <div className="rounded-md border border-slate-200 overflow-hidden">
-                                          <table className="w-full text-xs">
-                                            <thead>
-                                              <tr className="bg-slate-100">
-                                                <th className="text-left px-3 py-1.5 font-semibold text-slate-600 w-full">Unidade Curricular</th>
-                                                <th className="text-center px-3 py-1.5 font-semibold text-slate-600 whitespace-nowrap">Aulas/sem</th>
-                                                <th className="text-center px-3 py-1.5 font-semibold text-slate-600 whitespace-nowrap">C.H. Total</th>
-                                                <th className="text-center px-3 py-1.5 font-semibold text-slate-600 whitespace-nowrap">Tipo</th>
-                                              </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-slate-100">
-                                              {sem.subjects.map((sub, idx) => (
-                                                <tr key={sub.id} className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/50"}>
-                                                  <td className="px-3 py-1.5 text-slate-800">{sub.name}</td>
-                                                  <td className="px-3 py-1.5 text-center font-medium text-slate-700">{sub.weeklyClasses}</td>
-                                                  <td className="px-3 py-1.5 text-center text-slate-600">{sub.totalHours ? `${sub.totalHours}h` : "—"}</td>
-                                                  <td className="px-3 py-1.5 text-center">
-                                                    <Badge
-                                                      variant="outline"
-                                                      className={`text-[10px] px-1.5 py-0 ${sub.isElective ? "border-blue-300 text-blue-700" : "border-green-300 text-green-700"}`}
-                                                    >
-                                                      {sub.isElective ? "Optativa" : "Obrigatória"}
-                                                    </Badge>
-                                                  </td>
-                                                </tr>
-                                              ))}
-                                            </tbody>
-                                            <tfoot>
-                                              <tr className="bg-slate-100 border-t border-slate-200">
-                                                <td className="px-3 py-1.5 font-bold text-slate-700">Total do Semestre</td>
-                                                <td className="px-3 py-1.5 text-center font-bold text-green-700">{sem.weeklyClasses}</td>
-                                                <td className="px-3 py-1.5 text-center text-slate-500">
-                                                  {sem.subjects.reduce((s, sub) => s + (sub.totalHours ?? 0), 0)}h
-                                                </td>
-                                                <td />
-                                              </tr>
-                                            </tfoot>
-                                          </table>
-                                        </div>
+                                return (
+                                  <div key={course.courseId}>
+                                    {/* Cabeçalho do Curso */}
+                                    <button
+                                      className="w-full text-left bg-slate-50 hover:bg-slate-100 transition-colors px-3 md:px-4 py-2.5 flex items-start justify-between gap-2"
+                                      onClick={() => toggleCourse(courseKey)}
+                                    >
+                                      <div className="flex items-center gap-2 min-w-0">
+                                        {isCourseExpanded
+                                          ? <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+                                          : <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />}
+                                        <GraduationCap className="w-4 h-4 text-slate-500 shrink-0" />
+                                        <span className="font-medium text-sm text-slate-800 text-left">{course.courseName}</span>
+                                        {course.courseType && (
+                                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 shrink-0 hidden sm:flex">{course.courseType}</Badge>
+                                        )}
                                       </div>
-                                    ))}
+                                      <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
+                                        <Badge className="text-[10px] px-1.5 py-0 bg-blue-100 text-blue-800 hover:bg-blue-100">
+                                          1º: {course.firstHalfTotal}
+                                        </Badge>
+                                        <Badge className="text-[10px] px-1.5 py-0 bg-purple-100 text-purple-800 hover:bg-purple-100">
+                                          2º: {course.secondHalfTotal}
+                                        </Badge>
+                                      </div>
+                                    </button>
 
-                                    {/* Total do Curso */}
-                                    <div className="flex items-center flex-wrap justify-end gap-2 pt-1 border-t border-dashed border-slate-200">
-                                      <span className="text-xs text-slate-500">Total do Curso nesta Área:</span>
-                                      <Badge variant="outline" className="text-xs">
-                                        {course.totalSubjects} disciplinas
-                                      </Badge>
-                                      <Badge className="bg-slate-600 hover:bg-slate-600 text-xs">
-                                        <Hash className="w-3 h-3 mr-1" />
-                                        {course.totalWeeklyClasses} aulas/sem por turma
-                                      </Badge>
-                                      {(course as any).classesFirstHalfYear > 0 && (
-                                        <Badge className="bg-blue-600 hover:bg-blue-600 text-xs">
-                                          1º sem. ano: {(course as any).firstHalfTotal} aulas
-                                          {(course as any).classesFirstHalfYear > 1 && ` (${(course as any).classesFirstHalfYear} turmas)`}
-                                        </Badge>
-                                      )}
-                                      {(course as any).classesSecondHalfYear > 0 && (
-                                        <Badge className="bg-purple-600 hover:bg-purple-600 text-xs">
-                                          2º sem. ano: {(course as any).secondHalfTotal} aulas
-                                          {(course as any).classesSecondHalfYear > 1 && ` (${(course as any).classesSecondHalfYear} turmas)`}
-                                        </Badge>
-                                      )}
-                                    </div>
+                                    {/* Detalhamento por Edital */}
+                                    {isCourseExpanded && (
+                                      <div className="px-3 md:px-4 pb-3 pt-2 space-y-3 bg-white">
+                                        {course.offerings.length === 0 ? (
+                                          <p className="text-xs text-slate-400 italic py-2">Nenhum edital ativo para este curso no ano {targetYear}.</p>
+                                        ) : (
+                                          course.offerings.map(off => (
+                                            <div key={off.offeringId} className="border border-slate-200 rounded-lg overflow-hidden">
+                                              {/* Cabeçalho do Edital */}
+                                              <div
+                                                className="px-3 py-2 flex items-center gap-2 flex-wrap"
+                                                style={{ backgroundColor: area.areaColor ? area.areaColor + "22" : "#f0fdf4", borderLeft: `3px solid ${area.areaColor ?? "#16a34a"}` }}
+                                              >
+                                                <FileText className="w-3.5 h-3.5 shrink-0" style={{ color: area.areaColor ?? "#16a34a" }} />
+                                                <span className="font-semibold text-xs text-slate-800">
+                                                  Edital {off.academicTerm}
+                                                </span>
+                                                <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                                                  {off.numberOfEntries} turma{off.numberOfEntries > 1 ? "s" : ""}
+                                                </Badge>
+                                                <div className="flex items-center gap-1.5 ml-auto flex-wrap justify-end">
+                                                  {off.firstHalfClasses > 0 && (
+                                                    <Badge className="text-[10px] px-1.5 py-0 bg-blue-600 hover:bg-blue-600">
+                                                      1º sem: {off.firstHalfClasses} aulas/sem
+                                                    </Badge>
+                                                  )}
+                                                  {off.secondHalfClasses > 0 && (
+                                                    <Badge className="text-[10px] px-1.5 py-0 bg-purple-600 hover:bg-purple-600">
+                                                      2º sem: {off.secondHalfClasses} aulas/sem
+                                                    </Badge>
+                                                  )}
+                                                </div>
+                                              </div>
+
+                                              {/* 1º Semestre do Ano */}
+                                              {off.subjects1st.length > 0 && (
+                                                <div>
+                                                  <div className="bg-blue-600 px-3 py-1.5 flex items-center gap-2">
+                                                    <CalendarDays className="w-3.5 h-3.5 text-white shrink-0" />
+                                                    <span className="text-white text-xs font-semibold">
+                                                      1º Semestre do Ano — {off.courseSemester1st}º Sem. do Curso — {off.firstHalfClasses} aulas/sem
+                                                    </span>
+                                                  </div>
+                                                  <div className="overflow-x-auto">
+                                                    <table className="w-full text-xs min-w-[320px]">
+                                                      <thead>
+                                                        <tr className="bg-blue-50">
+                                                          <th className="text-left px-3 py-1.5 font-semibold text-slate-600">Unidade Curricular</th>
+                                                          <th className="text-center px-2 py-1.5 font-semibold text-slate-600 whitespace-nowrap">Aulas/sem</th>
+                                                          <th className="text-center px-2 py-1.5 font-semibold text-slate-600 whitespace-nowrap hidden sm:table-cell">Tipo</th>
+                                                        </tr>
+                                                      </thead>
+                                                      <tbody className="divide-y divide-slate-100">
+                                                        {off.subjects1st.map((sub, idx) => (
+                                                          <tr key={sub.id} className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/50"}>
+                                                            <td className="px-3 py-1.5 text-slate-800">{sub.name}</td>
+                                                            <td className="px-2 py-1.5 text-center font-medium text-slate-700">{sub.weeklyClasses}</td>
+                                                            <td className="px-2 py-1.5 text-center hidden sm:table-cell">
+                                                              <Badge
+                                                                variant="outline"
+                                                                className={`text-[10px] px-1.5 py-0 ${sub.isElective ? "border-blue-300 text-blue-700" : "border-green-300 text-green-700"}`}
+                                                              >
+                                                                {sub.isElective ? "Optativa" : "Obrigatória"}
+                                                              </Badge>
+                                                            </td>
+                                                          </tr>
+                                                        ))}
+                                                      </tbody>
+                                                    </table>
+                                                  </div>
+                                                </div>
+                                              )}
+
+                                              {/* 2º Semestre do Ano */}
+                                              {off.subjects2nd.length > 0 && (
+                                                <div>
+                                                  <div className="bg-purple-600 px-3 py-1.5 flex items-center gap-2">
+                                                    <CalendarDays className="w-3.5 h-3.5 text-white shrink-0" />
+                                                    <span className="text-white text-xs font-semibold">
+                                                      2º Semestre do Ano — {off.courseSemester2nd}º Sem. do Curso — {off.secondHalfClasses} aulas/sem
+                                                    </span>
+                                                  </div>
+                                                  <div className="overflow-x-auto">
+                                                    <table className="w-full text-xs min-w-[320px]">
+                                                      <thead>
+                                                        <tr className="bg-purple-50">
+                                                          <th className="text-left px-3 py-1.5 font-semibold text-slate-600">Unidade Curricular</th>
+                                                          <th className="text-center px-2 py-1.5 font-semibold text-slate-600 whitespace-nowrap">Aulas/sem</th>
+                                                          <th className="text-center px-2 py-1.5 font-semibold text-slate-600 whitespace-nowrap hidden sm:table-cell">Tipo</th>
+                                                        </tr>
+                                                      </thead>
+                                                      <tbody className="divide-y divide-slate-100">
+                                                        {off.subjects2nd.map((sub, idx) => (
+                                                          <tr key={sub.id} className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/50"}>
+                                                            <td className="px-3 py-1.5 text-slate-800">{sub.name}</td>
+                                                            <td className="px-2 py-1.5 text-center font-medium text-slate-700">{sub.weeklyClasses}</td>
+                                                            <td className="px-2 py-1.5 text-center hidden sm:table-cell">
+                                                              <Badge
+                                                                variant="outline"
+                                                                className={`text-[10px] px-1.5 py-0 ${sub.isElective ? "border-blue-300 text-blue-700" : "border-green-300 text-green-700"}`}
+                                                              >
+                                                                {sub.isElective ? "Optativa" : "Obrigatória"}
+                                                              </Badge>
+                                                            </td>
+                                                          </tr>
+                                                        ))}
+                                                      </tbody>
+                                                    </table>
+                                                  </div>
+                                                </div>
+                                              )}
+
+                                              {/* Turma sem aulas nesta área neste ano */}
+                                              {off.subjects1st.length === 0 && off.subjects2nd.length === 0 && (
+                                                <p className="text-xs text-slate-400 italic px-3 py-2">
+                                                  Esta turma não tem disciplinas desta área em {targetYear}.
+                                                </p>
+                                              )}
+                                            </div>
+                                          ))
+                                        )}
+                                      </div>
+                                    )}
                                   </div>
-                                )}
-                              </div>
-                            );
-                          })}
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </CardContent>
                 )}
               </Card>

@@ -603,12 +603,14 @@ const reportsRouter = router({
     .input(z.object({
       campusId: z.number().optional(),
       areaId: z.number().optional(),
+      targetYear: z.number().optional(),
     }).optional())
     .query(({ input }) => getMemoryByArea(input ?? {})),
   exportMemoryPdf: protectedProcedure
     .input(z.object({
       campusId: z.number().optional(),
       areaId: z.number().optional(),
+      targetYear: z.number().optional(),
     }).optional())
     .mutation(async ({ input }) => {
       const { generateMemoryPdf } = await import("./pdfGenerator");

@@ -144,3 +144,12 @@
 - [x] Memória de Cálculo: cálculo de aulas vem do PPC (weeklyClasses das disciplinas), não do edital
 - [x] Cursos ativos na Memória: filtro por courseIds com pelo menos uma oferta ativa
 - [x] Linha do Tempo de Ofertas: semestres futuros disponíveis (até 2 anos à frente)
+
+## v1.11 — Algoritmo Preditivo por Editais e Responsividade Mobile
+- [x] Backend: refatorar getMemoryByArea com algoritmo preditivo por editais (ciclo de vida do edital, S_Atual por semestre do ano civil)
+- [x] Backend: adicionar filtro por ano alvo no endpoint reports.memoryByArea
+- [x] Frontend MemoryCalc: adicionar seletor de ano alvo (padrão = ano atual)
+- [x] Frontend MemoryCalc: exibir resultado por edital com detalhamento (curso, semestre do curso, aulas, turmas)
+- [x] Frontend MemoryCalc: layout totalmente responsivo para mobile
+- [x] Responsividade mobile: DashboardLayout com menu hamburguer funcional no mobile (SidebarTrigger + header mobile)
+- [x] Responsividade mobile: todas as páginas com padding p-3 md:p-6 e títulos text-xl md:text-2xl
