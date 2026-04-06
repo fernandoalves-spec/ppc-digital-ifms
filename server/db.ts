@@ -191,9 +191,10 @@ export async function getSubjectsByCourse(courseId: number) {
 export async function findOrCreateCampus(name: string): Promise<number> {
   const db = await getDb();
   if (!db) throw new Error("DB unavailable");
-  const existing = await db.select().from(campuses).where(eq(campuses.name, name)).limit(1);
+  const trimmedName = name.trim();
+  const existing = await db.select().from(campuses).where(sql`LOWER(${campuses.name}) = LOWER(${trimmedName})`).limit(1);
   if (existing.length > 0) return existing[0].id;
-  const [result] = await db.insert(campuses).values({ name }).$returningId();
+  const [result] = await db.insert(campuses).values({ name: trimmedName }).$returningId();
   return result.id;
 }
 
@@ -223,15 +224,16 @@ export async function findOrCreateCourse(data: {
 }
 
 export async function findOrCreateTeachingArea(name: string): Promise<number | null> {
-  if (!name || name.trim() === "" || name.toLowerCase() === "n\u00e3o identificada" || name.toLowerCase() === "desconhecida") return null;
+  const trimmedName = name?.trim();
+  if (!trimmedName || trimmedName.toLowerCase() === "não identificada" || trimmedName.toLowerCase() === "desconhecida" || trimmedName.toLowerCase() === "geral") return null;
   const db = await getDb();
   if (!db) throw new Error("DB unavailable");
-  const existing = await db.select().from(teachingAreas).where(eq(teachingAreas.name, name)).limit(1);
+  const existing = await db.select().from(teachingAreas).where(sql`LOWER(${teachingAreas.name}) = LOWER(${trimmedName})`).limit(1);
   if (existing.length > 0) return existing[0].id;
   const colors = ["#16a34a","#2563eb","#d97706","#9333ea","#dc2626","#0891b2","#65a30d","#c026d3","#ea580c","#0284c7"];
   const allAreas = await db.select().from(teachingAreas);
   const color = colors[allAreas.length % colors.length];
-  const [result] = await db.insert(teachingAreas).values({ name, color }).$returningId();
+  const [result] = await db.insert(teachingAreas).values({ name: trimmedName, color }).$returningId();
   return result.id;
 }
 
@@ -270,6 +272,14 @@ export async function getSubjectsWithoutArea(courseId?: number) {
   const conditions = [eq(subjects.active, true), isNull(subjects.areaId)];
   if (courseId) conditions.push(eq(subjects.courseId, courseId));
   return db.select().from(subjects).where(and(...conditions)).orderBy(subjects.courseId, subjects.semester);
+}
+
+export async function getSubjectsByIds(ids: number[]) {
+  if (ids.length === 0) return [];
+  const db = await getDb();
+  if (!db) return [];
+  const result = await db.select().from(subjects).where(sql`${subjects.id} IN (${sql.join(ids.map(id => sql`${id}`), sql`, `)})`);
+  return result;
 }
 
 // ─── PPC Documents ────────────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -30,7 +30,14 @@ export default function ApprovalsPage() {
   );
   const { data: areas = [] } = trpc.areas.list.useQuery();
   const { data: courses = [] } = trpc.courses.list.useQuery({});
-  // subjects not needed here
+
+  // Buscar nomes das disciplinas referenciadas nas solicitações
+  const subjectIds = useMemo(() => Array.from(new Set(requests.map((r) => r.subjectId))), [requests]);
+  const { data: subjectsList = [] } = trpc.subjects.getByIds.useQuery(
+    { ids: subjectIds },
+    { enabled: subjectIds.length > 0 }
+  );
+  const subjectMap = useMemo(() => new Map(subjectsList.map((s) => [s.id, s])), [subjectsList]);
 
   const respondMutation = trpc.approval.respond.useMutation({
     onSuccess: () => {
@@ -59,6 +66,10 @@ export default function ApprovalsPage() {
   const isAdmin = user?.role === "admin";
 
   const filtered = filterStatus === "all" ? requests : requests.filter((r) => r.status === filterStatus);
+
+  // Solicitação que está sendo respondida (para exibir detalhes no modal)
+  const respondingRequest = respondingId ? requests.find((r) => r.id === respondingId) : null;
+  const respondingSubject = respondingRequest ? subjectMap.get(respondingRequest.subjectId) : null;
 
   return (
     <div className="space-y-6">
@@ -105,6 +116,7 @@ export default function ApprovalsPage() {
             const statusCfg = STATUS_CONFIG[req.status] ?? STATUS_CONFIG.pending;
             const StatusIcon = statusCfg.icon;
             const suggestedArea = req.suggestedAreaId ? areaMap.get(req.suggestedAreaId) : null;
+            const subject = subjectMap.get(req.subjectId);
 
             return (
               <Card key={req.id} className="border-slate-100">
@@ -115,11 +127,16 @@ export default function ApprovalsPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-slate-800 text-sm">Disciplina #{req.subjectId}</span>
+                        <span className="font-semibold text-slate-800 text-sm">
+                          {subject?.name ?? `Disciplina #${req.subjectId}`}
+                        </span>
                         <Badge className={`text-[10px] px-2 py-0 ${statusCfg.color}`}>{statusCfg.label}</Badge>
+                        {subject && (
+                          <span className="text-[10px] text-slate-400">{subject.semester}º sem · {subject.weeklyClasses} aulas/sem</span>
+                        )}
                       </div>
                       <p className="text-xs text-slate-500 mt-0.5">
-                        Curso: {courseMap.get(req.courseId) ?? `#${req.courseId}`} •
+                        Curso: {courseMap.get(req.courseId) ?? `#${req.courseId}`} ·
                         Criado em {new Date(req.createdAt).toLocaleDateString("pt-BR")}
                       </p>
                       {req.adminNotes && (
@@ -158,6 +175,15 @@ export default function ApprovalsPage() {
             <DialogTitle>Indicar Área do Docente</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
+            {respondingSubject && (
+              <div className="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                <p className="text-sm font-medium text-slate-800">{respondingSubject.name}</p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {respondingSubject.semester}º semestre · {respondingSubject.weeklyClasses} aulas/semana
+                  {respondingSubject.totalHours ? ` · ${respondingSubject.totalHours}h total` : ""}
+                </p>
+              </div>
+            )}
             <p className="text-sm text-slate-600">Selecione a área de ensino do docente responsável por esta disciplina.</p>
             <div className="space-y-1.5">
               <Label>Área de Ensino *</Label>

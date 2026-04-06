@@ -72,3 +72,10 @@
 - [x] Página/modal de revisão pós-extração com todos os campos editáveis antes de aplicar
 - [x] Atualizar CourseDetail para exibir ementa e referências de cada disciplina
 - [x] Atualizar router subjects.update para aceitar syllabus e bibliography
+
+## v1.2 — Auditoria Sênior e Limpeza
+- [x] Auditoria completa do backend (schema, db.ts, routers.ts)
+- [x] Auditoria completa do frontend (páginas, componentes, layout)
+- [x] Limpar banco de dados (remover dados de teste)
+- [x] Corrigir problemas encontrados na auditoria
+- [x] Rodar testes e garantir 100% passando

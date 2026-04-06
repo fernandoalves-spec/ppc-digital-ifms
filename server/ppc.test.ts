@@ -52,6 +52,12 @@ vi.mock("./db", () => ({
   createApprovalRequest: vi.fn().mockResolvedValue({ id: 2, subjectId: 2, courseId: 1, status: "pending", requestedById: 1, assignedToId: null, suggestedAreaId: null, adminNotes: null, coordinatorNotes: null, respondedAt: null, createdAt: new Date(), updatedAt: new Date() }),
   respondApprovalRequest: vi.fn().mockResolvedValue({ id: 1, status: "responded", suggestedAreaId: 1, coordinatorNotes: "Área adequada", respondedAt: new Date() }),
   getSubjectsWithoutArea: vi.fn().mockResolvedValue([]),
+  getSubjectsByIds: vi.fn().mockResolvedValue([
+    { id: 1, courseId: 1, name: "Algoritmos", semester: 1, weeklyClasses: 4, totalHours: 80, areaId: 1, isElective: false, isRemote: false, syllabus: null, bibliography: null, createdAt: new Date(), updatedAt: new Date() },
+  ]),
+  findOrCreateCampus: vi.fn().mockResolvedValue(1),
+  findOrCreateCourse: vi.fn().mockResolvedValue(1),
+  findOrCreateTeachingArea: vi.fn().mockResolvedValue(1),
   getAuditLogs: vi.fn().mockResolvedValue([
     { id: 1, action: "CREATE", entity: "campus", entityId: 1, oldValue: null, newValue: { name: "Campus Campo Grande" }, userId: 1, userEmail: "admin@ifms.edu.br", userName: "Admin", createdAt: new Date() },
   ]),

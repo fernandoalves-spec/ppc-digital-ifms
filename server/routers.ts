@@ -33,6 +33,7 @@ import {
   getReportByCourse,
   getReportData,
   getSubjectsByCourse,
+  getSubjectsByIds,
   getSubjectsWithoutArea,
   getTeachingAreas,
   getAllUsers,
@@ -196,6 +197,10 @@ const subjectsRouter = router({
   listByCourse: publicProcedure
     .input(z.object({ courseId: z.number() }))
     .query(({ input }) => getSubjectsByCourse(input.courseId)),
+
+  getByIds: protectedProcedure
+    .input(z.object({ ids: z.array(z.number()) }))
+    .query(({ input }) => getSubjectsByIds(input.ids)),
 
   listWithoutArea: coordinatorOrAdminProcedure
     .input(z.object({ courseId: z.number().optional() }))
@@ -502,13 +507,13 @@ const approvalRouter = router({
     }))
     .mutation(async ({ input, ctx }) => {
       const { id, ...data } = input;
+      // Buscar a solicitação ANTES de alterar o status
+      const allRequests = await getApprovalRequests();
+      const req = allRequests.find((r) => r.id === id);
       await respondApprovalRequest(id, data);
-      if (data.status === "responded" || data.status === "approved") {
-        const requests = await getApprovalRequests({ status: "pending" });
-        const req = requests.find((r) => r.id === id);
-        if (req) {
-          await updateSubject(req.subjectId, { areaId: data.suggestedAreaId });
-        }
+      // Atualizar a área da disciplina quando aprovado/respondido
+      if ((data.status === "responded" || data.status === "approved") && req) {
+        await updateSubject(req.subjectId, { areaId: data.suggestedAreaId });
       }
       await audit(ctx, "RESPOND", "approval_request", id, null, data);
       return { success: true };
@@ -629,7 +634,7 @@ const reportsRouter = router({
     }),
 });
 
-// ─── Audit Routerer ─────────────────────────────────────────────────────────────
+// ─── Audit Router ─────────────────────────────────────────────────────────────
 const auditRouter = router({
   list: adminProcedure
     .input(z.object({
