@@ -273,12 +273,20 @@ export default function MemoryCalc() {
                             <Building2 className="w-4 h-4 text-slate-300" />
                             <span className="font-semibold text-sm">{campus.campusName}</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-slate-400">Resumo por semestre:</span>
+                          <div className="flex items-center gap-3">
+                            <span className="text-xs text-slate-400">Aulas por semestre do ano:</span>
                             {campus.semesterSummary.map(s => (
-                              <Badge key={s.semester} className="text-[10px] px-1.5 py-0 bg-blue-600 hover:bg-blue-600">
-                                {s.semester}º: {s.weeklyClasses}
-                              </Badge>
+                              <div key={s.calendarSemester} className="flex items-center gap-1">
+                                <Badge
+                                  className={`text-[10px] px-2 py-0.5 ${
+                                    s.calendarSemester === 1
+                                      ? "bg-blue-600 hover:bg-blue-600"
+                                      : "bg-purple-600 hover:bg-purple-600"
+                                  }`}
+                                >
+                                  {s.label}: {s.weeklyClasses} aulas/sem
+                                </Badge>
+                              </div>
                             ))}
                           </div>
                         </div>
@@ -308,8 +316,18 @@ export default function MemoryCalc() {
                                   </div>
                                   <div className="flex items-center gap-2 shrink-0">
                                     <span className="text-xs text-slate-500">{course.totalSubjects} disciplinas</span>
+                                    {(course as any).classesFirstHalfYear > 0 && (
+                                      <Badge className="text-[10px] px-1.5 py-0 bg-blue-100 text-blue-800 hover:bg-blue-100">
+                                        1º sem: {(course as any).firstHalfTotal} aulas
+                                      </Badge>
+                                    )}
+                                    {(course as any).classesSecondHalfYear > 0 && (
+                                      <Badge className="text-[10px] px-1.5 py-0 bg-purple-100 text-purple-800 hover:bg-purple-100">
+                                        2º sem: {(course as any).secondHalfTotal} aulas
+                                      </Badge>
+                                    )}
                                     <Badge className="text-xs bg-green-100 text-green-800 hover:bg-green-100">
-                                      {course.totalWeeklyClasses} aulas/sem
+                                      {course.totalWeeklyClasses} aulas/sem/turma
                                     </Badge>
                                   </div>
                                 </button>
@@ -377,15 +395,27 @@ export default function MemoryCalc() {
                                     ))}
 
                                     {/* Total do Curso */}
-                                    <div className="flex items-center justify-end gap-3 pt-1 border-t border-dashed border-slate-200">
+                                    <div className="flex items-center flex-wrap justify-end gap-2 pt-1 border-t border-dashed border-slate-200">
                                       <span className="text-xs text-slate-500">Total do Curso nesta Área:</span>
-                                      <Badge className="bg-green-600 hover:bg-green-600 text-xs">
-                                        <Hash className="w-3 h-3 mr-1" />
-                                        {course.totalWeeklyClasses} aulas/sem
-                                      </Badge>
                                       <Badge variant="outline" className="text-xs">
                                         {course.totalSubjects} disciplinas
                                       </Badge>
+                                      <Badge className="bg-slate-600 hover:bg-slate-600 text-xs">
+                                        <Hash className="w-3 h-3 mr-1" />
+                                        {course.totalWeeklyClasses} aulas/sem por turma
+                                      </Badge>
+                                      {(course as any).classesFirstHalfYear > 0 && (
+                                        <Badge className="bg-blue-600 hover:bg-blue-600 text-xs">
+                                          1º sem. ano: {(course as any).firstHalfTotal} aulas
+                                          {(course as any).classesFirstHalfYear > 1 && ` (${(course as any).classesFirstHalfYear} turmas)`}
+                                        </Badge>
+                                      )}
+                                      {(course as any).classesSecondHalfYear > 0 && (
+                                        <Badge className="bg-purple-600 hover:bg-purple-600 text-xs">
+                                          2º sem. ano: {(course as any).secondHalfTotal} aulas
+                                          {(course as any).classesSecondHalfYear > 1 && ` (${(course as any).classesSecondHalfYear} turmas)`}
+                                        </Badge>
+                                      )}
                                     </div>
                                   </div>
                                 )}

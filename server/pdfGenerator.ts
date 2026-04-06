@@ -200,11 +200,12 @@ export async function generateMemoryPdf(opts: {
           let x = 48;
           checkPage(22);
           for (const s of campus.semesterSummary) {
-            doc.rect(x, y, colW - 2, 20).fill(BLUE);
-            doc.fillColor(WHITE).fontSize(8).font("Helvetica-Bold")
-              .text(`${s.semester}º sem`, x + 2, y + 3, { width: colW - 6, align: "center" });
+            const semColor = s.calendarSemester === 1 ? BLUE : "#7c3aed";
+            doc.rect(x, y, colW - 2, 22).fill(semColor);
+            doc.fillColor(WHITE).fontSize(7).font("Helvetica-Bold")
+              .text(s.label, x + 2, y + 3, { width: colW - 6, align: "center" });
             doc.fillColor(WHITE).fontSize(9).font("Helvetica")
-              .text(`${s.weeklyClasses} aulas`, x + 2, y + 11, { width: colW - 6, align: "center" });
+              .text(`${s.weeklyClasses} aulas/sem`, x + 2, y + 12, { width: colW - 6, align: "center" });
             x += colW;
             if (x > 40 + PAGE_W - colW) break;
           }

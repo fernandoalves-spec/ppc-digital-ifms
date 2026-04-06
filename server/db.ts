@@ -811,7 +811,7 @@ export async function getMemoryByArea(filters: { campusId?: number; areaId?: num
   const db = await getDb();
   if (!db) return [];
 
-  // Buscar disciplinas com área, curso e campus
+  // Buscar disciplinas com área, curso e campus (incluindo turmas do quadro de oferta)
   const rows = await db
     .select({
       areaId: teachingAreas.id,
@@ -820,6 +820,8 @@ export async function getMemoryByArea(filters: { campusId?: number; areaId?: num
       courseId: courses.id,
       courseName: courses.name,
       courseType: courses.type,
+      classesFirstHalfYear: courses.classesFirstHalfYear,   // turmas que ingressam no 1º sem. do ano
+      classesSecondHalfYear: courses.classesSecondHalfYear, // turmas que ingressam no 2º sem. do ano
       campusId: campuses.id,
       campusName: campuses.name,
       subjectId: subjects.id,
@@ -853,6 +855,8 @@ export async function getMemoryByArea(filters: { campusId?: number; areaId?: num
         courseId: number;
         courseName: string;
         courseType: string | null;
+        classesFirstHalfYear: number;
+        classesSecondHalfYear: number;
         semesters: Map<number, {
           semester: number;
           weeklyClasses: number;
@@ -887,6 +891,8 @@ export async function getMemoryByArea(filters: { campusId?: number; areaId?: num
         courseId: row.courseId,
         courseName: row.courseName,
         courseType: row.courseType,
+        classesFirstHalfYear: row.classesFirstHalfYear ?? 0,
+        classesSecondHalfYear: row.classesSecondHalfYear ?? 0,
         semesters: new Map(),
       });
     }
@@ -915,27 +921,57 @@ export async function getMemoryByArea(filters: { campusId?: number; areaId?: num
     areaId: area.areaId,
     areaName: area.areaName,
     areaColor: area.areaColor,
-    campuses: Array.from(area.campuses.values()).map(campus => ({
-      campusId: campus.campusId,
-      campusName: campus.campusName,
-      courses: Array.from(campus.courses.values()).map(course => ({
-        courseId: course.courseId,
-        courseName: course.courseName,
-        courseType: course.courseType,
-        semesters: Array.from(course.semesters.values()).sort((a, b) => a.semester - b.semester),
-        totalWeeklyClasses: Array.from(course.semesters.values()).reduce((s, sem) => s + sem.weeklyClasses, 0),
-        totalSubjects: Array.from(course.semesters.values()).reduce((s, sem) => s + sem.subjects.length, 0),
-      })),
-      // Resumo por semestre para o campus inteiro (somando todos os cursos)
-      semesterSummary: (() => {
-        const semMap = new Map<number, number>();
-        Array.from(campus.courses.values()).forEach(c => {
-          Array.from(c.semesters.values()).forEach((sem: { semester: number; weeklyClasses: number; subjects: any[] }) => {
-            semMap.set(sem.semester, (semMap.get(sem.semester) ?? 0) + sem.weeklyClasses);
-          });
-        });
-        return Array.from(semMap.entries()).sort(([a], [b]) => a - b).map(([semester, weeklyClasses]) => ({ semester, weeklyClasses }));
-      })(),
-    })),
+    campuses: Array.from(area.campuses.values()).map(campus => {
+      // Calcular aulas totais por semestre do ANO CIVIL para cada curso
+      // Regra (igual ao Quadro de Oferta):
+      //   Turmas do 1º ingresso (classesFirstHalfYear): símpares → 1º sem. ano, pares → 2º sem. ano
+      //   Turmas do 2º ingresso (classesSecondHalfYear): símpares → 2º sem. ano, pares → 1º sem. ano
+      const serializedCourses = Array.from(campus.courses.values()).map(course => {
+        const ingress1st = course.classesFirstHalfYear ?? 0;
+        const ingress2nd = course.classesSecondHalfYear ?? 0;
+        const sortedSemesters = Array.from(course.semesters.values()).sort((a, b) => a.semester - b.semester);
+        let firstHalfTotal = 0;
+        let secondHalfTotal = 0;
+        for (const sem of sortedSemesters) {
+          const isOdd = sem.semester % 2 !== 0;
+          if (ingress1st > 0) {
+            if (isOdd) firstHalfTotal  += sem.weeklyClasses * ingress1st;
+            else       secondHalfTotal += sem.weeklyClasses * ingress1st;
+          }
+          if (ingress2nd > 0) {
+            if (isOdd) secondHalfTotal += sem.weeklyClasses * ingress2nd;
+            else       firstHalfTotal  += sem.weeklyClasses * ingress2nd;
+          }
+        }
+        return {
+          courseId: course.courseId,
+          courseName: course.courseName,
+          courseType: course.courseType,
+          classesFirstHalfYear: ingress1st,
+          classesSecondHalfYear: ingress2nd,
+          firstHalfTotal,
+          secondHalfTotal,
+          totalClasses: firstHalfTotal + secondHalfTotal,
+          semesters: sortedSemesters,
+          totalWeeklyClasses: sortedSemesters.reduce((s, sem) => s + sem.weeklyClasses, 0),
+          totalSubjects: sortedSemesters.reduce((s, sem) => s + sem.subjects.length, 0),
+        };
+      });
+
+      // Resumo do campus: somar aulas totais de todos os cursos por semestre do ano civil
+      const campusFirstHalf  = serializedCourses.reduce((s, c) => s + c.firstHalfTotal, 0);
+      const campusSecondHalf = serializedCourses.reduce((s, c) => s + c.secondHalfTotal, 0);
+
+      return {
+        campusId: campus.campusId,
+        campusName: campus.campusName,
+        courses: serializedCourses,
+        // Resumo por semestre do ANO CIVIL (considera turmas em oferta — mesma lógica do Quadro de Oferta)
+        semesterSummary: [
+          { calendarSemester: 1, label: "1º Semestre do Ano", weeklyClasses: campusFirstHalf },
+          { calendarSemester: 2, label: "2º Semestre do Ano", weeklyClasses: campusSecondHalf },
+        ],
+      };
+    }),
   }));
 }

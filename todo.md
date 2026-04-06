@@ -130,3 +130,11 @@
 - [x] Backend: router courses.update deve aceitar campusId como campo editável
 - [x] PpcUpload: remover campo campus do prompt enviado à IA (campus já foi definido pelo usuário)
 - [x] PpcUpload: no backend (applyExtraction), ignorar qualquer campusId vindo da IA e usar sempre o campusId do documento PPC
+
+## v1.9 — Memória de Cálculo: semestre do ano civil
+- [x] Backend (db.ts getMemoryByArea): agrupar aulas por semestre do ano civil (1º sem. ano = semestres ímpares do curso; 2º sem. ano = semestres pares do curso)
+- [x] Frontend (MemoryCalc.tsx): exibir resumo com "1º Semestre do Ano" e "2º Semestre do Ano" em vez de semestres do curso
+- [x] PDF exportado deve refletir a mesma lógica de semestre do ano civil
+- [x] Memória de Cálculo: integrar com Quadro de Oferta (aulas totais = aulas/sem × turmas em oferta por semestre do ano civil)
+- [x] Backend: getMemoryByArea deve buscar classesFirstHalfYear e classesSecondHalfYear dos cursos e calcular aulas totais por semestre do ano
+- [x] Frontend: exibir aulas/sem (por turma) e aulas totais (considerando todas as turmas em oferta)
