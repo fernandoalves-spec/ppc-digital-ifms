@@ -113,3 +113,14 @@
 - [x] Redesenhar revisão pós-extração PPC como checklist com scroll (em vez de modal pesado)
 - [x] Redesenhar vinculação de áreas ao campus como checklist com checkboxes
 - [x] Garantir barra de rolagem visível em ambas as interfaces
+
+## v1.7 — Memória de Cálculo e Correções
+- [ ] PpcUpload: campus selecionado pelo usuário não pode ser alterado pela IA na extração
+- [ ] PpcUpload: corrigir layout do checklist — botão de aceitar sem sobreposição (sticky footer)
+- [ ] Backend: endpoint reports.memoryByArea — aulas por semestre por área por campus
+- [ ] Backend: geração de PDF da memória de cálculo (área, campus, disciplinas, curso, semestre)
+- [ ] Frontend: página Memória de Cálculo com filtros campus + área
+- [ ] Frontend: tabela de aulas por semestre (1º sem, 2º sem, total)
+- [ ] Frontend: lista de disciplinas por área com curso e semestre
+- [ ] Frontend: botão exportar PDF da memória de cálculo
+- [ ] Adicionar link "Memória de Cálculo" no menu lateral

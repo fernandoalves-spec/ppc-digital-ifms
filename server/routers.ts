@@ -36,6 +36,7 @@ import {
   getReportByCampus,
   getReportByCourse,
   getReportData,
+  getMemoryByArea,
   getSubjectsByCourse,
   getSubjectsByIds,
   getSubjectsWithoutArea,
@@ -596,9 +597,29 @@ const reportsRouter = router({
     }))
     .query(({ input }) => getReportData(input)),
 
-  byCourse: protectedProcedure.query(() => getReportByCourse()),
-
+   byCourse: protectedProcedure.query(() => getReportByCourse()),
   byCampus: protectedProcedure.query(() => getReportByCampus()),
+  memoryByArea: protectedProcedure
+    .input(z.object({
+      campusId: z.number().optional(),
+      areaId: z.number().optional(),
+    }).optional())
+    .query(({ input }) => getMemoryByArea(input ?? {})),
+  exportMemoryPdf: protectedProcedure
+    .input(z.object({
+      campusId: z.number().optional(),
+      areaId: z.number().optional(),
+    }).optional())
+    .mutation(async ({ input }) => {
+      const { generateMemoryPdf } = await import("./pdfGenerator");
+      const data = await getMemoryByArea(input ?? {});
+      const timestamp = new Date().toISOString().split("T")[0];
+      const fileName = `memoria-calculo-${timestamp}.pdf`;
+      const pdfBuffer = await generateMemoryPdf({ data, generatedAt: new Date().toLocaleString("pt-BR") });
+      const { storagePut: storagePutFn } = await import("./storage");
+      const { url } = await storagePutFn(`reports/${fileName}`, pdfBuffer, "application/pdf");
+      return { url, fileName };
+    }),
 
   exportPdf: protectedProcedure
     .input(z.object({

@@ -17,6 +17,7 @@ import ReportsPage from "./pages/Reports";
 import UsersPage from "./pages/Users";
 import AuditPage from "./pages/Audit";
 import OfferingsPage from "./pages/Offerings";
+import MemoryCalcPage from "./pages/MemoryCalc";
 
 function Router() {
   return (
@@ -33,6 +34,7 @@ function Router() {
         <Route path="/reports" component={ReportsPage} />
         <Route path="/users" component={UsersPage} />
         <Route path="/offerings" component={OfferingsPage} />
+        <Route path="/memory-calc" component={MemoryCalcPage} />
         <Route path="/audit" component={AuditPage} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />

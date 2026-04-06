@@ -129,3 +129,143 @@ export async function generateReportPdf(data: ReportData): Promise<Buffer> {
     doc.end();
   });
 }
+
+// ─── Memória de Cálculo por Área ─────────────────────────────────────────────
+type MemoryAreaData = Awaited<ReturnType<typeof import("./db").getMemoryByArea>>;
+
+export async function generateMemoryPdf(opts: {
+  data: MemoryAreaData;
+  generatedAt: string;
+}): Promise<Buffer> {
+  const PDFDocument = (await import("pdfkit")).default;
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ size: "A4", margin: 40, autoFirstPage: true });
+    const chunks: Buffer[] = [];
+    doc.on("data", (c: Buffer) => chunks.push(c));
+    doc.on("end", () => resolve(Buffer.concat(chunks)));
+    doc.on("error", reject);
+
+    const GREEN = "#16a34a";
+    const DARK = "#1e293b";
+    const GRAY = "#64748b";
+    const LIGHT = "#f1f5f9";
+    const WHITE = "#ffffff";
+    const BLUE = "#1d4ed8";
+    const PAGE_W = 515; // A4 width minus margins (40 * 2)
+
+    // ── Capa / Cabeçalho ─────────────────────────────────────────────────────
+    doc.rect(0, 0, doc.page.width, 90).fill(GREEN);
+    doc.fillColor(WHITE).fontSize(20).font("Helvetica-Bold")
+      .text("Memória de Cálculo — Aulas por Área", 40, 20, { width: PAGE_W });
+    doc.fillColor(WHITE).fontSize(10).font("Helvetica")
+      .text(`Instituto Federal de Mato Grosso do Sul — IFMS`, 40, 48, { width: PAGE_W });
+    doc.fillColor(WHITE).fontSize(9)
+      .text(`Gerado em: ${opts.generatedAt}`, 40, 64, { width: PAGE_W });
+
+    let y = 110;
+
+    const checkPage = (needed = 30) => {
+      if (y + needed > doc.page.height - 60) {
+        doc.addPage();
+        y = 40;
+      }
+    };
+
+    for (const area of opts.data) {
+      // ── Cabeçalho da Área ──────────────────────────────────────────────────
+      checkPage(50);
+      doc.rect(40, y, PAGE_W, 28).fill(area.areaColor ?? GREEN);
+      doc.fillColor(WHITE).fontSize(13).font("Helvetica-Bold")
+        .text(`Área: ${area.areaName}`, 48, y + 8, { width: PAGE_W - 16 });
+      y += 34;
+
+      for (const campus of area.campuses) {
+        // ── Campus ────────────────────────────────────────────────────────────
+        checkPage(40);
+        doc.rect(40, y, PAGE_W, 22).fill(DARK);
+        doc.fillColor(WHITE).fontSize(10).font("Helvetica-Bold")
+          .text(`Campus: ${campus.campusName}`, 48, y + 6, { width: PAGE_W - 16 });
+        y += 28;
+
+        // Resumo de aulas por semestre do campus
+        if (campus.semesterSummary.length > 0) {
+          checkPage(30);
+          doc.rect(40, y, PAGE_W, 18).fill(LIGHT);
+          doc.fillColor(GRAY).fontSize(8).font("Helvetica-Bold")
+            .text("Resumo de Aulas Semanais por Semestre (todos os cursos):", 48, y + 5);
+          y += 20;
+
+          // Linha de semestres
+          const colW = Math.min(80, PAGE_W / campus.semesterSummary.length);
+          let x = 48;
+          checkPage(22);
+          for (const s of campus.semesterSummary) {
+            doc.rect(x, y, colW - 2, 20).fill(BLUE);
+            doc.fillColor(WHITE).fontSize(8).font("Helvetica-Bold")
+              .text(`${s.semester}º sem`, x + 2, y + 3, { width: colW - 6, align: "center" });
+            doc.fillColor(WHITE).fontSize(9).font("Helvetica")
+              .text(`${s.weeklyClasses} aulas`, x + 2, y + 11, { width: colW - 6, align: "center" });
+            x += colW;
+            if (x > 40 + PAGE_W - colW) break;
+          }
+          y += 26;
+        }
+
+        for (const course of campus.courses) {
+          // ── Curso ──────────────────────────────────────────────────────────
+          checkPage(30);
+          doc.rect(40, y, PAGE_W, 18).fill("#e2e8f0");
+          doc.fillColor(DARK).fontSize(9).font("Helvetica-Bold")
+            .text(`Curso: ${course.courseName}  |  ${course.courseType ?? ""}  |  Total: ${course.totalWeeklyClasses} aulas/sem  |  ${course.totalSubjects} disciplinas`, 48, y + 5, { width: PAGE_W - 16, ellipsis: true });
+          y += 22;
+
+          for (const sem of course.semesters) {
+            // ── Semestre ────────────────────────────────────────────────────
+            checkPage(30);
+            doc.rect(40, y, PAGE_W, 16).fill("#f8fafc");
+            doc.rect(40, y, 4, 16).fill(area.areaColor ?? GREEN);
+            doc.fillColor(DARK).fontSize(9).font("Helvetica-Bold")
+              .text(`${sem.semester}º Semestre  —  ${sem.weeklyClasses} aulas/semana`, 50, y + 4, { width: PAGE_W - 20 });
+            y += 18;
+
+            // Tabela de disciplinas
+            checkPage(20);
+            doc.rect(40, y, PAGE_W, 14).fill("#e2e8f0");
+            doc.fillColor(GRAY).fontSize(7.5).font("Helvetica-Bold")
+              .text("Unidade Curricular", 48, y + 3, { width: 260 });
+            doc.text("Aulas/sem", 310, y + 3, { width: 70, align: "center" });
+            doc.text("C.H. Total", 380, y + 3, { width: 70, align: "center" });
+            doc.text("Tipo", 450, y + 3, { width: 60, align: "center" });
+            y += 16;
+
+            let rowBg = false;
+            for (const sub of sem.subjects) {
+              checkPage(16);
+              doc.rect(40, y, PAGE_W, 14).fill(rowBg ? LIGHT : WHITE);
+              doc.fillColor(DARK).fontSize(8).font("Helvetica")
+                .text(sub.name, 48, y + 3, { width: 258, ellipsis: true });
+              doc.text(String(sub.weeklyClasses), 310, y + 3, { width: 70, align: "center" });
+              doc.text(sub.totalHours ? `${sub.totalHours}h` : "—", 380, y + 3, { width: 70, align: "center" });
+              doc.fillColor(sub.isElective ? BLUE : GREEN).fontSize(7).font("Helvetica-Bold")
+                .text(sub.isElective ? "Optativa" : "Obrigatória", 450, y + 4, { width: 60, align: "center" });
+              y += 14;
+              rowBg = !rowBg;
+            }
+            y += 6;
+          }
+          y += 8;
+        }
+        y += 10;
+      }
+      y += 14;
+    }
+
+    // ── Rodapé ────────────────────────────────────────────────────────────────
+    const footerY = doc.page.height - 40;
+    doc.rect(0, footerY, doc.page.width, 40).fill(LIGHT);
+    doc.fillColor(GRAY).fontSize(8).font("Helvetica")
+      .text("PPC Digital IFMS — Memória de Cálculo de Aulas por Área", 40, footerY + 14, { align: "center", width: PAGE_W });
+
+    doc.end();
+  });
+}

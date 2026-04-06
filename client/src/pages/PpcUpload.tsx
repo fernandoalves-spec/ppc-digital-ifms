@@ -63,6 +63,11 @@ export default function PpcUploadPage() {
     onSuccess: (data) => {
       utils.ppc.list.invalidate();
       const d = data.data as ExtractedData;
+      // Campus selecionado pelo usuário é sempre preservado
+      const selectedCampus = (campuses as any[]).find((c: any) => c.id === selectedCampusId);
+      if (selectedCampus) {
+        d.campusName = selectedCampus.name;
+      }
       toast.success(`Extração concluída! ${d.subjects?.length ?? 0} disciplinas encontradas.`);
       setEditedData(JSON.parse(JSON.stringify(d)));
       // Marcar todas as disciplinas como selecionadas por padrão
@@ -353,7 +358,10 @@ export default function PpcUploadPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs text-slate-500">Campus</Label>
-                  <Input value={editedData.campusName} onChange={(e) => setEditedData({ ...editedData, campusName: e.target.value })} className="h-9" />
+                  <div className="flex items-center gap-2">
+                    <Input value={editedData.campusName} readOnly className="h-9 bg-slate-50 text-slate-600 cursor-not-allowed" />
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-green-700 border-green-200 bg-green-50 shrink-0 whitespace-nowrap">Fixo</Badge>
+                  </div>
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs text-slate-500">Curso</Label>
@@ -393,7 +401,7 @@ export default function PpcUploadPage() {
                 </div>
               </div>
 
-              <ScrollArea className="max-h-[500px] pr-1" style={{ maxHeight: "500px" }}>
+              <ScrollArea className="h-[420px] pr-2" style={{ height: "420px", overflowY: "auto" }}>
                 <div className="space-y-4">
                   {Object.entries(semesterGroups)
                     .sort(([a], [b]) => Number(a) - Number(b))
@@ -549,8 +557,8 @@ export default function PpcUploadPage() {
               </ScrollArea>
             </div>
 
-            {/* Botão de Aplicar */}
-            <div className="flex items-center justify-between bg-white rounded-lg border border-slate-200 p-4">
+            {/* Botão de Aplicar — sticky para não sobrepor */}
+            <div className="sticky bottom-0 z-20 flex items-center justify-between bg-white rounded-lg border border-green-200 shadow-lg p-4 mt-4">
               <div className="text-sm text-slate-600">
                 <strong className="text-green-700">{selectedSubjects.size}</strong> disciplinas selecionadas para importação
               </div>

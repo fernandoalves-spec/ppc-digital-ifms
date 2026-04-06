@@ -801,3 +801,141 @@ export async function getClassesBySemesterFromOfferings() {
     }))
     .sort((a, b) => a.semester - b.semester);
 }
+
+/**
+ * Memória de Cálculo por Área
+ * Retorna, para cada área de um campus, as disciplinas responsáveis,
+ * agrupadas por curso e semestre, com total de aulas semanais por semestre.
+ */
+export async function getMemoryByArea(filters: { campusId?: number; areaId?: number }) {
+  const db = await getDb();
+  if (!db) return [];
+
+  // Buscar disciplinas com área, curso e campus
+  const rows = await db
+    .select({
+      areaId: teachingAreas.id,
+      areaName: teachingAreas.name,
+      areaColor: teachingAreas.color,
+      courseId: courses.id,
+      courseName: courses.name,
+      courseType: courses.type,
+      campusId: campuses.id,
+      campusName: campuses.name,
+      subjectId: subjects.id,
+      subjectName: subjects.name,
+      semester: subjects.semester,
+      weeklyClasses: subjects.weeklyClasses,
+      totalHours: subjects.totalHours,
+      isElective: subjects.isElective,
+    })
+    .from(subjects)
+    .innerJoin(courses, eq(subjects.courseId, courses.id))
+    .innerJoin(campuses, eq(courses.campusId, campuses.id))
+    .innerJoin(teachingAreas, eq(subjects.areaId, teachingAreas.id))
+    .where(
+      and(
+        filters.campusId ? eq(campuses.id, filters.campusId) : undefined,
+        filters.areaId ? eq(teachingAreas.id, filters.areaId) : undefined,
+      )
+    )
+    .orderBy(teachingAreas.name, courses.name, subjects.semester, subjects.name);
+
+  // Agrupar por área → campus → curso → semestre → disciplinas
+  const areaMap = new Map<number, {
+    areaId: number;
+    areaName: string;
+    areaColor: string | null;
+    campuses: Map<number, {
+      campusId: number;
+      campusName: string;
+      courses: Map<number, {
+        courseId: number;
+        courseName: string;
+        courseType: string | null;
+        semesters: Map<number, {
+          semester: number;
+          weeklyClasses: number;
+          subjects: { id: number; name: string; weeklyClasses: number; totalHours: number | null; isElective: boolean }[];
+        }>;
+      }>;
+    }>;
+  }>();
+
+  for (const row of rows) {
+    if (!areaMap.has(row.areaId)) {
+      areaMap.set(row.areaId, {
+        areaId: row.areaId,
+        areaName: row.areaName,
+        areaColor: row.areaColor,
+        campuses: new Map(),
+      });
+    }
+    const area = areaMap.get(row.areaId)!;
+
+    if (!area.campuses.has(row.campusId)) {
+      area.campuses.set(row.campusId, {
+        campusId: row.campusId,
+        campusName: row.campusName,
+        courses: new Map(),
+      });
+    }
+    const campus = area.campuses.get(row.campusId)!;
+
+    if (!campus.courses.has(row.courseId)) {
+      campus.courses.set(row.courseId, {
+        courseId: row.courseId,
+        courseName: row.courseName,
+        courseType: row.courseType,
+        semesters: new Map(),
+      });
+    }
+    const course = campus.courses.get(row.courseId)!;
+
+    if (!course.semesters.has(row.semester)) {
+      course.semesters.set(row.semester, {
+        semester: row.semester,
+        weeklyClasses: 0,
+        subjects: [],
+      });
+    }
+    const sem = course.semesters.get(row.semester)!;
+    sem.weeklyClasses += row.weeklyClasses;
+    sem.subjects.push({
+      id: row.subjectId,
+      name: row.subjectName,
+      weeklyClasses: row.weeklyClasses,
+      totalHours: row.totalHours,
+      isElective: row.isElective ?? false,
+    });
+  }
+
+  // Serializar para array
+  return Array.from(areaMap.values()).map(area => ({
+    areaId: area.areaId,
+    areaName: area.areaName,
+    areaColor: area.areaColor,
+    campuses: Array.from(area.campuses.values()).map(campus => ({
+      campusId: campus.campusId,
+      campusName: campus.campusName,
+      courses: Array.from(campus.courses.values()).map(course => ({
+        courseId: course.courseId,
+        courseName: course.courseName,
+        courseType: course.courseType,
+        semesters: Array.from(course.semesters.values()).sort((a, b) => a.semester - b.semester),
+        totalWeeklyClasses: Array.from(course.semesters.values()).reduce((s, sem) => s + sem.weeklyClasses, 0),
+        totalSubjects: Array.from(course.semesters.values()).reduce((s, sem) => s + sem.subjects.length, 0),
+      })),
+      // Resumo por semestre para o campus inteiro (somando todos os cursos)
+      semesterSummary: (() => {
+        const semMap = new Map<number, number>();
+        Array.from(campus.courses.values()).forEach(c => {
+          Array.from(c.semesters.values()).forEach((sem: { semester: number; weeklyClasses: number; subjects: any[] }) => {
+            semMap.set(sem.semester, (semMap.get(sem.semester) ?? 0) + sem.weeklyClasses);
+          });
+        });
+        return Array.from(semMap.entries()).sort(([a], [b]) => a - b).map(([semester, weeklyClasses]) => ({ semester, weeklyClasses }));
+      })(),
+    })),
+  }));
+}

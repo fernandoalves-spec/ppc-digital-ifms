@@ -30,6 +30,7 @@ import {
   Bell,
   BookOpen,
   Building2,
+  Calculator,
   CalendarRange,
   ChevronRight,
   ClipboardList,
@@ -100,6 +101,7 @@ const menuGroups: MenuGroup[] = [
     label: "Relatórios",
     items: [
       { icon: FileText, label: "Relatórios", path: "/reports" },
+      { icon: Calculator, label: "Memória de Cálculo", path: "/memory-calc" },
     ],
   },
   {
