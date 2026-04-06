@@ -138,3 +138,9 @@
 - [x] Memória de Cálculo: integrar com Quadro de Oferta (aulas totais = aulas/sem × turmas em oferta por semestre do ano civil)
 - [x] Backend: getMemoryByArea deve buscar classesFirstHalfYear e classesSecondHalfYear dos cursos e calcular aulas totais por semestre do ano
 - [x] Frontend: exibir aulas/sem (por turma) e aulas totais (considerando todas as turmas em oferta)
+
+## v1.10 — Correções de lógica de negócio
+- [x] Memória de Cálculo: mostrar apenas disciplinas de cursos com oferta ativa cadastrada
+- [x] Memória de Cálculo: cálculo de aulas vem do PPC (weeklyClasses das disciplinas), não do edital
+- [x] Cursos ativos na Memória: filtro por courseIds com pelo menos uma oferta ativa
+- [x] Linha do Tempo de Ofertas: semestres futuros disponíveis (até 2 anos à frente)

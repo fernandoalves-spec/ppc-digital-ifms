@@ -811,7 +811,18 @@ export async function getMemoryByArea(filters: { campusId?: number; areaId?: num
   const db = await getDb();
   if (!db) return [];
 
-  // Buscar disciplinas com área, curso e campus (incluindo turmas do quadro de oferta)
+  // 1. Buscar IDs dos cursos que têm pelo menos uma oferta ativa cadastrada
+  //    (um curso só é considerado ativo quando tem oferta de vagas)
+  const activeOfferings = await db
+    .selectDistinct({ courseId: courseOfferings.courseId })
+    .from(courseOfferings)
+    .where(eq(courseOfferings.active, true));
+  const activeCourseIds = new Set(activeOfferings.map(o => o.courseId));
+  if (activeCourseIds.size === 0) return [];
+
+  // 2. Buscar disciplinas com área, curso e campus
+  //    Filtra apenas cursos que têm oferta cadastrada
+  //    O cálculo de aulas vem do PPC (weeklyClasses das disciplinas), não do edital
   const rows = await db
     .select({
       areaId: teachingAreas.id,
@@ -837,11 +848,16 @@ export async function getMemoryByArea(filters: { campusId?: number; areaId?: num
     .innerJoin(teachingAreas, eq(subjects.areaId, teachingAreas.id))
     .where(
       and(
+        eq(subjects.active, true),
+        eq(courses.active, true),
         filters.campusId ? eq(campuses.id, filters.campusId) : undefined,
         filters.areaId ? eq(teachingAreas.id, filters.areaId) : undefined,
       )
     )
     .orderBy(teachingAreas.name, courses.name, subjects.semester, subjects.name);
+
+  // 3. Filtrar apenas disciplinas de cursos com oferta ativa
+  const filteredRows = rows.filter(r => activeCourseIds.has(r.courseId));
 
   // Agrupar por área → campus → curso → semestre → disciplinas
   const areaMap = new Map<number, {
@@ -866,7 +882,7 @@ export async function getMemoryByArea(filters: { campusId?: number; areaId?: num
     }>;
   }>();
 
-  for (const row of rows) {
+  for (const row of filteredRows) {
     if (!areaMap.has(row.areaId)) {
       areaMap.set(row.areaId, {
         areaId: row.areaId,

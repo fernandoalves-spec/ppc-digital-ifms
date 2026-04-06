@@ -15,12 +15,11 @@ function generateTerms(): string[] {
   const terms: string[] = [];
   const now = new Date();
   const currentYear = now.getFullYear();
-  const currentHalf = now.getMonth() < 6 ? 1 : 2;
-  for (let y = 2020; y <= currentYear; y++) {
+  // Inclui 2 anos futuros para planejamento antecipado de semestres
+  const maxYear = currentYear + 2;
+  for (let y = 2020; y <= maxYear; y++) {
     terms.push(`${y}/1`);
-    if (y < currentYear || (y === currentYear && currentHalf >= 2)) {
-      terms.push(`${y}/2`);
-    }
+    terms.push(`${y}/2`);
   }
   return terms;
 }
