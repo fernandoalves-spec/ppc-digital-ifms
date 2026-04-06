@@ -45,6 +45,12 @@ import {
   updateSubject,
   updateTeachingArea,
   updateUserRole,
+  getOfferings,
+  createOffering,
+  updateOffering,
+  deleteOffering,
+  getClassesByAreaFromOfferings,
+  getClassesBySemesterFromOfferings,
 } from "./db";
 import { invokeLLM } from "./_core/llm";
 import { storagePut } from "./storage";
@@ -688,7 +694,77 @@ const usersRouter = router({
     .query(({ input }) => getUserCourseRoles(input.userId)),
 });
 
-// ─── App Router ───────────────────────────────────────────────────────────────
+// ─── Offerings Router (Quadro de Oferta) ─────────────────────────────────────
+const offeringsRouter = router({
+  list: protectedProcedure
+    .input(z.object({ campusId: z.number().optional(), courseId: z.number().optional() }).optional())
+    .query(({ input }) => getOfferings(input ?? {})),
+
+  create: protectedProcedure
+    .input(z.object({
+      courseId: z.number(),
+      campusId: z.number(),
+      academicTerm: z.string().regex(/^\d{4}\/[12]$/, "Formato inválido. Use AAAA/1 ou AAAA/2"),
+      selectionNotice: z.string().optional(),
+      numberOfEntries: z.number().min(1).default(1),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const result = await createOffering(input);
+      await createAuditLog({
+        userId: ctx.user.id,
+        userEmail: ctx.user.email ?? "",
+        userName: ctx.user.name ?? "",
+        action: "CREATE",
+        entity: "offering",
+        entityId: result.id,
+        newValue: input,
+      });
+      return result;
+    }),
+
+  update: protectedProcedure
+    .input(z.object({
+      id: z.number(),
+      selectionNotice: z.string().nullable().optional(),
+      numberOfEntries: z.number().min(1).optional(),
+      academicTerm: z.string().regex(/^\d{4}\/[12]$/).optional(),
+      active: z.boolean().optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const { id, ...data } = input;
+      await updateOffering(id, data);
+      await createAuditLog({
+        userId: ctx.user.id,
+        userEmail: ctx.user.email ?? "",
+        userName: ctx.user.name ?? "",
+        action: "UPDATE",
+        entity: "offering",
+        entityId: id,
+        newValue: data,
+      });
+      return { success: true };
+    }),
+
+  delete: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      await deleteOffering(input.id);
+      await createAuditLog({
+        userId: ctx.user.id,
+        userEmail: ctx.user.email ?? "",
+        userName: ctx.user.name ?? "",
+        action: "DELETE",
+        entity: "offering",
+        entityId: input.id,
+      });
+      return { success: true };
+    }),
+
+  classesByArea: protectedProcedure.query(() => getClassesByAreaFromOfferings()),
+  classesBySemester: protectedProcedure.query(() => getClassesBySemesterFromOfferings()),
+});
+
+// ─── App Router ─────────────────────────────────────────────────────────────────────
 export const appRouter = router({
   system: systemRouter,
   auth: router({
@@ -709,6 +785,7 @@ export const appRouter = router({
   reports: reportsRouter,
   audit: auditRouter,
   users: usersRouter,
+  offerings: offeringsRouter,
 });
 
 export type AppRouter = typeof appRouter;

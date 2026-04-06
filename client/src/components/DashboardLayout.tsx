@@ -30,6 +30,7 @@ import {
   Bell,
   BookOpen,
   Building2,
+  CalendarRange,
   ChevronRight,
   ClipboardList,
   FileText,
@@ -87,6 +88,12 @@ const menuGroups: MenuGroup[] = [
     items: [
       { icon: Upload, label: "Upload de PPC", path: "/ppc-upload", roles: ["admin"] },
       { icon: ClipboardList, label: "Solicitações", path: "/approvals", roles: ["admin", "coordinator"] },
+    ],
+  },
+  {
+    label: "Quadro de Oferta",
+    items: [
+      { icon: CalendarRange, label: "Quadro de Oferta", path: "/offerings", roles: ["admin", "coordinator"] },
     ],
   },
   {

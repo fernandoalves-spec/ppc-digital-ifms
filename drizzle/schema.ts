@@ -136,7 +136,24 @@ export const auditLogs = mysqlTable("audit_logs", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Quadro de Oferta (Turmas ofertadas por semestre) ──────────────────────────────
+export const courseOfferings = mysqlTable("course_offerings", {
+  id: int("id").autoincrement().primaryKey(),
+  courseId: int("courseId").notNull(),
+  campusId: int("campusId").notNull(),
+  /** Semestre letivo no formato "2020/1", "2020/2", "2021/1" etc. */
+  academicTerm: varchar("academicTerm", { length: 10 }).notNull(),
+  /** Nome do edital de seleção */
+  selectionNotice: varchar("selectionNotice", { length: 500 }),
+  /** Número de entradas/turmas (default 1) */
+  numberOfEntries: int("numberOfEntries").notNull().default(1),
+  /** Se a oferta está ativa */
+  active: boolean("active").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+// ─── Types ────────────────────────────────────────────────────────────────────────────
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type Campus = typeof campuses.$inferSelect;
@@ -153,3 +170,5 @@ export type ApprovalRequest = typeof approvalRequests.$inferSelect;
 export type InsertApprovalRequest = typeof approvalRequests.$inferInsert;
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type UserCourseRole = typeof userCourseRoles.$inferSelect;
+export type CourseOffering = typeof courseOfferings.$inferSelect;
+export type InsertCourseOffering = typeof courseOfferings.$inferInsert;

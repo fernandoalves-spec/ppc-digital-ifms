@@ -25,10 +25,8 @@ export default function ReportsPage() {
   const [isExporting, setIsExporting] = useState(false);
 
   const { data: courses = [] } = trpc.courses.list.useQuery({});
-  const { data: byArea } = trpc.dashboard.classesByArea.useQuery({});
-  const { data: bySemester } = trpc.dashboard.classesBySemester.useQuery(
-    filterCourse !== "all" ? { courseId: Number(filterCourse) } : {}
-  );
+  const { data: byArea } = trpc.offerings.classesByArea.useQuery();
+  const { data: bySemester } = trpc.offerings.classesBySemester.useQuery();
   const { data: byCourse } = trpc.reports.byCourse.useQuery();
   const { data: byCampus } = trpc.reports.byCampus.useQuery();
 

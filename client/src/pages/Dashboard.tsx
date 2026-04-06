@@ -8,7 +8,7 @@ import {
   PieChart, Pie, Cell, Legend
 } from "recharts";
 import {
-  BookOpen, Building2, GraduationCap, Layers, AlertTriangle, ClipboardList,
+  BookOpen, Building2, CalendarRange, GraduationCap, Layers, AlertTriangle, ClipboardList,
   TrendingUp, ArrowRight
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -21,6 +21,9 @@ export default function Dashboard() {
   const { data: stats, isLoading: statsLoading } = trpc.dashboard.stats.useQuery();
   const { data: byArea } = trpc.dashboard.classesByArea.useQuery({});
   const { data: bySemester } = trpc.dashboard.classesBySemester.useQuery({});
+  // Dados baseados nas ofertas reais (turmas ativas)
+  const { data: offeringsByArea } = trpc.offerings.classesByArea.useQuery();
+  const { data: offeringsBySemester } = trpc.offerings.classesBySemester.useQuery();
 
   const kpis = [
     { label: "Campus", value: stats?.totalCampuses ?? 0, icon: Building2, color: "text-blue-600", bg: "bg-blue-50", path: "/campus" },
@@ -82,14 +85,91 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Gráficos */}
+      {/* Gráficos baseados em Ofertas Reais */}
+      {(offeringsByArea && offeringsByArea.length > 0) || (offeringsBySemester && offeringsBySemester.length > 0) ? (
+        <>
+          <div className="flex items-center gap-2 mt-2">
+            <CalendarRange className="w-4 h-4 text-green-600" />
+            <h2 className="text-lg font-semibold text-slate-800">Aulas Baseadas nas Turmas Ativas (Quadro de Oferta)</h2>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="border-green-200 bg-green-50/30">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-green-600" />
+                  Aulas Semanais por Área (Turmas Ativas)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {offeringsByArea && offeringsByArea.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={240}>
+                    <BarChart data={offeringsByArea} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                      <XAxis dataKey="areaName" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+                      <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+                      <Tooltip
+                        contentStyle={{ borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 12 }}
+                        formatter={(v: number) => [`${v} aulas/sem`, "Total"]}
+                      />
+                      <Bar dataKey="totalWeeklyClasses" radius={[4, 4, 0, 0]}>
+                        {offeringsByArea.map((entry, index) => (
+                          <Cell key={entry.areaId} fill={entry.color || COLORS[index % COLORS.length]} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[240px] flex items-center justify-center text-slate-400 text-sm">
+                    Registre ofertas no Quadro de Oferta para ver os dados
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="border-green-200 bg-green-50/30">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-green-600" />
+                  Aulas por Semestre do Curso (Turmas Ativas)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {offeringsBySemester && offeringsBySemester.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={240}>
+                    <BarChart data={offeringsBySemester} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                      <XAxis dataKey="semester" tickFormatter={(v) => `${v}º`} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+                      <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+                      <Tooltip
+                        contentStyle={{ borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 12 }}
+                        formatter={(v: number) => [`${v} aulas/sem`, "Total"]}
+                        labelFormatter={(l) => `${l}º Semestre`}
+                      />
+                      <Bar dataKey="totalClasses" fill="#16a34a" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[240px] flex items-center justify-center text-slate-400 text-sm">
+                    Registre ofertas no Quadro de Oferta para ver os dados
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </>
+      ) : null}
+
+      {/* Gráficos Estáticos (visão geral do PPC) */}
+      <div className="flex items-center gap-2 mt-2">
+        <Layers className="w-4 h-4 text-blue-600" />
+        <h2 className="text-lg font-semibold text-slate-800">Visão Geral do PPC (Todas as Disciplinas)</h2>
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Aulas por Área */}
         <Card className="border-slate-100">
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
-              <Layers className="w-4 h-4 text-green-600" />
-              Aulas Semanais por Área
+              <Layers className="w-4 h-4 text-blue-600" />
+              Aulas Semanais por Área (PPC)
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -118,12 +198,11 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Aulas por Semestre */}
         <Card className="border-slate-100">
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-blue-600" />
-              Aulas Semanais por Semestre
+              Aulas Semanais por Semestre (PPC)
             </CardTitle>
           </CardHeader>
           <CardContent>

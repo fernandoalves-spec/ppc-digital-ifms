@@ -84,3 +84,15 @@
 - [x] Corrigir erro 500 na extração de PDF via LLM (bad response from upstream) — convertido para pdf-parse v2 + texto
 - [x] Adicionar teste automatizado do router ppc.extract com mock de PDFParse e invokeLLM
 - [x] Adicionar teste de erro para ppc.extract quando PDF não pode ser baixado
+
+## v1.4 — Quadro de Oferta
+- [x] Criar tabela course_offerings (campus, curso/PPC, semestre 2020/1..., edital, entradas, status)
+- [x] Aplicar migração SQL
+- [x] Backend: CRUD de ofertas com filtro por campus e curso
+- [x] Backend: cálculo de aulas semanais por área baseado em turmas ativas (não mais por disciplinas isoladas)
+- [x] Frontend: página Quadro de Oferta com filtro campus → PPC, registro de turmas por semestre
+- [x] Frontend: formulário com edital de seleção, número de entradas (default 1), editável
+- [x] Atualizar dashboard para usar dados de ofertas reais
+- [x] Atualizar relatórios para considerar turmas ativas
+- [x] Adicionar link no menu lateral
+- [x] Testes automatizados (20 testes passando)

@@ -4,6 +4,7 @@ import {
   approvalRequests,
   auditLogs,
   campuses,
+  courseOfferings,
   courses,
   InsertUser,
   ppcDocuments,
@@ -572,4 +573,184 @@ export async function assignUserCourseRole(data: { userId: number; courseId?: nu
   const db = await getDb();
   if (!db) throw new Error("DB unavailable");
   await db.insert(userCourseRoles).values(data);
+}
+
+// ─── Course Offerings (Quadro de Oferta) ──────────────────────────────────
+export async function getOfferings(filters?: { campusId?: number; courseId?: number }) {
+  const db = await getDb();
+  if (!db) return [];
+  const conditions = [eq(courseOfferings.active, true)];
+  if (filters?.campusId) conditions.push(eq(courseOfferings.campusId, filters.campusId));
+  if (filters?.courseId) conditions.push(eq(courseOfferings.courseId, filters.courseId));
+  return db.select().from(courseOfferings).where(and(...conditions)).orderBy(courseOfferings.academicTerm);
+}
+
+export async function createOffering(data: {
+  courseId: number;
+  campusId: number;
+  academicTerm: string;
+  selectionNotice?: string;
+  numberOfEntries?: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const [result] = await db.insert(courseOfferings).values(data).$returningId();
+  return result;
+}
+
+export async function updateOffering(id: number, data: Partial<{
+  selectionNotice: string | null;
+  numberOfEntries: number;
+  active: boolean;
+  academicTerm: string;
+}>) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.update(courseOfferings).set(data).where(eq(courseOfferings.id, id));
+}
+
+export async function deleteOffering(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.update(courseOfferings).set({ active: false }).where(eq(courseOfferings.id, id));
+}
+
+/**
+ * Calcula aulas semanais por área considerando as turmas ativas (offerings).
+ * Para cada oferta ativa, identifica quais semestres do curso estão sendo cursados
+ * naquele período e multiplica as aulas semanais pelo número de entradas.
+ */
+export async function getClassesByAreaFromOfferings() {
+  const db = await getDb();
+  if (!db) return [];
+  const allOfferings = await db.select().from(courseOfferings).where(eq(courseOfferings.active, true));
+  const allCourses = await db.select().from(courses).where(eq(courses.active, true));
+  const allSubjects = await db.select().from(subjects).where(eq(subjects.active, true));
+  const allAreas = await db.select().from(teachingAreas).where(eq(teachingAreas.active, true));
+
+  // Determinar o semestre atual (2026/1)
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentHalf = now.getMonth() < 6 ? 1 : 2;
+  const currentTerm = `${currentYear}/${currentHalf}`;
+
+  // Converter semestre acadêmico para número sequencial para cálculos
+  function termToNumber(term: string): number {
+    const [y, h] = term.split("/").map(Number);
+    return y * 2 + (h - 1);
+  }
+
+  const currentTermNum = termToNumber(currentTerm);
+  const courseMap = new Map(allCourses.map(c => [c.id, c]));
+
+  // Para cada área, calcular total de aulas semanais ativas
+  const areaClasses = new Map<number, { totalWeeklyClasses: number; subjectCount: number }>();
+  let noAreaClasses = 0;
+  let noAreaCount = 0;
+
+  for (const offering of allOfferings) {
+    const course = courseMap.get(offering.courseId);
+    if (!course) continue;
+
+    const offeringTermNum = termToNumber(offering.academicTerm);
+    const semestersElapsed = currentTermNum - offeringTermNum + 1;
+
+    // Se a turma já passou da duração do curso, pular
+    if (semestersElapsed < 1 || semestersElapsed > course.duration) continue;
+
+    // Disciplinas do semestre atual dessa turma
+    const courseSubjects = allSubjects.filter(
+      s => s.courseId === course.id && s.semester === semestersElapsed
+    );
+
+    for (const subj of courseSubjects) {
+      const classes = subj.weeklyClasses * offering.numberOfEntries;
+      if (subj.areaId) {
+        const current = areaClasses.get(subj.areaId) || { totalWeeklyClasses: 0, subjectCount: 0 };
+        current.totalWeeklyClasses += classes;
+        current.subjectCount += 1;
+        areaClasses.set(subj.areaId, current);
+      } else {
+        noAreaClasses += classes;
+        noAreaCount += 1;
+      }
+    }
+  }
+
+  const areaMap = new Map(allAreas.map(a => [a.id, a]));
+  const result = Array.from(areaClasses.entries()).map(([areaId, data]) => ({
+    areaId,
+    areaName: areaMap.get(areaId)?.name ?? "Desconhecida",
+    color: areaMap.get(areaId)?.color ?? "#94a3b8",
+    totalWeeklyClasses: data.totalWeeklyClasses,
+    subjectCount: data.subjectCount,
+  }));
+
+  if (noAreaClasses > 0) {
+    result.push({
+      areaId: 0,
+      areaName: "Sem Área Definida",
+      color: "#94a3b8",
+      totalWeeklyClasses: noAreaClasses,
+      subjectCount: noAreaCount,
+    });
+  }
+
+  return result.sort((a, b) => b.totalWeeklyClasses - a.totalWeeklyClasses);
+}
+
+/**
+ * Calcula aulas semanais por semestre considerando as turmas ativas.
+ */
+export async function getClassesBySemesterFromOfferings() {
+  const db = await getDb();
+  if (!db) return [];
+  const allOfferings = await db.select().from(courseOfferings).where(eq(courseOfferings.active, true));
+  const allCourses = await db.select().from(courses).where(eq(courses.active, true));
+  const allSubjects = await db.select().from(subjects).where(eq(subjects.active, true));
+
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentHalf = now.getMonth() < 6 ? 1 : 2;
+  const currentTerm = `${currentYear}/${currentHalf}`;
+
+  function termToNumber(term: string): number {
+    const [y, h] = term.split("/").map(Number);
+    return y * 2 + (h - 1);
+  }
+
+  const currentTermNum = termToNumber(currentTerm);
+  const courseMap = new Map(allCourses.map(c => [c.id, c]));
+
+  // Agrupar por semestre acadêmico (1º, 2º, etc.)
+  const semesterClasses = new Map<number, { totalClasses: number; subjectCount: number }>();
+
+  for (const offering of allOfferings) {
+    const course = courseMap.get(offering.courseId);
+    if (!course) continue;
+
+    const offeringTermNum = termToNumber(offering.academicTerm);
+    const semestersElapsed = currentTermNum - offeringTermNum + 1;
+    if (semestersElapsed < 1 || semestersElapsed > course.duration) continue;
+
+    const courseSubjects = allSubjects.filter(
+      s => s.courseId === course.id && s.semester === semestersElapsed
+    );
+
+    for (const subj of courseSubjects) {
+      const classes = subj.weeklyClasses * offering.numberOfEntries;
+      const current = semesterClasses.get(semestersElapsed) || { totalClasses: 0, subjectCount: 0 };
+      current.totalClasses += classes;
+      current.subjectCount += 1;
+      semesterClasses.set(semestersElapsed, current);
+    }
+  }
+
+  return Array.from(semesterClasses.entries())
+    .map(([semester, data]) => ({
+      semester,
+      totalClasses: data.totalClasses,
+      subjectCount: data.subjectCount,
+    }))
+    .sort((a, b) => a.semester - b.semester);
 }
