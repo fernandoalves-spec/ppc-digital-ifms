@@ -8,9 +8,6 @@ RUN npm install -g pnpm@10.4.1
 # Copiar arquivos de dependências
 COPY package.json pnpm-lock.yaml ./
 
-# Copiar patches se existirem
-COPY patches/ ./patches/ 2>/dev/null || true
-
 # Instalar TODAS as dependências (incluindo devDependencies para o build)
 RUN pnpm install --frozen-lockfile
 
