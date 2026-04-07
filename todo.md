@@ -153,3 +153,8 @@
 - [x] Frontend MemoryCalc: layout totalmente responsivo para mobile
 - [x] Responsividade mobile: DashboardLayout com menu hamburguer funcional no mobile (SidebarTrigger + header mobile)
 - [x] Responsividade mobile: todas as páginas com padding p-3 md:p-6 e títulos text-xl md:text-2xl
+
+## v1.18 — Storage compatível com Railway
+- [x] storage.ts: modo local quando BUILT_IN_FORGE_API_URL/KEY não estão configurados
+- [x] Modo local: salva arquivos em disco (./uploads/) e serve via /uploads/ no Express
+- [x] server/_core/index.ts: rota estática /uploads/ criada automaticamente na inicialização

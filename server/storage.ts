@@ -1,20 +1,20 @@
-// Preconfigured storage helpers for Manus WebDev templates
-// Uses the Biz-provided storage proxy (Authorization: Bearer <token>)
+// Storage helpers — suporta dois modos:
+// 1. Manus Storage Proxy (quando BUILT_IN_FORGE_API_URL e BUILT_IN_FORGE_API_KEY estão configurados)
+// 2. Modo local/Railway: salva em disco e serve via /uploads/ no servidor Express
 
 import { ENV } from './_core/env';
+import fs from 'fs';
+import path from 'path';
+
+// Diretório para armazenamento local (usado quando não há storage externo)
+const LOCAL_UPLOADS_DIR = process.env.LOCAL_UPLOADS_DIR || path.join(process.cwd(), "uploads");
 
 type StorageConfig = { baseUrl: string; apiKey: string };
 
-function getStorageConfig(): StorageConfig {
+function getStorageConfig(): StorageConfig | null {
   const baseUrl = ENV.forgeApiUrl;
   const apiKey = ENV.forgeApiKey;
-
-  if (!baseUrl || !apiKey) {
-    throw new Error(
-      "Storage proxy credentials missing: set BUILT_IN_FORGE_API_URL and BUILT_IN_FORGE_API_KEY"
-    );
-  }
-
+  if (!baseUrl || !apiKey) return null;
   return { baseUrl: baseUrl.replace(/\/+$/, ""), apiKey };
 }
 
@@ -67,36 +67,74 @@ function buildAuthHeaders(apiKey: string): HeadersInit {
   return { Authorization: `Bearer ${apiKey}` };
 }
 
+function getAppUrl(): string {
+  return (process.env.APP_URL || "http://localhost:3000").replace(/\/+$/, "");
+}
+
+/**
+ * Faz upload de um arquivo para o storage.
+ * - Se BUILT_IN_FORGE_API_URL/KEY estiverem configurados: usa o Manus Storage Proxy.
+ * - Caso contrário (Railway, desenvolvimento local): salva em disco e retorna URL do servidor.
+ */
 export async function storagePut(
   relKey: string,
   data: Buffer | Uint8Array | string,
   contentType = "application/octet-stream"
 ): Promise<{ key: string; url: string }> {
-  const { baseUrl, apiKey } = getStorageConfig();
+  const config = getStorageConfig();
   const key = normalizeKey(relKey);
-  const uploadUrl = buildUploadUrl(baseUrl, key);
-  const formData = toFormData(data, contentType, key.split("/").pop() ?? key);
-  const response = await fetch(uploadUrl, {
-    method: "POST",
-    headers: buildAuthHeaders(apiKey),
-    body: formData,
-  });
 
-  if (!response.ok) {
-    const message = await response.text().catch(() => response.statusText);
-    throw new Error(
-      `Storage upload failed (${response.status} ${response.statusText}): ${message}`
-    );
+  // Modo Manus Storage Proxy
+  if (config) {
+    const uploadUrl = buildUploadUrl(config.baseUrl, key);
+    const formData = toFormData(data, contentType, key.split("/").pop() ?? key);
+    const response = await fetch(uploadUrl, {
+      method: "POST",
+      headers: buildAuthHeaders(config.apiKey),
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const message = await response.text().catch(() => response.statusText);
+      throw new Error(
+        `Storage upload failed (${response.status} ${response.statusText}): ${message}`
+      );
+    }
+    const url = (await response.json()).url;
+    return { key, url };
   }
-  const url = (await response.json()).url;
+
+  // Modo local: salva em disco
+  const filePath = path.join(LOCAL_UPLOADS_DIR, key);
+  const dir = path.dirname(filePath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  const buffer = typeof data === "string"
+    ? Buffer.from(data, "utf-8")
+    : Buffer.from(data as any);
+  fs.writeFileSync(filePath, buffer);
+
+  const url = `${getAppUrl()}/uploads/${key}`;
   return { key, url };
 }
 
+/**
+ * Obtém a URL de download de um arquivo.
+ * - Se BUILT_IN_FORGE_API_URL/KEY estiverem configurados: usa o Manus Storage Proxy.
+ * - Caso contrário: retorna URL local do servidor.
+ */
 export async function storageGet(relKey: string): Promise<{ key: string; url: string; }> {
-  const { baseUrl, apiKey } = getStorageConfig();
+  const config = getStorageConfig();
   const key = normalizeKey(relKey);
-  return {
-    key,
-    url: await buildDownloadUrl(baseUrl, key, apiKey),
-  };
+
+  if (config) {
+    return {
+      key,
+      url: await buildDownloadUrl(config.baseUrl, key, config.apiKey),
+    };
+  }
+
+  const url = `${getAppUrl()}/uploads/${key}`;
+  return { key, url };
 }

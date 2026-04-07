@@ -2,6 +2,8 @@ import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
 import net from "net";
+import path from "path";
+import fs from "fs";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { setupGoogleAuth } from "./googleAuth";
@@ -44,6 +46,13 @@ async function startServer() {
     registerOAuthRoutes(app);
     console.log("[Auth] Manus OAuth ativado");
   }
+  // Servir arquivos locais (modo Railway/sem storage externo)
+  const uploadsDir = process.env.LOCAL_UPLOADS_DIR || path.join(process.cwd(), "uploads");
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+  app.use("/uploads", express.static(uploadsDir));
+
   // Health check simples para Railway e outros serviços de hospedagem
   app.get("/health", (_req, res) => {
     res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
