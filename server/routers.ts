@@ -827,9 +827,21 @@ export const appRouter = router({
   system: systemRouter,
   auth: router({
     me: publicProcedure.query((opts) => opts.ctx.user),
-    logout: publicProcedure.mutation(({ ctx }) => {
-      const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+    logout: publicProcedure.mutation(async ({ ctx }) => {
+      // Modo Google OAuth (Railway): usar passport logout
+      if (process.env.GOOGLE_CLIENT_ID) {
+        const req = ctx.req as any;
+        if (req.logout) {
+          await new Promise<void>((resolve) => req.logout(() => resolve()));
+          if (req.session?.destroy) {
+            await new Promise<void>((resolve) => req.session.destroy(() => resolve()));
+          }
+        }
+      } else {
+        // Modo Manus OAuth: limpar cookie de sessão
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+      }
       return { success: true } as const;
     }),
   }),
