@@ -44,6 +44,11 @@ async function startServer() {
     registerOAuthRoutes(app);
     console.log("[Auth] Manus OAuth ativado");
   }
+  // Health check simples para Railway e outros serviços de hospedagem
+  app.get("/health", (_req, res) => {
+    res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",
@@ -60,14 +65,20 @@ async function startServer() {
   }
 
   const preferredPort = parseInt(process.env.PORT || "3000");
-  const port = await findAvailablePort(preferredPort);
-
-  if (port !== preferredPort) {
-    console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
+  // Em produção (Railway), usar a porta exata sem tentar outras
+  // Em desenvolvimento, tentar portas alternativas se a preferida estiver ocupada
+  let port: number;
+  if (process.env.NODE_ENV === "production") {
+    port = preferredPort;
+  } else {
+    port = await findAvailablePort(preferredPort);
+    if (port !== preferredPort) {
+      console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
+    }
   }
 
-  server.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}/`);
+  server.listen(port, "0.0.0.0", () => {
+    console.log(`Server running on http://0.0.0.0:${port}/`);
   });
 }
 
