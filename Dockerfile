@@ -9,7 +9,7 @@ RUN npm install -g pnpm@10.4.1
 COPY package.json pnpm-lock.yaml ./
 
 # Copiar patches se existirem
-COPY patches/ ./patches/
+COPY patches/ ./patches/ 2>/dev/null || true
 
 # Instalar TODAS as dependências (incluindo devDependencies para o build)
 RUN pnpm install --frozen-lockfile
@@ -26,5 +26,5 @@ RUN pnpm prune --prod
 # Expor porta padrão (Railway sobrescreve com a variável PORT)
 EXPOSE 3000
 
-# Iniciar servidor em produção
-CMD ["node", "dist/index.js"]
+# Script de inicialização: cria tabelas se não existirem, depois inicia o servidor
+CMD ["sh", "-c", "node scripts/init-db.mjs && node dist/index.js"]

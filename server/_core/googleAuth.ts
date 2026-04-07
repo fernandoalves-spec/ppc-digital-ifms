@@ -5,21 +5,25 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import session from "express-session";
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import * as db from "../db";
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID ?? "";
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET ?? "";
 const SESSION_SECRET = process.env.JWT_SECRET ?? "ppc-digital-ifms-secret-change-me";
-const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
+const APP_URL = (process.env.APP_URL ?? "http://localhost:3000").replace(/\/$/, ""); // remove trailing slash
 
 export function setupGoogleAuth(app: Express) {
+  console.log(`[GoogleAuth] Configurando com APP_URL: ${APP_URL}`);
+  console.log(`[GoogleAuth] Callback URL: ${APP_URL}/api/auth/google/callback`);
+
   // Configurar express-session
   app.use(
     session({
       secret: SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
+      proxy: true, // necessário para Railway (proxy reverso)
       cookie: {
         secure: process.env.NODE_ENV === "production",
         httpOnly: true,
@@ -34,8 +38,9 @@ export function setupGoogleAuth(app: Express) {
 
   // Configurar estratégia Google
   if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
-    console.warn("[GoogleAuth] GOOGLE_CLIENT_ID ou GOOGLE_CLIENT_SECRET não configurados!");
+    console.warn("[GoogleAuth] ⚠️  GOOGLE_CLIENT_ID ou GOOGLE_CLIENT_SECRET não configurados!");
   } else {
+    console.log("[GoogleAuth] ✅ Credenciais Google configuradas.");
     passport.use(
       new GoogleStrategy(
         {
@@ -49,6 +54,8 @@ export function setupGoogleAuth(app: Express) {
             const name = profile.displayName ?? null;
             const openId = `google:${profile.id}`;
 
+            console.log(`[GoogleAuth] Login: ${email} (${openId})`);
+
             await db.upsertUser({
               openId,
               name,
@@ -58,9 +65,15 @@ export function setupGoogleAuth(app: Express) {
             });
 
             const user = await db.getUserByOpenId(openId);
-            if (!user) return done(new Error("Usuário não encontrado após upsert"), false);
+            if (!user) {
+              console.error("[GoogleAuth] ❌ Usuário não encontrado após upsert");
+              return done(new Error("Usuário não encontrado após upsert"), false);
+            }
+
+            console.log(`[GoogleAuth] ✅ Login bem-sucedido: ${user.email} (role: ${user.role})`);
             return done(null, user);
           } catch (err) {
+            console.error("[GoogleAuth] ❌ Erro no callback:", err);
             return done(err as Error, false);
           }
         }
@@ -77,13 +90,18 @@ export function setupGoogleAuth(app: Express) {
       const user = await db.getUserById(id);
       done(null, user ?? false);
     } catch (err) {
-      done(err, false);
+      console.error("[GoogleAuth] Erro ao desserializar usuário:", err);
+      done(null, false); // não propagar erro, apenas retornar não autenticado
     }
   });
 
   // Rotas de autenticação
   app.get(
     "/api/auth/google",
+    (req: Request, _res: Response, next: NextFunction) => {
+      console.log(`[GoogleAuth] Iniciando fluxo OAuth, origin: ${req.headers.origin ?? req.headers.host}`);
+      next();
+    },
     passport.authenticate("google", {
       scope: ["profile", "email"],
       prompt: "select_account",
@@ -92,13 +110,21 @@ export function setupGoogleAuth(app: Express) {
 
   app.get(
     "/api/auth/google/callback",
-    passport.authenticate("google", { failureRedirect: "/?error=auth_failed" }),
-    (_req, res) => {
+    (req: Request, _res: Response, next: NextFunction) => {
+      console.log(`[GoogleAuth] Callback recebido, query: ${JSON.stringify(req.query)}`);
+      next();
+    },
+    passport.authenticate("google", {
+      failureRedirect: "/?error=auth_failed",
+      failureMessage: true,
+    }),
+    (_req: Request, res: Response) => {
+      console.log("[GoogleAuth] ✅ Autenticação bem-sucedida, redirecionando para /");
       res.redirect("/");
     }
   );
 
-  app.post("/api/auth/logout", (req, res) => {
+  app.post("/api/auth/logout", (req: Request, res: Response) => {
     req.logout(() => {
       req.session.destroy(() => {
         res.json({ success: true });
@@ -106,7 +132,7 @@ export function setupGoogleAuth(app: Express) {
     });
   });
 
-  app.get("/api/auth/me", (req, res) => {
+  app.get("/api/auth/me", (req: Request, res: Response) => {
     if (req.isAuthenticated() && req.user) {
       res.json(req.user);
     } else {
