@@ -301,6 +301,27 @@ vi.mock("pdf-parse", () => ({
   })),
 }));
 
+// ── Mock do módulo Gemini ────────────────────────────────────────────────────
+vi.mock("./_core/gemini", () => ({
+  isGeminiAvailable: vi.fn().mockReturnValue(false),
+  extractPdfWithGemini: vi.fn().mockResolvedValue({
+    courseName: "Técnico em Informática",
+    courseType: "Técnico",
+    duration: 6,
+    subjects: [{
+      name: "Algoritmos",
+      semester: 1,
+      weeklyClasses: 4,
+      totalHours: 80,
+      isElective: false,
+      isRemote: false,
+      suggestedArea: "Informática",
+      syllabus: "Lógica de programação, estruturas de dados",
+      bibliography: "CORMEN, T. Algoritmos. 3ª ed.",
+    }],
+  }),
+}));
+
 // ── Mock do invokeLLM ──────────────────────────────────────────────────────
 vi.mock("./_core/llm", () => ({
   invokeLLM: vi.fn().mockResolvedValue({

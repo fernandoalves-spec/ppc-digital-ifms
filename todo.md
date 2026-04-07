@@ -158,3 +158,10 @@
 - [x] storage.ts: modo local quando BUILT_IN_FORGE_API_URL/KEY não estão configurados
 - [x] Modo local: salva arquivos em disco (./uploads/) e serve via /uploads/ no Express
 - [x] server/_core/index.ts: rota estática /uploads/ criada automaticamente na inicialização
+
+## v1.19 — Migração para Google Gemini API (extração de PDF gratuita)
+- [x] Criar server/_core/gemini.ts com integração direta ao Google Gemini SDK (@google/genai)
+- [x] Lógica dual: usa Gemini SDK direto quando GEMINI_API_KEY disponível (Railway), usa invokeLLM como fallback (Manus)
+- [x] Gemini processa o PDF nativo (base64) sem precisar extrair texto manualmente
+- [x] Adicionar GEMINI_API_KEY ao env.ts e configurar no ambiente
+- [x] Adicionar mock do módulo gemini nos testes (23 testes passando)

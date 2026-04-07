@@ -58,6 +58,7 @@ import {
   getClassesBySemesterFromOfferings,
 } from "./db";
 import { invokeLLM } from "./_core/llm";
+import { extractPdfWithGemini, isGeminiAvailable } from "./_core/gemini";
 import { storagePut } from "./storage";
 import { nanoid } from "nanoid";
 
@@ -330,29 +331,41 @@ const ppcRouter = router({
           const areas = await getCampusAreas(input.campusId);
           campusAreaNames = areas.map(a => a.name);
         }
-        // Baixar o PDF e extrair texto com pdf-parse v2
+        // Baixar o PDF
         const pdfResponse = await fetch(input.fileUrl);
         if (!pdfResponse.ok) throw new Error(`Falha ao baixar PDF: ${pdfResponse.status}`);
         const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
-        const { PDFParse } = await import("pdf-parse");
-        const parser = new PDFParse({ data: pdfBuffer });
-        const textResult = await parser.getText();
-        const pdfText = textResult.pages.map((p: any) => p.text || "").join("\n");
 
-        if (!pdfText || pdfText.trim().length < 100) {
-          throw new Error("O PDF não contém texto extraível suficiente. Verifique se o arquivo é um PPC válido.");
-        }
+        const ppcJsonSchema = {
+          type: "object",
+          properties: {
+            courseName: { type: "string", description: "Nome completo do curso" },
+            courseType: { type: "string", description: "Tipo: Técnico, Subsequente, Graduação, FIC ou Pós-graduação" },
+            duration: { type: "integer", description: "Duração em semestres" },
+            subjects: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  semester: { type: "integer" },
+                  weeklyClasses: { type: "integer" },
+                  totalHours: { type: "integer", nullable: true },
+                  isElective: { type: "boolean" },
+                  isRemote: { type: "boolean" },
+                  suggestedArea: { type: "string" },
+                  syllabus: { type: "string", nullable: true },
+                  bibliography: { type: "string", nullable: true },
+                },
+                required: ["name", "semester", "weeklyClasses", "isElective", "isRemote", "suggestedArea"],
+              },
+            },
+          },
+          required: ["courseName", "courseType", "duration", "subjects"],
+        };
 
-        // Truncar texto se muito longo (limite seguro para o LLM)
-        const maxChars = 120000;
-        const truncatedText = pdfText.length > maxChars ? pdfText.substring(0, maxChars) + "\n[... texto truncado ...]" : pdfText;
-
-        const response = await invokeLLM({
-          messages: [
-            {
-              role: "system",
-              content: `Você é um especialista em análise de Projetos Pedagógicos de Curso (PPC) de institutos federais brasileiros.
-Analise o texto extraído do documento PPC e extraia TODAS as informações em formato JSON estruturado.
+        const systemPrompt = `Você é um especialista em análise de Projetos Pedagógicos de Curso (PPC) de institutos federais brasileiros.
+Analise o documento PPC e extraia TODAS as informações em formato JSON estruturado.
 
 Para cada disciplina/unidade curricular, extraia:
 1. name: nome completo da disciplina
@@ -365,52 +378,82 @@ Para cada disciplina/unidade curricular, extraia:
 8. syllabus: ementa completa da disciplina (texto do PPC, ou null se não encontrar)
 9. bibliography: referências bibliográficas (básica e complementar, texto do PPC, ou null se não encontrar)
 
-IMPORTANTE: Retorne APENAS o JSON válido, sem texto adicional, sem markdown.`,
-            },
-            {
-              role: "user",
-              content: `Extraia TODAS as informações do PPC abaixo: curso (nome e tipo) e para cada disciplina extraia também a ementa e referências bibliográficas completas. O campus já foi informado pelo usuário, NÃO é necessário extrair o campus.\n\n--- TEXTO DO PPC ---\n${truncatedText}`,
-            },
-          ],
-          response_format: {
-            type: "json_schema",
-            json_schema: {
-              name: "ppc_extraction",
-              strict: true,
-              schema: {
-                type: "object",
-                properties: {
-                  courseName: { type: "string", description: "Nome completo do curso" },
-                  courseType: { type: "string", description: "Tipo: Técnico, Subsequente, Graduação, FIC ou Pós-graduação" },
-                  duration: { type: "integer", description: "Duração em semestres" },
-                  subjects: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        name: { type: "string" },
-                        semester: { type: "integer" },
-                        weeklyClasses: { type: "integer" },
-                        totalHours: { type: ["integer", "null"] },
-                        isElective: { type: "boolean" },
-                        isRemote: { type: "boolean" },
-                        suggestedArea: { type: "string" },
-                        syllabus: { type: ["string", "null"] },
-                        bibliography: { type: ["string", "null"] },
+Retorne APENAS JSON válido conforme o schema fornecido.`;
+
+        const userPrompt = `Extraia TODAS as informações do PPC: curso (nome e tipo) e para cada disciplina extraia também a ementa e referências bibliográficas completas. O campus já foi informado pelo usuário, NÃO é necessário extrair o campus.`;
+
+        let extractedData: any;
+
+        if (isGeminiAvailable()) {
+          // Modo Railway/externo: usa Gemini SDK diretamente com o PDF nativo
+          console.log("[PPC Extract] Usando Google Gemini SDK direto");
+          extractedData = await extractPdfWithGemini({
+            pdfBuffer,
+            systemPrompt,
+            userPrompt,
+            jsonSchema: ppcJsonSchema,
+            schemaName: "ppc_extraction",
+          });
+        } else {
+          // Modo Manus: extrai texto do PDF e envia via invokeLLM
+          console.log("[PPC Extract] Usando invokeLLM (Manus)");
+          const { PDFParse } = await import("pdf-parse");
+          const parser = new PDFParse({ data: pdfBuffer });
+          const textResult = await parser.getText();
+          const pdfText = textResult.pages.map((p: any) => p.text || "").join("\n");
+
+          if (!pdfText || pdfText.trim().length < 100) {
+            throw new Error("O PDF não contém texto extraível suficiente. Verifique se o arquivo é um PPC válido.");
+          }
+
+          const maxChars = 120000;
+          const truncatedText = pdfText.length > maxChars ? pdfText.substring(0, maxChars) + "\n[... texto truncado ...]" : pdfText;
+
+          const response = await invokeLLM({
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: `${userPrompt}\n\n--- TEXTO DO PPC ---\n${truncatedText}` },
+            ],
+            response_format: {
+              type: "json_schema",
+              json_schema: {
+                name: "ppc_extraction",
+                strict: true,
+                schema: {
+                  type: "object",
+                  properties: {
+                    courseName: { type: "string" },
+                    courseType: { type: "string" },
+                    duration: { type: "integer" },
+                    subjects: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          name: { type: "string" },
+                          semester: { type: "integer" },
+                          weeklyClasses: { type: "integer" },
+                          totalHours: { type: ["integer", "null"] },
+                          isElective: { type: "boolean" },
+                          isRemote: { type: "boolean" },
+                          suggestedArea: { type: "string" },
+                          syllabus: { type: ["string", "null"] },
+                          bibliography: { type: ["string", "null"] },
+                        },
+                        required: ["name", "semester", "weeklyClasses", "isElective", "isRemote", "suggestedArea", "syllabus", "bibliography"],
+                        additionalProperties: false,
                       },
-                      required: ["name", "semester", "weeklyClasses", "isElective", "isRemote", "suggestedArea", "syllabus", "bibliography"],
-                      additionalProperties: false,
                     },
                   },
+                  required: ["courseName", "courseType", "duration", "subjects"],
+                  additionalProperties: false,
                 },
-                required: ["courseName", "courseType", "duration", "subjects"],
-                additionalProperties: false,
               },
             },
-          },
-        });
-        const content = response.choices[0]?.message?.content;
-        const extractedData = typeof content === "string" ? JSON.parse(content) : content;
+          });
+          const content = response.choices[0]?.message?.content;
+          extractedData = typeof content === "string" ? JSON.parse(content) : content;
+        }
         await updatePpcDocument(input.documentId, {
           status: "extracted",
           extractedData,
