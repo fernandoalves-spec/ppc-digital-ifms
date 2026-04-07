@@ -14,7 +14,16 @@ export async function createContext(
   let user: User | null = null;
 
   try {
-    user = await sdk.authenticateRequest(opts.req);
+    // Modo Google OAuth (Railway): usuário autenticado via passport session
+    if (process.env.GOOGLE_CLIENT_ID) {
+      const req = opts.req as any;
+      if (req.isAuthenticated && req.isAuthenticated() && req.user) {
+        user = req.user as User;
+      }
+    } else {
+      // Modo Manus OAuth (plataforma Manus)
+      user = await sdk.authenticateRequest(opts.req);
+    }
   } catch (error) {
     // Authentication is optional for public procedures.
     user = null;
