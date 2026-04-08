@@ -34,6 +34,9 @@ class OAuthService {
   }
 
   private ensureOAuthServerUrlConfigured() {
+    if (process.env.GOOGLE_CLIENT_ID) {
+      return;
+    }
     if (!ENV.oAuthServerUrl) {
       throw new Error("OAUTH_SERVER_URL is not configured");
     }
@@ -88,6 +91,9 @@ const createOAuthHttpClient = (): AxiosInstance =>
   });
 
 const assertOAuthServerUrlConfigured = () => {
+  if (process.env.GOOGLE_CLIENT_ID) {
+    return;
+  }
   if (!ENV.oAuthServerUrl) {
     throw new Error("OAUTH_SERVER_URL is not configured");
   }

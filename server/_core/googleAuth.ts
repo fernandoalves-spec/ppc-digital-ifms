@@ -31,9 +31,10 @@ let redisClient: RedisClientType | null = null;
 
 function validateSessionStoreEnv() {
   if (IS_PRODUCTION && !REDIS_URL) {
-    throw new Error(
-      "[GoogleAuth] Configuração inválida: REDIS_URL é obrigatório em produção para persistência de sessão OAuth. Sem Redis, o express-session usa MemoryStore (não recomendado e sem persistência)."
+    console.warn(
+      "[GoogleAuth] REDIS_URL nao configurado em producao. Iniciando com MemoryStore (nao recomendado para escalabilidade/persistencia)."
     );
+    return;
   }
 
   if (REDIS_URL && !REDIS_URL.startsWith("redis://") && !REDIS_URL.startsWith("rediss://")) {
@@ -51,7 +52,7 @@ function validateSessionStoreEnv() {
 
 function createSessionStore() {
   if (!REDIS_URL) {
-    console.info("[GoogleAuth] Sessão em MemoryStore (apenas desenvolvimento local).");
+    console.info("[GoogleAuth] Sessao em MemoryStore (sem persistencia compartilhada).");
     return undefined;
   }
 
@@ -208,3 +209,5 @@ export function setupGoogleAuth(app: Express) {
     }
   });
 }
+
+
