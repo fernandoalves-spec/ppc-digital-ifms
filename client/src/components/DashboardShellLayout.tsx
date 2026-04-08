@@ -18,7 +18,6 @@ import {
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
@@ -447,12 +446,11 @@ function DashboardLayoutContent({
 
                     return (
                       <SidebarMenuItem key={item.path}>
-                        <SidebarMenuButton
-                          isActive={isActive}
+                        <button
                           onClick={() => setLocation(item.path)}
-                          tooltip={item.label}
+                          title={item.label}
                           className={[
-                            "h-10 rounded-xl px-3 py-2 text-left transition-colors",
+                            "flex h-10 w-full items-center gap-2 rounded-xl px-3 py-2 text-left transition-colors",
                             isActive
                               ? "bg-white text-slate-900 shadow-lg shadow-black/10"
                               : "text-emerald-50/85 hover:bg-white/8 hover:text-white",
@@ -466,7 +464,7 @@ function DashboardLayoutContent({
                             </span>
                           )}
                           {!isCollapsed && isActive && <ChevronRight className="h-3.5 w-3.5 shrink-0 text-emerald-600" />}
-                        </SidebarMenuButton>
+                        </button>
                       </SidebarMenuItem>
                     );
                   })}
