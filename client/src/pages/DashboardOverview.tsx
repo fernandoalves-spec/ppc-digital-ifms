@@ -30,15 +30,17 @@ import {
 } from "recharts";
 import { useLocation } from "wouter";
 
+// Paleta de gráficos derivada da identidade visual IFMS
+// Prioriza o verde e o vermelho oficiais, com variações hierárquicas
 const COLORS = [
-  ifmsColorTokens.green.hex,
-  "#2563eb",
-  "#d97706",
-  "#0f766e",
-  ifmsColorTokens.red.hex,
-  "#7c3aed",
-  "#0891b2",
-  "#65a30d",
+  ifmsColorTokens.green.hex, // #32A041 — verde oficial
+  "#1d6d2c", // verde escuro institucional
+  ifmsColorTokens.red.hex, // #C8191E — vermelho oficial
+  "#58b566", // verde claro derivado
+  "#0f3d18", // verde 900
+  "#85cb8f", // verde 300
+  "#8f1216", // vermelho escuro derivado
+  "#1f2937", // grafite neutro
 ];
 
 export default function DashboardOverview() {
@@ -55,40 +57,40 @@ export default function DashboardOverview() {
       label: "Campus",
       value: stats?.totalCampuses ?? 0,
       icon: Building2,
-      accent: "from-sky-500/15 to-sky-100",
-      iconColor: "text-sky-700",
+      accent: "from-[rgba(50,160,65,0.18)] to-[var(--ifms-green-100)]",
+      iconColor: "text-[var(--ifms-green-700)]",
       path: "/campus",
     },
     {
       label: "Cursos ativos",
       value: stats?.totalCourses ?? 0,
       icon: GraduationCap,
-      accent: "from-emerald-500/15 to-emerald-100",
-      iconColor: "text-emerald-700",
+      accent: "from-[rgba(50,160,65,0.22)] to-[var(--ifms-green-100)]",
+      iconColor: "text-[var(--ifms-green-700)]",
       path: "/courses",
     },
     {
       label: "Disciplinas",
       value: stats?.totalSubjects ?? 0,
       icon: BookOpen,
-      accent: "from-violet-500/15 to-violet-100",
-      iconColor: "text-violet-700",
+      accent: "from-[rgba(29,109,44,0.18)] to-[var(--ifms-green-100)]",
+      iconColor: "text-[var(--ifms-green-900)]",
       path: "/subjects",
     },
     {
       label: "Áreas de ensino",
       value: stats?.totalAreas ?? 0,
       icon: Layers,
-      accent: "from-amber-500/15 to-amber-100",
-      iconColor: "text-amber-700",
+      accent: "from-[rgba(88,181,102,0.2)] to-[var(--ifms-green-50)]",
+      iconColor: "text-[var(--ifms-green-700)]",
       path: "/areas",
     },
     {
       label: "Solicitações pendentes",
       value: stats?.pendingApprovals ?? 0,
       icon: ClipboardList,
-      accent: "from-rose-500/15 to-rose-100",
-      iconColor: "text-rose-700",
+      accent: "from-[rgba(200,25,30,0.18)] to-[var(--ifms-red-100)]",
+      iconColor: "text-[var(--ifms-red-600)]",
       path: "/approvals",
       alert: (stats?.pendingApprovals ?? 0) > 0,
     },
@@ -96,8 +98,8 @@ export default function DashboardOverview() {
       label: "Disciplinas sem área",
       value: stats?.subjectsWithoutArea ?? 0,
       icon: AlertTriangle,
-      accent: "from-orange-500/15 to-orange-100",
-      iconColor: "text-orange-700",
+      accent: "from-[rgba(200,25,30,0.14)] to-[var(--ifms-red-50)]",
+      iconColor: "text-[var(--ifms-red-700)]",
       path: "/subjects",
       alert: (stats?.subjectsWithoutArea ?? 0) > 0,
     },
@@ -106,10 +108,13 @@ export default function DashboardOverview() {
   return (
     <div className="space-y-6">
       <section className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
-        <div className="rounded-[1.75rem] bg-[var(--color-hero)] p-6 text-white md:p-7">
+        <div className="hero-strip relative overflow-hidden rounded-[1.75rem] p-6 text-white md:p-7">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge className="rounded-full bg-white/12 px-3 py-1 text-white hover:bg-white/12">Visão executiva</Badge>
-            <Badge className="rounded-full bg-white/12 px-3 py-1 text-white hover:bg-white/12">
+            <Badge className="rounded-full bg-white/14 px-3 py-1 text-white hover:bg-white/14">Visão executiva</Badge>
+            <Badge className="rounded-full bg-[var(--ifms-red)]/90 px-3 py-1 text-white hover:bg-[var(--ifms-red)]">
+              IFMS
+            </Badge>
+            <Badge className="rounded-full bg-white/14 px-3 py-1 text-white hover:bg-white/14">
               {user?.name ? `Olá, ${user.name.split(" ")[0]}` : "Ambiente institucional"}
             </Badge>
           </div>
@@ -117,13 +122,16 @@ export default function DashboardOverview() {
           <h2 className="mt-5 max-w-2xl text-2xl font-bold tracking-tight md:text-3xl">
             Acompanhe a saúde acadêmica do PPC Digital com leitura rápida e prioridade clara.
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-emerald-50/80 md:text-base">
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-white/80 md:text-base">
             Veja dados consolidados de cursos, áreas, ofertas e pendências em um só painel, com foco em governança e
-            tomada de decisão.
+            tomada de decisão acadêmica.
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
-            <Button className="rounded-full bg-white text-slate-950 hover:bg-emerald-50" onClick={() => setLocation("/reports")}>
+            <Button
+              className="rounded-full bg-white text-[var(--ifms-green-900)] hover:bg-[var(--ifms-green-50)]"
+              onClick={() => setLocation("/reports")}
+            >
               Abrir relatórios
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -135,29 +143,47 @@ export default function DashboardOverview() {
               Ver quadro de oferta
             </Button>
           </div>
+
+          <div className="ifms-bar absolute inset-x-0 bottom-0" />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-[1.5rem] border border-emerald-100 bg-gradient-to-br from-white to-emerald-50 p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Status operacional</p>
-            <p className="mt-3 text-3xl font-bold tracking-tight text-slate-950">{stats?.pendingApprovals ?? 0}</p>
-            <p className="mt-1 text-sm text-slate-600">solicitações aguardando resposta</p>
+          <div className="rounded-[1.5rem] border border-[var(--ifms-green-100)] bg-gradient-to-br from-white to-[var(--ifms-green-50)] p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--ifms-green-700)]">
+              Status operacional
+            </p>
+            <p className="mt-3 text-3xl font-bold tracking-tight text-[var(--ifms-green-900)]">
+              {stats?.pendingApprovals ?? 0}
+            </p>
+            <p className="mt-1 text-sm text-[var(--ifms-text-soft)]">solicitações aguardando resposta</p>
           </div>
-          <div className="rounded-[1.5rem] border border-amber-100 bg-gradient-to-br from-white to-amber-50 p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Saneamento curricular</p>
-            <p className="mt-3 text-3xl font-bold tracking-tight text-slate-950">{stats?.subjectsWithoutArea ?? 0}</p>
-            <p className="mt-1 text-sm text-slate-600">disciplinas ainda sem área vinculada</p>
+          <div className="rounded-[1.5rem] border border-[var(--ifms-red-100)] bg-gradient-to-br from-white to-[var(--ifms-red-50)] p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--ifms-red-600)]">
+              Saneamento curricular
+            </p>
+            <p className="mt-3 text-3xl font-bold tracking-tight text-[var(--ifms-green-900)]">
+              {stats?.subjectsWithoutArea ?? 0}
+            </p>
+            <p className="mt-1 text-sm text-[var(--ifms-text-soft)]">disciplinas ainda sem área vinculada</p>
           </div>
-          <div className="rounded-[1.5rem] border border-sky-100 bg-gradient-to-br from-white to-sky-50 p-5 sm:col-span-2">
+          <div className="rounded-[1.5rem] border border-[var(--ifms-green-100)] bg-gradient-to-br from-white to-[var(--ifms-green-50)] p-5 sm:col-span-2">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Última leitura</p>
-                <p className="mt-3 text-lg font-semibold tracking-tight text-slate-950">Atualização orientada por dados</p>
-                <p className="mt-1 max-w-md text-sm leading-6 text-slate-600">
-                  Os indicadores combinam visão do PPC e leitura das turmas ativas para apoiar análise acadêmica.
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--ifms-green-700)]">
+                  Última leitura
+                </p>
+                <p className="mt-3 text-lg font-semibold tracking-tight text-[var(--ifms-green-900)]">
+                  Atualização orientada por dados
+                </p>
+                <p className="mt-1 max-w-md text-sm leading-6 text-[var(--ifms-text-soft)]">
+                  Os indicadores combinam a visão do PPC com a leitura das turmas ativas para apoiar a análise
+                  acadêmica institucional.
                 </p>
               </div>
-              <Badge variant="outline" className="rounded-full bg-white/80 text-slate-600">
+              <Badge
+                variant="outline"
+                className="rounded-full border-[var(--ifms-green-200)] bg-white/80 text-[var(--ifms-green-700)]"
+              >
                 Atualizado agora
               </Badge>
             </div>
@@ -171,37 +197,41 @@ export default function DashboardOverview() {
             key={kpi.label}
             onClick={() => setLocation(kpi.path)}
             className={`rounded-[1.5rem] border p-4 text-left transition hover:-translate-y-0.5 hover:shadow-lg ${
-              kpi.alert ? "border-orange-200 bg-orange-50/60" : "border-white/70 bg-white/72"
+              kpi.alert
+                ? "border-[var(--ifms-red-100)] bg-[var(--ifms-red-50)]"
+                : "border-[var(--ifms-green-100)] bg-white/78"
             }`}
           >
             <div className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br ${kpi.accent}`}>
               <kpi.icon className={`h-5 w-5 ${kpi.iconColor}`} />
             </div>
-            <p className="mt-4 text-2xl font-bold tracking-tight text-slate-950">{statsLoading ? "-" : kpi.value}</p>
-            <p className="mt-1 text-xs leading-5 text-slate-500">{kpi.label}</p>
+            <p className="mt-4 text-2xl font-bold tracking-tight text-[var(--ifms-green-900)]">
+              {statsLoading ? "-" : kpi.value}
+            </p>
+            <p className="mt-1 text-xs leading-5 text-[var(--ifms-text-soft)]">{kpi.label}</p>
           </button>
         ))}
       </section>
 
       {(stats?.pendingApprovals ?? 0) > 0 && (
-        <section className="rounded-[1.5rem] border border-amber-200 bg-amber-50/75 p-4 md:p-5">
+        <section className="rounded-[1.5rem] border border-[var(--ifms-red-100)] bg-[var(--ifms-red-50)] p-4 md:p-5">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-100">
-                <AlertTriangle className="h-5 w-5 text-amber-700" />
+              <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl bg-white">
+                <AlertTriangle className="h-5 w-5 text-[var(--ifms-red-600)]" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-amber-900">
+                <p className="text-sm font-semibold text-[var(--ifms-red-700)]">
                   {stats?.pendingApprovals} solicitação(ões) de indicação de área aguardando resposta
                 </p>
-                <p className="mt-1 text-sm text-amber-700">
+                <p className="mt-1 text-sm text-[var(--ifms-text-soft)]">
                   Priorize a atuação dos coordenadores para manter o fluxo institucional em dia.
                 </p>
               </div>
             </div>
             <Button
               variant="outline"
-              className="rounded-full border-amber-300 bg-white/80 text-amber-900 hover:bg-amber-100"
+              className="rounded-full border-[var(--ifms-red-100)] bg-white/90 text-[var(--ifms-red-700)] hover:bg-[var(--ifms-red-50)]"
               onClick={() => setLocation("/approvals")}
             >
               Ver solicitações
@@ -214,8 +244,8 @@ export default function DashboardOverview() {
       {(offeringsByArea && offeringsByArea.length > 0) || (offeringsBySemester && offeringsBySemester.length > 0) ? (
         <section className="space-y-4">
           <div className="flex items-center gap-2">
-            <CalendarRange className="h-4 w-4 text-emerald-700" />
-            <h3 className="text-lg font-semibold tracking-tight text-slate-950">
+            <CalendarRange className="h-4 w-4 text-[var(--ifms-green-700)]" />
+            <h3 className="text-lg font-semibold tracking-tight text-[var(--ifms-green-900)]">
               Quadro de oferta com base nas turmas ativas
             </h3>
           </div>
@@ -224,7 +254,7 @@ export default function DashboardOverview() {
             <ChartCard
               title="Aulas semanais por área"
               icon={Layers}
-              accent="text-emerald-700"
+              accent="text-[var(--ifms-green-700)]"
               body={
                 offeringsByArea && offeringsByArea.length > 0 ? (
                   <ResponsiveContainer width="100%" height={260}>
@@ -252,7 +282,7 @@ export default function DashboardOverview() {
             <ChartCard
               title="Aulas por semestre do curso"
               icon={TrendingUp}
-              accent="text-emerald-700"
+              accent="text-[var(--ifms-green-700)]"
               body={
                 offeringsBySemester && offeringsBySemester.length > 0 ? (
                   <ResponsiveContainer width="100%" height={260}>
@@ -279,15 +309,15 @@ export default function DashboardOverview() {
 
       <section className="space-y-4">
         <div className="flex items-center gap-2">
-          <Layers className="h-4 w-4 text-sky-700" />
-          <h3 className="text-lg font-semibold tracking-tight text-slate-950">Visão geral do PPC</h3>
+          <Layers className="h-4 w-4 text-[var(--ifms-green-700)]" />
+          <h3 className="text-lg font-semibold tracking-tight text-[var(--ifms-green-900)]">Visão geral do PPC</h3>
         </div>
 
         <div className="grid gap-5 lg:grid-cols-2">
           <ChartCard
             title="Aulas semanais por área"
             icon={Layers}
-            accent="text-sky-700"
+            accent="text-[var(--ifms-green-700)]"
             body={
               byArea && byArea.length > 0 ? (
                 <ResponsiveContainer width="100%" height={260}>
@@ -315,7 +345,7 @@ export default function DashboardOverview() {
           <ChartCard
             title="Aulas semanais por semestre"
             icon={TrendingUp}
-            accent="text-sky-700"
+            accent="text-[var(--ifms-green-700)]"
             body={
               bySemester && bySemester.length > 0 ? (
                 <ResponsiveContainer width="100%" height={260}>
@@ -328,7 +358,7 @@ export default function DashboardOverview() {
                       formatter={(value: number) => [`${value} aulas/semana`, "Total"]}
                       labelFormatter={(label) => `${label}º semestre`}
                     />
-                    <Bar dataKey="totalClasses" fill="#2563eb" radius={[8, 8, 0, 0]} />
+                    <Bar dataKey="totalClasses" fill={ifmsColorTokens.red.hex} radius={[8, 8, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
@@ -342,7 +372,7 @@ export default function DashboardOverview() {
           <ChartCard
             title="Distribuição de disciplinas por área"
             icon={Layers}
-            accent="text-violet-700"
+            accent="text-[var(--ifms-green-800)]"
             body={
               <div className="flex flex-col items-center gap-4">
                 <ResponsiveContainer width="100%" height={280}>
@@ -365,7 +395,13 @@ export default function DashboardOverview() {
                       contentStyle={{ borderRadius: 16, border: "1px solid #e2e8f0", fontSize: 12 }}
                       formatter={(value: number) => [`${value} disciplinas`, ""]}
                     />
-                    <Legend formatter={(value) => <span className="text-xs text-slate-600">{value}</span>} iconType="circle" iconSize={8} />
+                    <Legend
+                      formatter={(value) => (
+                        <span className="text-xs text-[var(--ifms-text-soft)]">{value}</span>
+                      )}
+                      iconType="circle"
+                      iconSize={8}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -389,9 +425,9 @@ function ChartCard({
   body: React.ReactNode;
 }) {
   return (
-    <Card className="rounded-[1.5rem] border-white/70 bg-white/80 shadow-none">
+    <Card className="rounded-[1.5rem] border-[var(--ifms-green-100)] bg-white/85 shadow-none">
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-base font-semibold tracking-tight text-slate-950">
+        <CardTitle className="flex items-center gap-2 text-base font-semibold tracking-tight text-[var(--ifms-green-900)]">
           <Icon className={`h-4 w-4 ${accent}`} />
           {title}
         </CardTitle>
@@ -403,7 +439,7 @@ function ChartCard({
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="flex h-[260px] items-center justify-center rounded-[1.25rem] border border-dashed border-slate-200 bg-slate-50 text-sm text-slate-500">
+    <div className="flex h-[260px] items-center justify-center rounded-[1.25rem] border border-dashed border-[var(--ifms-green-200)] bg-[var(--ifms-green-50)] text-sm text-[var(--ifms-text-soft)]">
       {message}
     </div>
   );

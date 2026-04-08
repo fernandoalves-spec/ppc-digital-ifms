@@ -1,80 +1,122 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
+  /* ------------------------------------------------------------------ */
+  /*  Paleta oficial do IFMS (Manual de Identidade Visual)               */
+  /*  Verde:  #32A041  (Pantone 362 C)                                   */
+  /*  Vermelho: #C8191E  (Pantone 187 C)                                 */
+  /*  Preto: #000000  (Process Black C)                                  */
+  /* ------------------------------------------------------------------ */
+  --ifms-green: #32a041;
+  --ifms-red: #c8191e;
+  --ifms-black: #000000;
+
+  /* Escala derivada do verde oficial IFMS */
+  --ifms-green-950: #08220d;
+  --ifms-green-900: #0f3d18;
+  --ifms-green-800: #155222;
+  --ifms-green-700: #1d6d2c;
+  --ifms-green-600: #248737;
+  --ifms-green-500: #32a041;
+  --ifms-green-400: #58b566;
+  --ifms-green-300: #85cb8f;
+  --ifms-green-200: #b4e0ba;
+  --ifms-green-100: #d8eedc;
+  --ifms-green-50: #eff8f1;
+
+  /* Escala derivada do vermelho oficial IFMS */
+  --ifms-red-700: #8f1216;
+  --ifms-red-600: #c8191e;
+  --ifms-red-500: #dc3a40;
+  --ifms-red-100: #fbd8da;
+  --ifms-red-50: #fcefef;
+
+  /* Shadcn color tokens (HSL) alinhados à identidade IFMS */
   --background: 0 0% 100%;
-  --foreground: 142 36% 12%;
-  --muted: 138 12% 94%;
-  --muted-foreground: 142 12% 36%;
+  --foreground: 128 60% 8%;
+  --muted: 128 30% 95%;
+  --muted-foreground: 128 14% 30%;
   --popover: 0 0% 100%;
-  --popover-foreground: 142 36% 12%;
+  --popover-foreground: 128 60% 8%;
   --card: 0 0% 100%;
-  --card-foreground: 142 36% 12%;
-  --border: 142 16% 86%;
-  --input: 142 18% 88%;
-  --primary: 138 73% 29%;
+  --card-foreground: 128 60% 8%;
+  --border: 128 22% 86%;
+  --input: 128 22% 88%;
+  --primary: 128 52% 41%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 142 23% 96%;
-  --secondary-foreground: 142 36% 18%;
-  --accent: 142 28% 93%;
-  --accent-foreground: 142 36% 18%;
-  --destructive: 0 72% 46%;
+  --secondary: 128 40% 96%;
+  --secondary-foreground: 128 60% 12%;
+  --accent: 128 40% 93%;
+  --accent-foreground: 128 60% 12%;
+  --destructive: 358 78% 44%;
   --destructive-foreground: 0 0% 100%;
-  --ring: 138 73% 29%;
+  --ring: 128 52% 41%;
   --radius: 1rem;
 
-  --ifms-green-900: #0f3d28;
-  --ifms-green-800: #14532d;
-  --ifms-green-700: #166534;
-  --ifms-green-600: #15803d;
-  --ifms-green-500: #16a34a;
-  --ifms-green-100: #dcfce7;
-  --ifms-green-50: #f2fbf5;
-  --ifms-red: #e11d48;
-  --ifms-surface: #f5f7f4;
-  --ifms-panel: rgba(255, 255, 255, 0.92);
+  /* Tokens usados em classes arbitrárias do Tailwind (bg-[var(--color-*)]) */
+  --color-primary: var(--ifms-green);
+  --color-primary-strong: var(--ifms-green-700);
+  --color-hero: var(--ifms-green-800);
+  --color-hero-foreground: #ffffff;
+  --color-surface: #f4f8f4;
+  --color-surface-strong: #ffffff;
+  --color-border: rgba(15, 61, 24, 0.14);
+  --color-danger: var(--ifms-red);
+
+  /* Tokens institucionais usados pelo shell/layout */
+  --ifms-surface: #f4f8f4;
+  --ifms-panel: rgba(255, 255, 255, 0.94);
   --ifms-panel-strong: rgba(255, 255, 255, 0.98);
-  --ifms-border: rgba(15, 61, 40, 0.12);
-  --ifms-text: #163020;
-  --ifms-text-soft: #4a6351;
-  --ifms-sidebar: linear-gradient(180deg, #0f3d28 0%, #14532d 52%, #0a2418 100%);
-  --ifms-sidebar-foreground: rgba(255, 255, 255, 0.94);
-  --ifms-sidebar-muted: rgba(220, 252, 231, 0.72);
-  --ifms-shadow: 0 20px 55px rgba(15, 61, 40, 0.12);
-  --ifms-shadow-soft: 0 8px 24px rgba(15, 61, 40, 0.08);
-  --sidebar-background: 138 55% 18%;
+  --ifms-border: rgba(15, 61, 24, 0.14);
+  --ifms-text: #0a1a10;
+  --ifms-text-soft: #3b5142;
+  --ifms-sidebar: linear-gradient(180deg, #0f3d18 0%, #155222 52%, #08220d 100%);
+  --ifms-sidebar-foreground: rgba(255, 255, 255, 0.96);
+  --ifms-sidebar-muted: rgba(216, 238, 220, 0.74);
+  --ifms-shadow: 0 22px 60px rgba(15, 61, 24, 0.14);
+  --ifms-shadow-soft: 0 10px 26px rgba(15, 61, 24, 0.08);
+
+  --sidebar-background: 128 50% 16%;
   --sidebar-foreground: 0 0% 100%;
-  --sidebar-primary: 138 73% 52%;
+  --sidebar-primary: 128 52% 50%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 138 38% 24%;
+  --sidebar-accent: 128 40% 24%;
   --sidebar-accent-foreground: 0 0% 100%;
-  --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: 138 73% 52%;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: 128 52% 50%;
 }
 
 .dark {
-  --background: 142 28% 8%;
+  --background: 128 36% 6%;
   --foreground: 0 0% 98%;
-  --muted: 142 18% 16%;
-  --muted-foreground: 142 12% 72%;
-  --popover: 142 28% 8%;
+  --muted: 128 22% 14%;
+  --muted-foreground: 128 10% 72%;
+  --popover: 128 36% 6%;
   --popover-foreground: 0 0% 98%;
-  --card: 142 24% 10%;
+  --card: 128 30% 9%;
   --card-foreground: 0 0% 98%;
-  --border: 142 18% 20%;
-  --input: 142 18% 18%;
-  --primary: 138 61% 45%;
+  --border: 128 22% 18%;
+  --input: 128 22% 16%;
+  --primary: 128 52% 45%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 142 18% 16%;
+  --secondary: 128 22% 14%;
   --secondary-foreground: 0 0% 98%;
-  --accent: 142 18% 18%;
+  --accent: 128 22% 16%;
   --accent-foreground: 0 0% 98%;
-  --destructive: 0 63% 31%;
+  --destructive: 358 64% 38%;
   --destructive-foreground: 0 0% 98%;
-  --ring: 138 61% 45%;
+  --ring: 128 52% 45%;
+
+  --color-primary: var(--ifms-green);
+  --color-hero: var(--ifms-green-900);
+  --color-hero-foreground: #ffffff;
+  --color-surface: #0a1a10;
+  --color-surface-strong: #0f2615;
+  --color-border: rgba(255, 255, 255, 0.1);
 }
 
 @layer base {
@@ -88,11 +130,12 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: "Inter", sans-serif;
+    font-family: "Open Sans", Arial, sans-serif;
+    font-feature-settings: "kern", "liga";
     background:
-      radial-gradient(circle at top left, rgba(34, 197, 94, 0.14), transparent 22%),
-      radial-gradient(circle at right, rgba(20, 83, 45, 0.08), transparent 28%),
-      linear-gradient(180deg, #f3f7f2 0%, #eef3ef 100%);
+      radial-gradient(circle at top left, rgba(50, 160, 65, 0.14), transparent 22%),
+      radial-gradient(circle at right, rgba(21, 82, 34, 0.08), transparent 28%),
+      linear-gradient(180deg, #f3f8f3 0%, #edf3ed 100%);
     color: var(--ifms-text);
   }
 
@@ -102,10 +145,14 @@
 }
 
 @layer utilities {
+  .font-institutional {
+    font-family: "Open Sans", Arial, sans-serif;
+  }
+
   .app-shell {
     min-height: 100vh;
     background:
-      radial-gradient(circle at top right, rgba(22, 163, 74, 0.14), transparent 24%),
+      radial-gradient(circle at top right, rgba(50, 160, 65, 0.14), transparent 24%),
       linear-gradient(180deg, #f4f8f3 0%, #eef3ef 48%, #f6f8f4 100%);
   }
 
@@ -118,25 +165,40 @@
 
   .institutional-panel {
     background: var(--ifms-panel-strong);
-    border: 1px solid rgba(15, 61, 40, 0.1);
+    border: 1px solid rgba(15, 61, 24, 0.1);
     box-shadow: var(--ifms-shadow);
   }
 
   .hero-strip {
-    background: linear-gradient(135deg, rgba(15, 61, 40, 0.95), rgba(21, 128, 61, 0.92));
-    color: white;
+    background: linear-gradient(
+      135deg,
+      var(--ifms-green-900) 0%,
+      var(--ifms-green-700) 48%,
+      var(--ifms-green-500) 100%
+    );
+    color: #ffffff;
+  }
+
+  .hero-strip-accent {
+    background: linear-gradient(
+      135deg,
+      var(--ifms-green-800) 0%,
+      var(--ifms-green-600) 60%,
+      var(--ifms-red-600) 140%
+    );
+    color: #ffffff;
   }
 
   .kpi-card {
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 249, 245, 0.98));
-    border: 1px solid rgba(15, 61, 40, 0.1);
+    border: 1px solid rgba(15, 61, 24, 0.1);
     box-shadow: var(--ifms-shadow-soft);
   }
 
   .kpi-card-dark {
-    background: linear-gradient(180deg, rgba(15, 61, 40, 0.98), rgba(20, 83, 45, 0.98));
+    background: linear-gradient(180deg, var(--ifms-green-900) 0%, var(--ifms-green-700) 100%);
     color: white;
-    border: 1px solid rgba(220, 252, 231, 0.08);
+    border: 1px solid rgba(216, 238, 220, 0.08);
     box-shadow: var(--ifms-shadow);
   }
 
@@ -150,9 +212,9 @@
   }
 
   .menu-active {
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.96), rgba(220, 252, 231, 0.96));
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.96), rgba(216, 238, 220, 0.96));
     color: var(--ifms-green-900);
-    box-shadow: 0 10px 24px rgba(10, 36, 24, 0.14);
+    box-shadow: 0 10px 24px rgba(8, 34, 13, 0.18);
   }
 
   .status-dot {
@@ -161,6 +223,46 @@
     border-radius: 9999px;
     display: inline-flex;
     background: var(--ifms-green-500);
-    box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.12);
+    box-shadow: 0 0 0 4px rgba(50, 160, 65, 0.16);
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: 9999px;
+    background: var(--ifms-green-50);
+    color: var(--ifms-green-800);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    border: 1px solid var(--ifms-green-100);
+  }
+
+  .ifms-bar {
+    height: 0.35rem;
+    border-radius: 9999px;
+    background: linear-gradient(
+      90deg,
+      var(--ifms-green-500) 0%,
+      var(--ifms-green-500) 60%,
+      var(--ifms-red-600) 60%,
+      var(--ifms-red-600) 100%
+    );
+  }
+
+  .container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    max-width: 1280px;
+  }
+
+  .page-shell {
+    width: 100%;
   }
 }

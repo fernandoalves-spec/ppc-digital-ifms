@@ -260,20 +260,26 @@ export default function DashboardShellLayout({ children }: { children: ReactNode
     return (
       <div className="app-shell flex min-h-screen items-center justify-center p-4">
         <div className="institutional-panel w-full max-w-xl rounded-[2rem] p-10 text-center">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[1.75rem] hero-strip shadow-2xl shadow-emerald-950/20">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[1.75rem] hero-strip shadow-2xl shadow-[rgba(8,34,13,0.28)]">
             <GraduationCap className="h-8 w-8" />
           </div>
-          <p className="mt-6 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-700">Ambiente institucional</p>
+          <p className="mt-6 text-xs font-semibold uppercase tracking-[0.35em] text-[var(--ifms-green-700)]">
+            Ambiente institucional
+          </p>
           <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-[var(--ifms-green-900)]">PPC Digital</h1>
+          <div className="mx-auto mt-3 h-1 w-24 rounded-full">
+            <div className="ifms-bar" />
+          </div>
           <p className="mt-4 text-sm leading-7 text-[var(--ifms-text-soft)]">
-            Acesse com sua conta institucional para entrar no ambiente de gestão acadêmica, análise documental e acompanhamento operacional.
+            Acesse com sua conta institucional para entrar no ambiente de gestão acadêmica do Instituto Federal de Mato
+            Grosso do Sul.
           </p>
           <Button
             onClick={() => {
               window.location.href = getLoginUrl();
             }}
             size="lg"
-            className="mt-8 h-12 w-full rounded-full bg-[var(--ifms-green-700)] text-white hover:bg-[var(--ifms-green-800)]"
+            className="mt-8 h-12 w-full rounded-full bg-[var(--ifms-green-600)] text-white hover:bg-[var(--ifms-green-700)]"
           >
             Entrar com conta institucional
           </Button>
@@ -354,9 +360,9 @@ function DashboardLayoutContent({
 
   const roleBadgeColor =
     {
-      admin: "bg-rose-50 text-rose-700 border border-rose-100",
-      coordinator: "bg-sky-50 text-sky-700 border border-sky-100",
-      teacher: "bg-emerald-50 text-emerald-700 border border-emerald-100",
+      admin: "bg-[var(--ifms-red-50)] text-[var(--ifms-red-700)] border border-[var(--ifms-red-100)]",
+      coordinator: "bg-[var(--ifms-green-50)] text-[var(--ifms-green-800)] border border-[var(--ifms-green-100)]",
+      teacher: "bg-[var(--ifms-green-100)] text-[var(--ifms-green-900)] border border-[var(--ifms-green-200)]",
       user: "bg-slate-50 text-slate-700 border border-slate-100",
     }[userRole] ?? "bg-slate-50 text-slate-700 border border-slate-100";
 
@@ -396,13 +402,13 @@ function DashboardLayoutContent({
                 </button>
                 {!isCollapsed && (
                   <>
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/12">
-                      <GraduationCap className="h-5 w-5" />
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--ifms-green-500)] shadow-[0_8px_20px_rgba(50,160,65,0.35)]">
+                      <GraduationCap className="h-5 w-5 text-white" />
                     </div>
                     <div className="min-w-0">
                       <p className="truncate text-base font-bold tracking-tight">PPC Digital</p>
-                      <p className="truncate text-[11px] uppercase tracking-[0.24em] text-[var(--ifms-sidebar-muted)]">
-                        Gestão acadêmica institucional
+                      <p className="truncate text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--ifms-sidebar-muted)]">
+                        IFMS
                       </p>
                     </div>
                   </>
@@ -410,14 +416,19 @@ function DashboardLayoutContent({
               </div>
 
               {!isCollapsed && (
-                <div className="mt-4 rounded-[1.35rem] bg-white/8 p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--ifms-sidebar-muted)]">
-                    Ambiente
-                  </p>
-                  <p className="mt-2 text-sm font-semibold leading-6 text-white">
-                    Plataforma para leitura, organização e acompanhamento do PPC institucional.
-                  </p>
-                </div>
+                <>
+                  <div className="mt-4 h-[3px] w-full overflow-hidden rounded-full">
+                    <div className="ifms-bar h-full w-full" />
+                  </div>
+                  <div className="mt-4 rounded-[1.35rem] bg-white/8 p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--ifms-sidebar-muted)]">
+                      Instituto Federal de MS
+                    </p>
+                    <p className="mt-2 text-sm font-semibold leading-6 text-white">
+                      Gestão institucional de Projetos Pedagógicos de Curso.
+                    </p>
+                  </div>
+                </>
               )}
             </div>
           </SidebarHeader>
@@ -448,7 +459,9 @@ function DashboardLayoutContent({
                           <div
                             className={[
                               "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",
-                              isActive ? "bg-emerald-100 text-[var(--ifms-green-800)]" : "bg-white/8 text-white",
+                              isActive
+                                ? "bg-[var(--ifms-green-500)] text-white shadow-[0_6px_14px_rgba(50,160,65,0.4)]"
+                                : "bg-white/8 text-white",
                             ].join(" ")}
                           >
                             <item.icon className="h-4 w-4" />
@@ -497,8 +510,8 @@ function DashboardLayoutContent({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-60 rounded-2xl border-[color:var(--ifms-border)]">
                 <div className="px-3 py-2">
-                  <p className="truncate text-sm font-semibold text-slate-950">{user?.name}</p>
-                  <p className="truncate text-xs text-slate-500">{user?.email}</p>
+                  <p className="truncate text-sm font-semibold text-[var(--ifms-green-900)]">{user?.name}</p>
+                  <p className="truncate text-xs text-[var(--ifms-text-soft)]">{user?.email}</p>
                   <span className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[10px] font-semibold ${roleBadgeColor}`}>
                     {roleLabel}
                   </span>
@@ -506,7 +519,7 @@ function DashboardLayoutContent({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={logout}
-                  className="cursor-pointer rounded-xl text-rose-600 focus:bg-rose-50 focus:text-rose-600"
+                  className="cursor-pointer rounded-xl text-[var(--ifms-red-600)] focus:bg-[var(--ifms-red-50)] focus:text-[var(--ifms-red-600)]"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Sair</span>
@@ -517,7 +530,7 @@ function DashboardLayoutContent({
         </Sidebar>
 
         <div
-          className={`absolute right-0 top-0 h-full w-1 cursor-col-resize transition-colors hover:bg-emerald-400/30 ${
+          className={`absolute right-0 top-0 h-full w-1 cursor-col-resize transition-colors hover:bg-[var(--ifms-green-500)]/40 ${
             isCollapsed ? "hidden" : ""
           }`}
           onMouseDown={() => {
@@ -532,7 +545,7 @@ function DashboardLayoutContent({
           {isMobile ? (
             <div className="institutional-panel sticky top-3 z-40 mb-4 flex items-center justify-between rounded-[1.6rem] px-4 py-3">
               <div className="flex items-center gap-3">
-                <SidebarTrigger className="h-10 w-10 rounded-2xl border border-emerald-100 bg-white" />
+                <SidebarTrigger className="h-10 w-10 rounded-2xl border border-[var(--ifms-green-100)] bg-white" />
                 <div>
                   <p className="text-sm font-semibold tracking-tight text-[var(--ifms-green-900)]">{currentPage.title}</p>
                   <p className="text-xs text-[var(--ifms-text-soft)]">{currentPage.badge}</p>
@@ -542,7 +555,7 @@ function DashboardLayoutContent({
               {pendingCount > 0 && (
                 <button
                   onClick={() => setLocation("/approvals")}
-                  className="relative rounded-2xl border border-emerald-100 bg-white p-2.5"
+                  className="relative rounded-2xl border border-[var(--ifms-green-100)] bg-white p-2.5"
                 >
                   <Bell className="h-5 w-5 text-[var(--ifms-green-800)]" />
                   <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--ifms-red)] px-1 text-[9px] font-bold text-white">
@@ -553,46 +566,52 @@ function DashboardLayoutContent({
             </div>
           ) : (
             <div className="institutional-panel mb-5 overflow-hidden rounded-[2rem]">
-              <div className="hero-strip px-6 py-6 md:px-8 md:py-8">
+              <div className="hero-strip relative px-6 py-6 md:px-8 md:py-8">
                 <div className="flex flex-wrap items-start justify-between gap-5">
                   <div className="max-w-3xl">
                     <div className="mb-3 flex flex-wrap items-center gap-2">
-                      <Badge className="rounded-full bg-white/12 px-3 py-1 text-white hover:bg-white/12">
+                      <Badge className="rounded-full bg-white/14 px-3 py-1 text-white hover:bg-white/14">
                         {currentPage.badge}
                       </Badge>
-                      <Badge className="rounded-full bg-emerald-100 px-3 py-1 text-[var(--ifms-green-900)] hover:bg-emerald-100">
+                      <Badge className="rounded-full bg-[var(--ifms-red)]/90 px-3 py-1 text-white hover:bg-[var(--ifms-red)]">
+                        IFMS
+                      </Badge>
+                      <Badge className="rounded-full bg-[var(--ifms-green-100)] px-3 py-1 text-[var(--ifms-green-900)] hover:bg-[var(--ifms-green-100)]">
                         {roleLabel}
                       </Badge>
                     </div>
                     <h1 className="text-3xl font-extrabold tracking-tight md:text-4xl">{currentPage.title}</h1>
-                    <p className="mt-3 max-w-2xl text-sm leading-7 text-emerald-50/88 md:text-base">
+                    <p className="mt-3 max-w-2xl text-sm leading-7 text-white/85 md:text-base">
                       {currentPage.description}
                     </p>
                   </div>
 
                   <div className="grid min-w-[280px] gap-3 sm:grid-cols-3">
-                    <div className="rounded-[1.5rem] border border-white/12 bg-white/10 p-4 backdrop-blur-sm">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-50/70">Pendências</p>
+                    <div className="rounded-[1.5rem] border border-white/14 bg-white/10 p-4 backdrop-blur-sm">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70">Pendências</p>
                       <p className="mt-3 text-3xl font-extrabold">{pendingCount}</p>
-                      <p className="mt-1 text-sm text-emerald-50/72">solicitações aguardando encaminhamento</p>
+                      <p className="mt-1 text-sm text-white/72">solicitações aguardando encaminhamento</p>
                     </div>
-                    <div className="rounded-[1.5rem] border border-white/12 bg-white/10 p-4 backdrop-blur-sm">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-50/70">Disciplinas</p>
+                    <div className="rounded-[1.5rem] border border-white/14 bg-white/10 p-4 backdrop-blur-sm">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70">Disciplinas</p>
                       <p className="mt-3 text-3xl font-extrabold">{subjectsWithoutArea}</p>
-                      <p className="mt-1 text-sm text-emerald-50/72">sem vinculação de área</p>
+                      <p className="mt-1 text-sm text-white/72">sem vinculação de área</p>
                     </div>
-                    <div className="rounded-[1.5rem] border border-white/12 bg-white/10 p-4 backdrop-blur-sm">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-50/70">Cursos</p>
+                    <div className="rounded-[1.5rem] border border-white/14 bg-white/10 p-4 backdrop-blur-sm">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70">Cursos</p>
                       <p className="mt-3 text-3xl font-extrabold">{courseCount}</p>
-                      <p className="mt-1 text-sm text-emerald-50/72">registrados na plataforma</p>
+                      <p className="mt-1 text-sm text-white/72">registrados na plataforma</p>
                     </div>
                   </div>
                 </div>
+                <div className="ifms-bar absolute inset-x-0 bottom-0" />
               </div>
 
-              <div className="grid gap-4 border-t border-[rgba(15,61,40,0.08)] bg-[rgba(255,255,255,0.92)] px-6 py-5 md:grid-cols-[1.5fr,1fr] md:px-8">
+              <div className="grid gap-4 border-t border-[rgba(15,61,24,0.08)] bg-[rgba(255,255,255,0.94)] px-6 py-5 md:grid-cols-[1.5fr,1fr] md:px-8">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--ifms-green-700)]">Leitura operacional</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--ifms-green-700)]">
+                    Leitura operacional
+                  </p>
                   <p className="mt-2 text-lg font-bold tracking-tight text-[var(--ifms-green-900)]">
                     Estrutura orientada para gestão institucional, acompanhamento contínuo e navegação por prioridades.
                   </p>
@@ -602,7 +621,7 @@ function DashboardLayoutContent({
                     <button
                       key={action.path}
                       onClick={() => setLocation(action.path)}
-                      className="flex items-center justify-between rounded-2xl border border-emerald-100 bg-emerald-50/60 px-4 py-3 text-left text-sm font-semibold text-[var(--ifms-green-900)] transition hover:bg-emerald-100/70"
+                      className="flex items-center justify-between rounded-2xl border border-[var(--ifms-green-100)] bg-[var(--ifms-green-50)] px-4 py-3 text-left text-sm font-semibold text-[var(--ifms-green-900)] transition hover:bg-[var(--ifms-green-100)]"
                     >
                       <span className="truncate pr-3">{action.label}</span>
                       <ArrowRight className="h-4 w-4 shrink-0" />
