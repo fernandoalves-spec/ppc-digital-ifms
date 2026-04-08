@@ -452,39 +452,20 @@ function DashboardLayoutContent({
                           onClick={() => setLocation(item.path)}
                           tooltip={item.label}
                           className={[
-                            "h-auto min-h-11 rounded-2xl px-3 py-3 text-left transition-all",
+                            "h-10 rounded-xl px-3 py-2 text-left transition-colors",
                             isActive
                               ? "bg-white text-slate-900 shadow-lg shadow-black/10"
                               : "text-emerald-50/85 hover:bg-white/8 hover:text-white",
                           ].join(" ")}
                         >
-                          <item.icon className={`mt-0.5 h-4 w-4 shrink-0 ${isActive ? "text-emerald-700" : ""}`} />
-                          {!isCollapsed ? (
-                            <div className="flex min-w-0 flex-1 items-start gap-3">
-                              <div className="min-w-0 flex-1">
-                                <p className="truncate text-sm font-medium">{item.label}</p>
-                                <p
-                                  className={`mt-1 line-clamp-2 text-xs leading-5 ${
-                                    isActive ? "text-slate-500" : "text-emerald-50/55"
-                                  }`}
-                                >
-                                  {item.description}
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {showBadge && (
-                                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1.5 text-[10px] font-bold text-white">
-                                    {pendingCount > 9 ? "9+" : pendingCount}
-                                  </span>
-                                )}
-                                {isActive && <ChevronRight className="h-3.5 w-3.5 shrink-0 text-emerald-600" />}
-                              </div>
-                            </div>
-                          ) : showBadge ? (
-                            <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
+                          <item.icon className={`h-4 w-4 shrink-0 ${isActive ? "text-emerald-700" : ""}`} />
+                          {!isCollapsed && <span className="flex-1 truncate text-sm font-medium">{item.label}</span>}
+                          {showBadge && (
+                            <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1.5 text-[10px] font-bold text-white">
                               {pendingCount > 9 ? "9+" : pendingCount}
                             </span>
-                          ) : null}
+                          )}
+                          {!isCollapsed && isActive && <ChevronRight className="h-3.5 w-3.5 shrink-0 text-emerald-600" />}
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     );
