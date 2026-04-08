@@ -316,12 +316,3 @@ class SDKServer {
 
 export const createSdk = (client?: AxiosInstance): SDKServer =>
   new SDKServer(client ?? createOAuthHttpClient());
-
-let sdkInstance: SDKServer | null = null;
-
-export const getSdk = (): SDKServer => {
-  if (!sdkInstance) {
-    sdkInstance = createSdk();
-  }
-  return sdkInstance;
-};

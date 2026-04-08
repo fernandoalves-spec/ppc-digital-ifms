@@ -19,8 +19,8 @@ export function registerOAuthRoutes(app: Express) {
     }
 
     try {
-      const { getSdk } = await import("./sdk");
-      const sdk = getSdk();
+      const { createSdk } = await import("./sdk");
+      const sdk = createSdk();
       const tokenResponse = await sdk.exchangeCodeForToken(code, state);
       const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
 

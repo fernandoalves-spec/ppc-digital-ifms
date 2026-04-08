@@ -23,8 +23,8 @@ export async function createContext(
       // Modo Manus OAuth (plataforma Manus)
       // Carrega o SDK apenas neste ramo para evitar efeitos colaterais
       // quando estamos em modo Google OAuth.
-      const { getSdk } = await import("./sdk");
-      const sdk = getSdk();
+      const { createSdk } = await import("./sdk");
+      const sdk = createSdk();
       user = await sdk.authenticateRequest(opts.req);
     }
   } catch (error) {
