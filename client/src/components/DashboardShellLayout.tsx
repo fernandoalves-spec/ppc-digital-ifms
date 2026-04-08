@@ -1,5 +1,8 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import BrandMark from "@/components/BrandMark";
+import EmptyStateInstitutional from "@/components/layout/EmptyStateInstitutional";
+import PageHeader from "@/components/layout/PageHeader";
+import StatCard from "@/components/layout/StatCard";
 import PageContainer from "@/components/PageContainer";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -20,11 +23,13 @@ import {
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
+  SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { getPageMeta } from "@/config/pageMeta";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
 import { trpc } from "@/lib/trpc";
@@ -46,12 +51,12 @@ import {
   Upload,
   Users,
 } from "lucide-react";
-import { CSSProperties, ReactNode, useMemo } from "react";
+import { CSSProperties, ElementType, ReactNode, useMemo } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 
 type MenuItem = {
-  icon: React.ElementType;
+  icon: ElementType;
   label: string;
   path: string;
   roles?: string[];
@@ -101,81 +106,6 @@ const menuGroups: MenuGroup[] = [
   },
 ];
 
-const pageMeta = [
-  {
-    match: (path: string) => path === "/" || path === "/dashboard",
-    title: "Dashboard institucional",
-    description: "Panorama operacional de cursos, pendencias e fluxo academico.",
-    badge: "Painel",
-  },
-  {
-    match: (path: string) => path.startsWith("/courses"),
-    title: "Cursos",
-    description: "Consulta e gestao dos PPCs e estruturas curriculares.",
-    badge: "Gestao academica",
-  },
-  {
-    match: (path: string) => path.startsWith("/subjects"),
-    title: "Disciplinas",
-    description: "Base curricular institucional e vinculacao por area.",
-    badge: "Gestao academica",
-  },
-  {
-    match: (path: string) => path.startsWith("/areas"),
-    title: "Areas de ensino",
-    description: "Distribuicao de responsabilidades academicas por area.",
-    badge: "Gestao academica",
-  },
-  {
-    match: (path: string) => path.startsWith("/campus"),
-    title: "Campus",
-    description: "Gestao das unidades institucionais do IFMS.",
-    badge: "Gestao academica",
-  },
-  {
-    match: (path: string) => path.startsWith("/ppc-upload"),
-    title: "Upload de PPC",
-    description: "Entrada de documentos com extracao estruturada.",
-    badge: "Fluxo operacional",
-  },
-  {
-    match: (path: string) => path.startsWith("/approvals"),
-    title: "Solicitacoes",
-    description: "Acompanhamento de pendencias e aprovacoes institucionais.",
-    badge: "Fluxo operacional",
-  },
-  {
-    match: (path: string) => path.startsWith("/offerings"),
-    title: "Quadro de oferta",
-    description: "Consolidacao de turmas, cargas e distribuicao por area.",
-    badge: "Fluxo operacional",
-  },
-  {
-    match: (path: string) => path.startsWith("/reports"),
-    title: "Relatorios",
-    description: "Leitura analitica para acompanhamento e decisao.",
-    badge: "Analises",
-  },
-  {
-    match: (path: string) => path.startsWith("/memory-calc"),
-    title: "Memoria de calculo",
-    description: "Parametros operacionais e memoria auxiliar.",
-    badge: "Analises",
-  },
-  {
-    match: (path: string) => path.startsWith("/users"),
-    title: "Usuarios",
-    description: "Perfis, permissoes e controles de acesso.",
-    badge: "Governanca",
-  },
-  {
-    match: (path: string) => path.startsWith("/audit"),
-    title: "Auditoria",
-    description: "Rastreabilidade completa de eventos do sistema.",
-    badge: "Governanca",
-  },
-];
-
 export default function DashboardShellLayout({ children }: { children: ReactNode }) {
   const { loading, user } = useAuth();
 
@@ -207,6 +137,12 @@ export default function DashboardShellLayout({ children }: { children: ReactNode
 
   return (
     <div className="app-shell">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-[var(--ifms-green-900)]"
+      >
+        Ir para o conteudo principal
+      </a>
       <SidebarProvider style={{ "--sidebar-width": "18rem" } as CSSProperties}>
         <DashboardLayoutContent>{children}</DashboardLayoutContent>
       </SidebarProvider>
@@ -243,7 +179,7 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
     { admin: "Administrador", coordinator: "Coordenador", teacher: "Docente", user: "Usuario" }[userRole] ??
     "Usuario";
 
-  const currentPage = pageMeta.find(entry => entry.match(location)) ?? pageMeta[0];
+  const currentPage = getPageMeta(location);
 
   const quickActions = useMemo(
     () =>
@@ -260,6 +196,8 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
     <>
       <Sidebar
         collapsible="icon"
+        role="navigation"
+        aria-label="Menu principal do sistema"
         className="border-r border-white/10 bg-[image:var(--ifms-sidebar)] text-[var(--ifms-sidebar-foreground)]"
       >
         <SidebarHeader className="border-b border-white/10 p-3">
@@ -268,6 +206,8 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
               <button
                 onClick={toggleSidebar}
                 className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white transition hover:bg-white/20"
+                aria-label={isCollapsed ? "Expandir menu" : "Recolher menu"}
+                aria-expanded={!isCollapsed}
               >
                 <Menu className="h-4 w-4" />
               </button>
@@ -294,13 +234,16 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
 
                   return (
                     <SidebarMenuItem key={item.path}>
-                      <button
+                      <SidebarMenuButton
                         onClick={() => setLocation(item.path)}
-                        title={item.label}
+                        tooltip={item.label}
+                        isActive={active}
+                        aria-current={active ? "page" : undefined}
+                        aria-label={`Abrir ${item.label}`}
                         className={[
-                          "flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition",
+                          "h-auto min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2 text-left",
                           active
-                            ? "bg-white text-[var(--ifms-green-900)] shadow-sm"
+                            ? "bg-white text-[var(--ifms-green-900)]"
                             : "text-white/90 hover:bg-white/10 hover:text-white",
                         ].join(" ")}
                       >
@@ -318,7 +261,7 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
                             {pendingCount > 9 ? "9+" : pendingCount}
                           </span>
                         )}
-                      </button>
+                      </SidebarMenuButton>
                     </SidebarMenuItem>
                   );
                 })}
@@ -330,7 +273,10 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
         <SidebarFooter className="border-t border-white/10 p-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-left hover:bg-white/10">
+              <button
+                className="flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-left hover:bg-white/10"
+                aria-label="Abrir menu do perfil"
+              >
                 <Avatar className="h-9 w-9 border border-white/10">
                   <AvatarFallback className="bg-white/10 text-sm font-semibold text-white">
                     {user?.name?.charAt(0).toUpperCase() ?? "U"}
@@ -365,7 +311,7 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
       <SidebarInset className="bg-transparent">
         <div className="mx-auto flex min-h-screen w-full max-w-[1500px] flex-col px-3 pb-4 pt-3 md:px-5 md:pb-6 md:pt-5">
           {isMobile ? (
-            <div className="mb-4 flex items-center justify-between rounded-2xl border border-[var(--ifms-green-100)] bg-white px-3 py-2.5 shadow-[var(--ifms-shadow-soft)]">
+            <header className="mb-4 flex items-center justify-between rounded-2xl border border-[var(--ifms-green-100)] bg-white px-3 py-2.5 shadow-[var(--ifms-shadow-soft)]">
               <div className="flex items-center gap-2">
                 <SidebarTrigger className="h-9 w-9 rounded-xl border border-[var(--ifms-green-100)] bg-white" />
                 <div>
@@ -377,6 +323,7 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
                 <button
                   onClick={() => setLocation("/approvals")}
                   className="relative inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--ifms-green-100)] bg-white"
+                  aria-label="Abrir pendencias"
                 >
                   <Bell className="h-4 w-4 text-[var(--ifms-green-900)]" />
                   <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--ifms-red)] px-1 text-[9px] font-bold text-white">
@@ -384,66 +331,51 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
                   </span>
                 </button>
               )}
-            </div>
+            </header>
           ) : (
-            <section className="mb-5 overflow-hidden rounded-3xl border border-[var(--ifms-green-100)] bg-white">
-              <div className="hero-strip px-5 py-5 md:px-7 md:py-6">
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div className="max-w-3xl text-white">
-                    <div className="mb-3 flex items-center gap-2">
-                      <Badge className="rounded-full bg-white/15 px-3 py-1 text-white hover:bg-white/15">
-                        {currentPage.badge}
-                      </Badge>
-                      <Badge className="rounded-full bg-[var(--ifms-red)]/95 px-3 py-1 text-white hover:bg-[var(--ifms-red)]/95">
-                        IFMS
-                      </Badge>
-                    </div>
-                    <h1 className="text-3xl font-extrabold tracking-tight">{currentPage.title}</h1>
-                    <p className="mt-2 text-sm leading-7 text-white/85 md:text-base">{currentPage.description}</p>
-                  </div>
+            <section className="mb-5 space-y-3">
+              <PageHeader
+                badge={currentPage.badge}
+                title={currentPage.title}
+                description={currentPage.description}
+                className="hero-strip border-none text-white shadow-none"
+                titleClassName="text-3xl font-extrabold tracking-tight text-white"
+              />
 
-                  <div className="grid min-w-[280px] gap-3 sm:grid-cols-3">
-                    <InfoStat label="Pendencias" value={pendingCount} />
-                    <InfoStat label="Sem area" value={subjectsWithoutArea} />
-                    <InfoStat label="Cursos" value={totalCourses} />
-                  </div>
-                </div>
+              <div className="page-grid md:grid-cols-3">
+                <StatCard label="Pendencias" value={pendingCount} tone={pendingCount > 0 ? "danger" : "default"} />
+                <StatCard label="Sem area" value={subjectsWithoutArea} tone={subjectsWithoutArea > 0 ? "danger" : "default"} />
+                <StatCard label="Cursos" value={totalCourses} />
               </div>
 
-              <div className="grid gap-3 border-t border-[var(--ifms-green-100)] bg-[var(--ifms-green-50)] px-5 py-4 md:grid-cols-2 md:px-7">
-                <p className="text-sm text-[var(--ifms-green-900)]">
-                  Fluxo orientado por prioridade institucional, com navegacao simplificada para equipe academica.
-                </p>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {quickActions.slice(0, 4).map(action => (
-                    <button
-                      key={action.path}
-                      onClick={() => setLocation(action.path)}
-                      className="flex items-center justify-between rounded-xl border border-[var(--ifms-green-100)] bg-white px-3 py-2 text-left text-sm font-medium text-[var(--ifms-green-900)] hover:bg-[var(--ifms-green-50)]"
-                    >
-                      <span className="truncate pr-2">{action.label}</span>
-                      <ArrowRight className="h-4 w-4 shrink-0" />
-                    </button>
-                  ))}
-                </div>
+              <div className="grid gap-2 rounded-2xl border border-[var(--ifms-green-100)] bg-white px-4 py-3 md:grid-cols-4">
+                {quickActions.map(action => (
+                  <button
+                    key={action.path}
+                    onClick={() => setLocation(action.path)}
+                    aria-label={action.label}
+                    className="flex items-center justify-between rounded-xl border border-[var(--ifms-green-100)] bg-[var(--ifms-green-50)] px-3 py-2 text-left text-sm font-medium text-[var(--ifms-green-900)] hover:bg-white"
+                  >
+                    <span className="truncate pr-2">{action.label}</span>
+                    <ArrowRight className="h-4 w-4 shrink-0" />
+                  </button>
+                ))}
               </div>
             </section>
           )}
 
-          <main className="flex-1">
-            <PageContainer className="p-0">{children}</PageContainer>
+          <main id="main-content" className="flex-1" role="main">
+            <PageContainer className="p-0">
+              {children ?? (
+                <EmptyStateInstitutional
+                  title={currentPage.emptyStateTitle}
+                  description={currentPage.emptyStateDescription}
+                />
+              )}
+            </PageContainer>
           </main>
         </div>
       </SidebarInset>
     </>
-  );
-}
-
-function InfoStat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-xl border border-white/25 bg-white/10 p-3 text-white backdrop-blur-sm">
-      <p className="text-[11px] uppercase tracking-[0.22em] text-white/75">{label}</p>
-      <p className="mt-2 text-2xl font-bold tracking-tight">{value}</p>
-    </div>
   );
 }
