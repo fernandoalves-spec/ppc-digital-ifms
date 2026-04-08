@@ -5,6 +5,8 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import session from "express-session";
+import { RedisStore } from "connect-redis";
+import { createClient, type RedisClientType } from "redis";
 import type { Express, Request, Response, NextFunction } from "express";
 import * as db from "../db";
 
@@ -12,6 +14,46 @@ const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID ?? "";
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET ?? "";
 const SESSION_SECRET = process.env.JWT_SECRET ?? "ppc-digital-ifms-secret-change-me";
 const APP_URL = (process.env.APP_URL ?? "http://localhost:3000").replace(/\/$/, ""); // remove trailing slash
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+const SESSION_MAX_AGE_MS = 365 * 24 * 60 * 60 * 1000; // 1 ano
+const SESSION_TTL_SECONDS = Math.floor(SESSION_MAX_AGE_MS / 1000);
+const REDIS_URL = process.env.REDIS_URL ?? "";
+const REDIS_USERNAME = process.env.REDIS_USERNAME ?? "";
+const REDIS_PASSWORD = process.env.REDIS_PASSWORD ?? "";
+
+let redisClient: RedisClientType | null = null;
+
+function getSessionStore() {
+  if (!REDIS_URL) {
+    if (IS_PRODUCTION) {
+      throw new Error(
+        "[GoogleAuth] REDIS_URL é obrigatório em produção para persistência de sessão. Configure REDIS_URL (e opcionalmente REDIS_USERNAME/REDIS_PASSWORD)."
+      );
+    }
+    console.warn("[GoogleAuth] REDIS_URL não configurado. Usando MemoryStore apenas para desenvolvimento.");
+    return undefined;
+  }
+
+  if (!redisClient) {
+    redisClient = createClient({
+      url: REDIS_URL,
+      username: REDIS_USERNAME || undefined,
+      password: REDIS_PASSWORD || undefined,
+    });
+    redisClient.on("error", (err) => {
+      console.error("[GoogleAuth] ❌ Erro no cliente Redis:", err);
+    });
+    redisClient.connect().catch((err) => {
+      console.error("[GoogleAuth] ❌ Falha ao conectar no Redis:", err);
+    });
+  }
+
+  return new RedisStore({
+    client: redisClient,
+    ttl: SESSION_TTL_SECONDS,
+    prefix: "sess:",
+  });
+}
 
 export function setupGoogleAuth(app: Express) {
   console.log(`[GoogleAuth] Configurando com APP_URL: ${APP_URL}`);
@@ -21,14 +63,15 @@ export function setupGoogleAuth(app: Express) {
   app.use(
     session({
       secret: SESSION_SECRET,
+      store: getSessionStore(),
       resave: false,
       saveUninitialized: false,
       proxy: true, // necessário para Railway (proxy reverso)
       cookie: {
-        secure: process.env.NODE_ENV === "production",
+        secure: IS_PRODUCTION,
         httpOnly: true,
-        maxAge: 365 * 24 * 60 * 60 * 1000, // 1 ano
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        maxAge: SESSION_MAX_AGE_MS,
+        sameSite: IS_PRODUCTION ? "none" : "lax",
       },
     })
   );
