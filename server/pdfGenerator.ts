@@ -1,4 +1,5 @@
 import PDFDocument from "pdfkit";
+import { ifmsColorTokens, ifmsExportPalette, ifmsTypographyTokens } from "../shared/branding/ifmsTokens";
 
 interface ReportData {
   title: string;
@@ -27,9 +28,9 @@ export async function generateReportPdf(data: ReportData): Promise<Buffer> {
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
 
-    const GREEN = "#16a34a";
+    const GREEN = ifmsExportPalette.headerBackground;
     const BLUE = "#1d4ed8";
-    const DARK = "#1e293b";
+    const DARK = ifmsExportPalette.text;
     const GRAY = "#64748b";
     const LIGHT_GRAY = "#f1f5f9";
     const WHITE = "#ffffff";
@@ -38,7 +39,7 @@ export async function generateReportPdf(data: ReportData): Promise<Buffer> {
     // ── Header ──────────────────────────────────────────────────────────────
     doc.rect(0, 0, doc.page.width, 80).fill(GREEN);
     doc.fillColor(WHITE).fontSize(20).font("Helvetica-Bold").text("PPC Digital IFMS", 50, 20);
-    doc.fontSize(10).font("Helvetica").text("Instituto Federal de Mato Grosso do Sul", 50, 45);
+    doc.fontSize(10).font("Helvetica").text(`Instituto Federal de Mato Grosso do Sul — ${ifmsTypographyTokens.primaryFamily}`, 50, 45);
     doc.fillColor(WHITE).fontSize(8).text(`Gerado em: ${data.generatedAt}`, doc.page.width - 200, 55, { width: 150, align: "right" });
 
     // ── Title ────────────────────────────────────────────────────────────────
@@ -145,8 +146,8 @@ export async function generateMemoryPdf(opts: {
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
 
-    const GREEN = "#16a34a";
-    const DARK = "#1e293b";
+    const GREEN = ifmsExportPalette.headerBackground;
+    const DARK = ifmsExportPalette.text;
     const GRAY = "#64748b";
     const LIGHT = "#f1f5f9";
     const WHITE = "#ffffff";
@@ -200,7 +201,7 @@ export async function generateMemoryPdf(opts: {
           let x = 48;
           checkPage(22);
           for (const s of campus.semesterSummary) {
-            const semColor = s.calendarSemester === 1 ? BLUE : "#7c3aed";
+            const semColor = s.calendarSemester === 1 ? BLUE : ifmsColorTokens.red.hex;
             doc.rect(x, y, colW - 2, 22).fill(semColor);
             doc.fillColor(WHITE).fontSize(7).font("Helvetica-Bold")
               .text(s.label, x + 2, y + 3, { width: colW - 6, align: "center" });
@@ -261,7 +262,7 @@ export async function generateMemoryPdf(opts: {
             // 2º semestre do ano
             if (off.subjects2nd.length > 0) {
               checkPage(20);
-              doc.rect(40, y, PAGE_W, 14).fill("#7c3aed");
+              doc.rect(40, y, PAGE_W, 14).fill(ifmsColorTokens.red.hex);
               doc.fillColor(WHITE).fontSize(8).font("Helvetica-Bold")
                 .text(`2º Sem. do Ano — ${off.courseSemester2nd}º Sem. do Curso — ${off.secondHalfClasses} aulas/sem`, 48, y + 3, { width: PAGE_W - 16 });
               y += 16;

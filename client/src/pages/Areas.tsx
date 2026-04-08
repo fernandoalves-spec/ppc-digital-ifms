@@ -8,8 +8,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Layers, Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { ifmsColorTokens } from "@shared/branding/ifmsTokens";
 
-const PRESET_COLORS = ["#16a34a","#2563eb","#d97706","#9333ea","#dc2626","#0891b2","#65a30d","#c026d3","#ea580c","#0d9488"];
+const PRESET_COLORS = [ifmsColorTokens.green.hex, "#2563eb", "#d97706", "#9333ea", ifmsColorTokens.red.hex, "#0891b2", "#65a30d", "#c026d3", "#ea580c", "#0d9488"];
+const DEFAULT_AREA_COLOR = ifmsColorTokens.green.hex;
 
 export default function AreasPage() {
   const utils = trpc.useUtils();
@@ -29,9 +31,9 @@ export default function AreasPage() {
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [form, setForm] = useState({ name: "", description: "", color: "#16a34a" });
+  const [form, setForm] = useState({ name: "", description: "", color: DEFAULT_AREA_COLOR });
 
-  const resetForm = () => setForm({ name: "", description: "", color: "#16a34a" });
+  const resetForm = () => setForm({ name: "", description: "", color: DEFAULT_AREA_COLOR });
 
   const handleSubmit = () => {
     if (!form.name.trim()) return toast.error("Nome da área é obrigatório.");
@@ -43,7 +45,7 @@ export default function AreasPage() {
   };
 
   const handleEdit = (area: any) => {
-    setForm({ name: area.name, description: area.description ?? "", color: area.color ?? "#16a34a" });
+    setForm({ name: area.name, description: area.description ?? "", color: area.color ?? DEFAULT_AREA_COLOR });
     setEditingId(area.id);
     setShowForm(true);
   };
@@ -78,11 +80,11 @@ export default function AreasPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {areas.map((area) => (
             <Card key={area.id} className="border-slate-100 hover:shadow-md transition-all overflow-hidden">
-              <div className="h-1.5" style={{ backgroundColor: area.color ?? "#3B82F6" }} />
+              <div className="h-1.5" style={{ backgroundColor: area.color ?? DEFAULT_AREA_COLOR }} />
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${area.color}20` }}>
-                    <Layers className="w-4 h-4" style={{ color: area.color ?? "#3B82F6" }} />
+                    <Layers className="w-4 h-4" style={{ color: area.color ?? DEFAULT_AREA_COLOR }} />
                   </div>
                   <div className="flex gap-1">
                     <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-blue-600" onClick={() => handleEdit(area)}>
