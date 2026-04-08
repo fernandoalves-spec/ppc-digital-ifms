@@ -1,6 +1,5 @@
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 import type { User } from "../../drizzle/schema";
-import { sdk } from "./sdk";
 
 export type TrpcContext = {
   req: CreateExpressContextOptions["req"];
@@ -22,6 +21,8 @@ export async function createContext(
       }
     } else {
       // Modo Manus OAuth (plataforma Manus)
+      const { getSdk } = await import("./sdk");
+      const sdk = getSdk();
       user = await sdk.authenticateRequest(opts.req);
     }
   } catch (error) {
