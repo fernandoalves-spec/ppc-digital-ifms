@@ -7,8 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { FileText, Download, BarChart2, Layers, GraduationCap, Clock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { ifmsColorTokens } from "@shared/branding/ifmsTokens";
 
-const COLORS = ["#16a34a","#2563eb","#d97706","#9333ea","#dc2626","#0891b2","#65a30d","#c026d3"];
+const COLORS = [ifmsColorTokens.green.hex, "#2563eb", "#d97706", "#9333ea", ifmsColorTokens.red.hex, "#0891b2", "#65a30d", "#c026d3"];
 
 type ReportType = "by_area" | "by_semester" | "by_course" | "by_campus";
 

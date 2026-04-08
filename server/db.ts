@@ -14,6 +14,7 @@ import {
   userCourseRoles,
   users,
 } from "../drizzle/schema";
+import { ifmsColorTokens } from "../shared/branding/ifmsTokens";
 import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -486,7 +487,7 @@ export async function getClassesByArea(campusId?: number) {
     result.push({
       areaId: area.id,
       areaName: area.name,
-      color: area.color ?? "#3B82F6",
+      color: area.color ?? ifmsColorTokens.green.hex,
       totalWeeklyClasses: areaSubjects.reduce((sum, s) => sum + s.weeklyClasses, 0),
       subjectCount: areaSubjects.length,
     });
@@ -571,7 +572,7 @@ export async function getReportData(filters: { areaId?: number; campusId?: numbe
       subjects: courseSubjects.map((s) => ({
         ...s,
         areaName: s.areaId ? (areaMap.get(s.areaId)?.name ?? "Sem área") : "Sem área",
-        areaColor: s.areaId ? (areaMap.get(s.areaId)?.color ?? "#94a3b8") : "#94a3b8",
+        areaColor: s.areaId ? (areaMap.get(s.areaId)?.color ?? ifmsColorTokens.green.hex) : ifmsColorTokens.green.hex,
       })),
     };
   }).filter((c) => c.total > 0);
@@ -734,7 +735,7 @@ export async function getClassesByAreaFromOfferings() {
   const result = Array.from(areaClasses.entries()).map(([areaId, data]) => ({
     areaId,
     areaName: areaMap.get(areaId)?.name ?? "Desconhecida",
-    color: areaMap.get(areaId)?.color ?? "#94a3b8",
+    color: areaMap.get(areaId)?.color ?? ifmsColorTokens.green.hex,
     totalWeeklyClasses: data.totalWeeklyClasses,
     subjectCount: data.subjectCount,
   }));
@@ -743,7 +744,7 @@ export async function getClassesByAreaFromOfferings() {
     result.push({
       areaId: 0,
       areaName: "Sem Área Definida",
-      color: "#94a3b8",
+      color: ifmsColorTokens.green.hex,
       totalWeeklyClasses: noAreaClasses,
       subjectCount: noAreaCount,
     });

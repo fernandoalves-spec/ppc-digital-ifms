@@ -12,8 +12,9 @@ import {
   TrendingUp, ArrowRight
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { ifmsColorTokens } from "@shared/branding/ifmsTokens";
 
-const COLORS = ["#16a34a", "#2563eb", "#d97706", "#9333ea", "#dc2626", "#0891b2", "#65a30d", "#c026d3"];
+const COLORS = [ifmsColorTokens.green.hex, "#2563eb", "#d97706", "#9333ea", ifmsColorTokens.red.hex, "#0891b2", "#65a30d", "#c026d3"];
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -145,7 +146,7 @@ export default function Dashboard() {
                         formatter={(v: number) => [`${v} aulas/sem`, "Total"]}
                         labelFormatter={(l) => `${l}º Semestre`}
                       />
-                      <Bar dataKey="totalClasses" fill="#16a34a" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="totalClasses" fill={ifmsColorTokens.green.hex} radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
