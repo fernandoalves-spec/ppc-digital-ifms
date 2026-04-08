@@ -2,14 +2,17 @@ import { GoogleGenAI } from "@google/genai";
 import { ENV } from "./env";
 
 let client: GoogleGenAI | null = null;
+let cachedApiKey: string | null = null;
 
 function getClient(): GoogleGenAI {
-  if (!ENV.geminiApiKey) {
+  const runtimeApiKey = process.env.GEMINI_API_KEY ?? ENV.geminiApiKey;
+  if (!runtimeApiKey) {
     throw new Error("GEMINI_API_KEY is not configured.");
   }
 
-  if (!client) {
-    client = new GoogleGenAI({ apiKey: ENV.geminiApiKey });
+  if (!client || cachedApiKey !== runtimeApiKey) {
+    client = new GoogleGenAI({ apiKey: runtimeApiKey });
+    cachedApiKey = runtimeApiKey;
   }
 
   return client;
@@ -41,8 +44,41 @@ function parseGeminiJson(text: string): unknown {
   }
 }
 
+function getResponseText(response: unknown): string {
+  if (!response || typeof response !== "object") {
+    throw new Error("Gemini returned an invalid response object.");
+  }
+
+  const textLike = (response as { text?: unknown }).text;
+  if (typeof textLike === "string" && textLike.trim().length > 0) {
+    return textLike;
+  }
+  if (typeof textLike === "function") {
+    const value = textLike();
+    if (typeof value === "string" && value.trim().length > 0) {
+      return value;
+    }
+  }
+
+  const candidateText = (response as { candidates?: unknown[] }).candidates
+    ?.flatMap((candidate) =>
+      typeof candidate === "object" && candidate
+        ? ((candidate as { content?: { parts?: Array<{ text?: unknown }> } }).content?.parts ?? [])
+        : [],
+    )
+    .map((part) => (typeof part.text === "string" ? part.text : ""))
+    .join("\n")
+    .trim();
+
+  if (candidateText) {
+    return candidateText;
+  }
+
+  throw new Error("Gemini returned an empty text response.");
+}
+
 export function isGeminiAvailable(): boolean {
-  return Boolean(ENV.geminiApiKey);
+  return Boolean(process.env.GEMINI_API_KEY ?? ENV.geminiApiKey);
 }
 
 export async function extractPdfWithGemini(params: {
@@ -95,10 +131,7 @@ export async function extractPdfWithGemini(params: {
       ],
     });
 
-    const text = response.text;
-    if (!text) {
-      throw new Error("Gemini returned an empty response.");
-    }
+    const text = getResponseText(response);
 
     try {
       return parseGeminiJson(text);
