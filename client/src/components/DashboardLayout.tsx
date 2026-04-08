@@ -28,6 +28,7 @@ import { useIsMobile } from "@/hooks/useMobile";
 import { trpc } from "@/lib/trpc";
 import {
   Bell,
+  Blend,
   BookOpen,
   Building2,
   Calculator,
@@ -102,6 +103,12 @@ const menuGroups: MenuGroup[] = [
     items: [
       { icon: FileText, label: "Relatórios", path: "/reports" },
       { icon: Calculator, label: "Memória de Cálculo", path: "/memory-calc" },
+    ],
+  },
+  {
+    label: "Identidade Visual",
+    items: [
+      { icon: Blend, label: "Compositor de Marcas", path: "/brand-composer", roles: ["admin", "coordinator"] },
     ],
   },
   {

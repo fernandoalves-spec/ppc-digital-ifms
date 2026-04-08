@@ -18,6 +18,7 @@ import UsersPage from "./pages/Users";
 import AuditPage from "./pages/Audit";
 import OfferingsPage from "./pages/Offerings";
 import MemoryCalcPage from "./pages/MemoryCalc";
+import BrandComposerPage from "./pages/BrandComposer";
 
 function Router() {
   return (
@@ -36,6 +37,7 @@ function Router() {
         <Route path="/offerings" component={OfferingsPage} />
         <Route path="/memory-calc" component={MemoryCalcPage} />
         <Route path="/audit" component={AuditPage} />
+        <Route path="/brand-composer" component={BrandComposerPage} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>
