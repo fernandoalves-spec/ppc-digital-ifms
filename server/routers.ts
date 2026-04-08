@@ -61,6 +61,7 @@ import { invokeLLM } from "./_core/llm";
 import { extractPdfWithGemini, isGeminiAvailable } from "./_core/gemini";
 import { storagePut } from "./storage";
 import { nanoid } from "nanoid";
+import { validateBrandPolicyIfms } from "./domain/branding/ifmsPolicy";
 
 // ─── Middleware de Role ───────────────────────────────────────────────────────
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -801,6 +802,27 @@ const offeringsRouter = router({
   classesBySemester: protectedProcedure.query(() => getClassesBySemesterFromOfferings()),
 });
 
+const brandingRouter = router({
+  validateIfms: publicProcedure
+    .input(z.object({
+      medium: z.enum(["digital", "print"]),
+      integrityAreaX: z.number(),
+      widthPx: z.number().optional(),
+      widthCm: z.number().optional(),
+      typography: z.string(),
+      orientation: z.enum(["horizontal", "vertical"]),
+      lockup: z.enum(["symbol-left-text-right", "symbol-top-text-bottom"]),
+      backgroundComplex: z.boolean(),
+      hasWhiteBase: z.boolean(),
+      hasDistortion: z.boolean(),
+      hasColorChange: z.boolean(),
+      hasOutline: z.boolean(),
+      hasFrame: z.boolean(),
+      hasReorganization: z.boolean(),
+    }))
+    .query(({ input }) => validateBrandPolicyIfms(input)),
+});
+
 // ─── App Router ─────────────────────────────────────────────────────────────────────
 export const appRouter = router({
   system: systemRouter,
@@ -835,6 +857,7 @@ export const appRouter = router({
   audit: auditRouter,
   users: usersRouter,
   offerings: offeringsRouter,
+  branding: brandingRouter,
 });
 
 export type AppRouter = typeof appRouter;
