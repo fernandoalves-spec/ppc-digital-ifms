@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,13 +10,13 @@ import { GraduationCap, Plus, Pencil, Trash2, ChevronRight } from "lucide-react"
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 
-const COURSE_TYPES = ["Técnico", "Subsequente", "Graduação", "FIC", "Pós-graduação"] as const;
+const COURSE_TYPES = ["Tecnico", "Subsequente", "Graduacao", "FIC", "Pos-graduacao"] as const;
 const TYPE_COLORS: Record<string, string> = {
-  "Técnico": "bg-blue-100 text-blue-700",
+  "Tecnico": "bg-blue-100 text-blue-700",
   "Subsequente": "bg-purple-100 text-purple-700",
-  "Graduação": "bg-green-100 text-green-700",
+  "Graduacao": "bg-green-100 text-green-700",
   "FIC": "bg-amber-100 text-amber-700",
-  "Pós-graduação": "bg-red-100 text-red-700",
+  "Pos-graduacao": "bg-red-100 text-red-700",
 };
 
 type FormState = {
@@ -30,7 +29,7 @@ type FormState = {
 };
 
 const EMPTY_FORM: FormState = {
-  name: "", type: "Técnico", campusId: "", duration: "6",
+  name: "", type: "Tecnico", campusId: "", duration: "6",
   classesFirstHalfYear: "1", classesSecondHalfYear: "0",
 };
 
@@ -41,28 +40,18 @@ export default function CoursesPage() {
   const { data: courses = [], isLoading } = trpc.courses.list.useQuery({});
 
   const createMutation = trpc.courses.create.useMutation({
-    onSuccess: () => {
-      utils.courses.list.invalidate();
-      toast.success("Curso criado!");
-      setShowForm(false);
-      setForm(EMPTY_FORM);
-    },
-    onError: (e) => toast.error(e.message),
+    onSuccess: () => { utils.courses.list.invalidate(); toast.success("Curso criado!"); setShowForm(false); setForm(EMPTY_FORM); },
+    onError: e => toast.error(e.message),
   });
 
   const updateMutation = trpc.courses.update.useMutation({
-    onSuccess: () => {
-      utils.courses.list.invalidate();
-      toast.success("Curso atualizado!");
-      setEditingId(null);
-      setForm(EMPTY_FORM);
-    },
-    onError: (e) => toast.error(e.message),
+    onSuccess: () => { utils.courses.list.invalidate(); toast.success("Curso atualizado!"); setEditingId(null); setForm(EMPTY_FORM); },
+    onError: e => toast.error(e.message),
   });
 
   const deleteMutation = trpc.courses.delete.useMutation({
     onSuccess: () => { utils.courses.list.invalidate(); toast.success("Curso removido."); },
-    onError: (e) => toast.error(e.message),
+    onError: e => toast.error(e.message),
   });
 
   const [showForm, setShowForm] = useState(false);
@@ -71,19 +60,15 @@ export default function CoursesPage() {
   const [filterType, setFilterType] = useState<string>("all");
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
 
-  const campusMap = new Map(campuses.map((c) => [c.id, c.name]));
+  const campusMap = new Map(campuses.map(c => [c.id, c.name]));
 
-  const filtered = courses.filter((c) => {
+  const filtered = courses.filter(c => {
     if (filterCampus !== "all" && c.campusId !== Number(filterCampus)) return false;
     if (filterType !== "all" && c.type !== filterType) return false;
     return true;
   });
 
-  const openCreate = () => {
-    setEditingId(null);
-    setForm(EMPTY_FORM);
-    setShowForm(true);
-  };
+  const openCreate = () => { setEditingId(null); setForm(EMPTY_FORM); setShowForm(true); };
 
   const openEdit = (course: typeof courses[number], e: React.MouseEvent) => {
     e.stopPropagation();
@@ -100,131 +85,89 @@ export default function CoursesPage() {
   };
 
   const handleSubmit = () => {
-    if (!form.name.trim()) return toast.error("Nome do curso é obrigatório.");
+    if (!form.name.trim()) return toast.error("Nome do curso e obrigatorio.");
     if (!form.campusId) return toast.error("Selecione um campus.");
     const payload = {
-      name: form.name,
-      type: form.type,
-      campusId: Number(form.campusId),
-      duration: Number(form.duration),
-      classesFirstHalfYear: Number(form.classesFirstHalfYear),
+      name: form.name, type: form.type, campusId: Number(form.campusId),
+      duration: Number(form.duration), classesFirstHalfYear: Number(form.classesFirstHalfYear),
       classesSecondHalfYear: Number(form.classesSecondHalfYear),
     };
-    if (editingId !== null) {
-      updateMutation.mutate({ id: editingId, ...payload });
-    } else {
-      createMutation.mutate(payload);
-    }
+    if (editingId !== null) updateMutation.mutate({ id: editingId, ...payload });
+    else createMutation.mutate(payload);
   };
 
-  const isSaving = createMutation.isPending || updateMutation.isPending;
-
   return (
-    <div className="space-y-4 p-3 md:p-6">
-      <div className="flex items-start justify-between gap-3 flex-wrap">
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-slate-900">Cursos</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Gerencie os cursos ofertados pelo IFMS</p>
+          <h1 className="text-2xl font-bold text-slate-900">Cursos</h1>
+          <p className="mt-1 text-sm text-slate-500">Gerencie os cursos ofertados pelo IFMS</p>
         </div>
-        <Button onClick={openCreate} className="bg-green-600 hover:bg-green-700 shrink-0">
-          <Plus className="w-4 h-4 mr-1 md:mr-2" /> <span>Novo Curso</span>
+        <Button onClick={openCreate} className="bg-green-600 hover:bg-green-700">
+          <Plus className="mr-2 h-4 w-4" /> Novo Curso
         </Button>
       </div>
 
-      {/* Filtros */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-3">
         <Select value={filterCampus} onValueChange={setFilterCampus}>
-          <SelectTrigger className="w-full sm:w-44 bg-white">
-            <SelectValue placeholder="Todos os campus" />
-          </SelectTrigger>
+          <SelectTrigger className="w-44 bg-white"><SelectValue placeholder="Todos os campus" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos os campus</SelectItem>
-            {campuses.map((c) => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
+            {campuses.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={filterType} onValueChange={setFilterType}>
-          <SelectTrigger className="w-full sm:w-40 bg-white">
-            <SelectValue placeholder="Todos os tipos" />
-          </SelectTrigger>
+          <SelectTrigger className="w-40 bg-white"><SelectValue placeholder="Todos os tipos" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos os tipos</SelectItem>
-            {COURSE_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+            {COURSE_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
           </SelectContent>
         </Select>
-        <span className="text-sm text-slate-500 self-center">{filtered.length} curso(s)</span>
+        <span className="text-sm text-slate-500">{filtered.length} curso(s)</span>
       </div>
 
       {isLoading ? (
-        <div className="space-y-3">
-          {[1,2,3].map(i => <div key={i} className="h-20 bg-slate-100 rounded-xl animate-pulse" />)}
-        </div>
+        <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-20 animate-pulse rounded-xl bg-slate-100" />)}</div>
       ) : filtered.length === 0 ? (
-        <Card className="border-dashed border-2 border-slate-200">
-          <CardContent className="py-16 text-center">
-            <GraduationCap className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500 font-medium">Nenhum curso encontrado</p>
-          </CardContent>
-        </Card>
+        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-16 text-center">
+          <GraduationCap className="mb-3 h-12 w-12 text-slate-300" />
+          <p className="font-medium text-slate-500">Nenhum curso encontrado</p>
+        </div>
       ) : (
         <div className="space-y-2">
-          {filtered.map((course) => (
-            <Card
-              key={course.id}
-              className="border-slate-100 hover:shadow-md transition-all cursor-pointer"
-              onClick={() => setLocation(`/courses/${course.id}`)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center shrink-0">
-                    <GraduationCap className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-semibold text-slate-900 truncate">{course.name}</h3>
-                      <Badge className={`text-[10px] px-2 py-0 ${TYPE_COLORS[course.type] ?? "bg-slate-100 text-slate-700"}`}>
-                        {course.type}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-slate-500 mt-0.5">
-                      {campusMap.get(course.campusId) ?? "Campus desconhecido"} • {course.duration} semestres
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <div className="text-right hidden sm:block">
-                      <p className="text-xs text-slate-400">Turmas/ano</p>
-                      <p className="text-sm font-semibold text-slate-700">
-                        {course.classesFirstHalfYear + course.classesSecondHalfYear}
-                      </p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-slate-400 hover:text-blue-600"
-                      onClick={(e) => openEdit(course, e)}
-                      title="Editar curso"
-                    >
-                      <Pencil className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-slate-400 hover:text-red-600"
-                      onClick={(e) => { e.stopPropagation(); deleteMutation.mutate({ id: course.id }); }}
-                      title="Excluir curso"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                    <ChevronRight className="w-4 h-4 text-slate-400" />
-                  </div>
+          {filtered.map(course => (
+            <div key={course.id} className="flex cursor-pointer items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:shadow-md" onClick={() => setLocation(`/courses/${course.id}`)}>
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-green-50">
+                <GraduationCap className="h-5 w-5 text-green-600" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="truncate font-semibold text-slate-900">{course.name}</h3>
+                  <Badge className={`text-[10px] ${TYPE_COLORS[course.type] ?? "bg-slate-100 text-slate-700"}`}>{course.type}</Badge>
                 </div>
-              </CardContent>
-            </Card>
+                <p className="mt-0.5 text-sm text-slate-500">
+                  {campusMap.get(course.campusId) ?? "Campus desconhecido"} · {course.duration} semestres
+                </p>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <div className="hidden text-right sm:block">
+                  <p className="text-xs text-slate-400">Turmas/ano</p>
+                  <p className="text-sm font-semibold text-slate-700">{course.classesFirstHalfYear + course.classesSecondHalfYear}</p>
+                </div>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-blue-600" onClick={e => openEdit(course, e)}>
+                  <Pencil className="h-3.5 w-3.5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600" onClick={e => { e.stopPropagation(); deleteMutation.mutate({ id: course.id }); }}>
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+                <ChevronRight className="h-4 w-4 text-slate-400" />
+              </div>
+            </div>
           ))}
         </div>
       )}
 
-      {/* Dialog: Criar / Editar */}
-      <Dialog open={showForm} onOpenChange={(o) => { setShowForm(o); if (!o) { setEditingId(null); setForm(EMPTY_FORM); } }}>
+      <Dialog open={showForm} onOpenChange={o => { setShowForm(o); if (!o) { setEditingId(null); setForm(EMPTY_FORM); } }}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>{editingId !== null ? "Editar Curso" : "Novo Curso"}</DialogTitle>
@@ -232,72 +175,46 @@ export default function CoursesPage() {
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
               <Label>Nome do Curso *</Label>
-              <Input
-                placeholder="Ex: Técnico Integrado em Informática"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-              />
+              <Input placeholder="Ex: Tecnico Integrado em Informatica" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Tipo *</Label>
-                <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as any })}>
+                <Select value={form.type} onValueChange={v => setForm({ ...form, type: v as any })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {COURSE_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                  </SelectContent>
+                  <SelectContent>{COURSE_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div className="space-y-1.5">
                 <Label>Campus *</Label>
-                <Select value={form.campusId} onValueChange={(v) => setForm({ ...form, campusId: v })}>
+                <Select value={form.campusId} onValueChange={v => setForm({ ...form, campusId: v })}>
                   <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                  <SelectContent>
-                    {campuses.map((c) => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
-                  </SelectContent>
+                  <SelectContent>{campuses.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1.5">
-                <Label>Duração (sem.)</Label>
-                <Select value={form.duration} onValueChange={(v) => setForm({ ...form, duration: v })}>
+                <Label>Duracao (sem.)</Label>
+                <Select value={form.duration} onValueChange={v => setForm({ ...form, duration: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {[1,2,3,4,5,6,7,8,9,10,11,12].map((n) => (
-                      <SelectItem key={n} value={String(n)}>{n}</SelectItem>
-                    ))}
-                  </SelectContent>
+                  <SelectContent>{[1,2,3,4,5,6,7,8,9,10,11,12].map(n => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label>Turmas 1º Sem</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  value={form.classesFirstHalfYear}
-                  onChange={(e) => setForm({ ...form, classesFirstHalfYear: e.target.value })}
-                />
+                <Label>Turmas 1o Sem</Label>
+                <Input type="number" min={0} value={form.classesFirstHalfYear} onChange={e => setForm({ ...form, classesFirstHalfYear: e.target.value })} />
               </div>
               <div className="space-y-1.5">
-                <Label>Turmas 2º Sem</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  value={form.classesSecondHalfYear}
-                  onChange={(e) => setForm({ ...form, classesSecondHalfYear: e.target.value })}
-                />
+                <Label>Turmas 2o Sem</Label>
+                <Input type="number" min={0} value={form.classesSecondHalfYear} onChange={e => setForm({ ...form, classesSecondHalfYear: e.target.value })} />
               </div>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={isSaving}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              {isSaving ? "Salvando..." : editingId !== null ? "Salvar Alterações" : "Criar Curso"}
+            <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending} className="bg-green-600 hover:bg-green-700">
+              {createMutation.isPending || updateMutation.isPending ? "Salvando..." : editingId !== null ? "Salvar" : "Criar Curso"}
             </Button>
           </DialogFooter>
         </DialogContent>

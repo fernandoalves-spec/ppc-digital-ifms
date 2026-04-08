@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, Clock, User, FileText, Database } from "lucide-react";
+import { Shield, Clock, User } from "lucide-react";
 
 const ACTION_COLORS: Record<string, string> = {
   CREATE: "bg-green-100 text-green-700",
@@ -21,11 +20,11 @@ const ENTITY_LABELS: Record<string, string> = {
   campus: "Campus",
   course: "Curso",
   subject: "Disciplina",
-  teaching_area: "Área de Ensino",
+  teaching_area: "Area de Ensino",
   ppc_document: "Documento PPC",
-  approval_request: "Solicitação",
-  user: "Usuário",
-  user_course_role: "Vínculo Docente",
+  approval_request: "Solicitacao",
+  user: "Usuario",
+  user_course_role: "Vinculo Docente",
 };
 
 export default function AuditPage() {
@@ -36,73 +35,63 @@ export default function AuditPage() {
   );
 
   return (
-    <div className="space-y-4 p-3 md:p-6">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-xl md:text-2xl font-bold text-slate-900">Histórico de Auditoria</h1>
-        <p className="text-sm text-slate-500 mt-0.5">Rastreamento completo de todas as alterações realizadas no sistema</p>
+        <h1 className="text-2xl font-bold text-slate-900">Historico de Auditoria</h1>
+        <p className="mt-1 text-sm text-slate-500">Rastreamento completo de todas as alteracoes realizadas no sistema</p>
       </div>
 
       <Select value={filterEntity} onValueChange={setFilterEntity}>
-        <SelectTrigger className="w-52 bg-white">
-          <SelectValue placeholder="Todas as entidades" />
-        </SelectTrigger>
+        <SelectTrigger className="w-52 bg-white"><SelectValue placeholder="Todas as entidades" /></SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Todas as entidades</SelectItem>
-          {Object.entries(ENTITY_LABELS).map(([k, v]) => (
-            <SelectItem key={k} value={k}>{v}</SelectItem>
-          ))}
+          {Object.entries(ENTITY_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
         </SelectContent>
       </Select>
 
       {isLoading ? (
-        <div className="space-y-2">{[1,2,3,4,5].map(i => <div key={i} className="h-14 bg-slate-100 rounded-xl animate-pulse" />)}</div>
+        <div className="space-y-2">{[1,2,3,4,5].map(i => <div key={i} className="h-14 animate-pulse rounded-xl bg-slate-100" />)}</div>
       ) : logs.length === 0 ? (
-        <Card className="border-dashed border-2 border-slate-200">
-          <CardContent className="py-16 text-center">
-            <Shield className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500">Nenhum registro de auditoria encontrado</p>
-          </CardContent>
-        </Card>
+        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-16 text-center">
+          <Shield className="mb-3 h-12 w-12 text-slate-300" />
+          <p className="text-slate-500">Nenhum registro encontrado</p>
+        </div>
       ) : (
         <div className="space-y-2">
-          {logs.map((log) => {
+          {logs.map(log => {
             const actionColor = ACTION_COLORS[log.action] ?? "bg-slate-100 text-slate-600";
             const entityLabel = ENTITY_LABELS[log.entity] ?? log.entity;
             return (
-              <Card key={log.id} className="border-slate-100">
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-3">
-                    <Badge className={`text-[10px] px-2 py-0.5 shrink-0 ${actionColor}`}>{log.action}</Badge>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-medium text-slate-700">{entityLabel}</span>
-                        {log.entityId && <span className="text-xs text-slate-400">#{log.entityId}</span>}
-                        {log.newValue != null && (
-                          <span className="text-xs text-slate-500 truncate max-w-xs">
-                            {(() => {
-                              const val = log.newValue;
-                              if (typeof val === "object" && val !== null) {
-                                return Object.entries(val as Record<string, unknown>).slice(0, 2).map(([k, v]) => `${k}: ${v}`).join(", ");
-                              }
-                              return String(val);
-                            })()}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-3 mt-0.5">
-                        <span className="text-xs text-slate-400 flex items-center gap-1">
-                          <User className="w-3 h-3" />
-                          {log.userName ?? log.userEmail ?? "Sistema"}
-                        </span>
-                        <span className="text-xs text-slate-400 flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {new Date(log.createdAt).toLocaleString("pt-BR")}
-                        </span>
-                      </div>
-                    </div>
+              <div key={log.id} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+                <Badge className={`shrink-0 text-[10px] ${actionColor}`}>{log.action}</Badge>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-medium text-slate-700">{entityLabel}</span>
+                    {log.entityId && <span className="text-xs text-slate-400">#{log.entityId}</span>}
+                    {log.newValue != null && (
+                      <span className="max-w-xs truncate text-xs text-slate-500">
+                        {(() => {
+                          const val = log.newValue;
+                          if (typeof val === "object" && val !== null) {
+                            return Object.entries(val as Record<string, unknown>).slice(0, 2).map(([k, v]) => `${k}: ${v}`).join(", ");
+                          }
+                          return String(val);
+                        })()}
+                      </span>
+                    )}
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="mt-0.5 flex items-center gap-3">
+                    <span className="flex items-center gap-1 text-xs text-slate-400">
+                      <User className="h-3 w-3" />
+                      {log.userName ?? log.userEmail ?? "Sistema"}
+                    </span>
+                    <span className="flex items-center gap-1 text-xs text-slate-400">
+                      <Clock className="h-3 w-3" />
+                      {new Date(log.createdAt).toLocaleString("pt-BR")}
+                    </span>
+                  </div>
+                </div>
+              </div>
             );
           })}
         </div>

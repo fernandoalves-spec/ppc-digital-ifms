@@ -1,7 +1,4 @@
 import { useState } from "react";
-import EmptyStateInstitutional from "@/components/layout/EmptyStateInstitutional";
-import PageHeader from "@/components/layout/PageHeader";
-import SectionCard from "@/components/layout/SectionCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,14 +9,8 @@ import { BarChart2, Clock, Download, FileText, GraduationCap, Layers, Loader2 } 
 import { toast } from "sonner";
 
 const COLORS = [
-  ifmsColorTokens.green.hex,
-  "#2563eb",
-  "#d97706",
-  "#9333ea",
-  ifmsColorTokens.red.hex,
-  "#0891b2",
-  "#65a30d",
-  "#c026d3",
+  ifmsColorTokens.green.hex, "#2563eb", "#d97706", "#9333ea",
+  ifmsColorTokens.red.hex, "#0891b2", "#65a30d", "#c026d3",
 ];
 
 type ReportType = "by_area" | "by_semester" | "by_course" | "by_campus";
@@ -48,87 +39,71 @@ export default function ReportsPage() {
       link.href = data.url;
       link.download = data.fileName;
       link.click();
-      toast.success("Relatorio exportado com sucesso.");
+      toast.success("Relatorio exportado.");
       setIsExporting(false);
     },
-    onError: e => {
-      toast.error(e.message);
-      setIsExporting(false);
-    },
+    onError: e => { toast.error(e.message); setIsExporting(false); },
   });
 
   const handleExport = () => {
     setIsExporting(true);
-    exportPdf.mutate({
-      type: reportType,
-      courseId: filterCourse !== "all" ? Number(filterCourse) : undefined,
-    });
+    exportPdf.mutate({ type: reportType, courseId: filterCourse !== "all" ? Number(filterCourse) : undefined });
   };
 
-  const currentReportType = REPORT_TYPES.find(report => report.value === reportType)!;
+  const currentType = REPORT_TYPES.find(r => r.value === reportType)!;
 
   return (
-    <div className="page-stack p-3 md:p-6">
-      <PageHeader
-        badge="Analises"
-        title="Relatorios"
-        description="Visualize e exporte relatorios analiticos do PPC."
-        actions={
-          <Button onClick={handleExport} disabled={isExporting} className="bg-[var(--ifms-green-600)] hover:bg-[var(--ifms-green-700)]">
-            {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-            Exportar PDF
-          </Button>
-        }
-      />
-
-      <SectionCard>
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-          {REPORT_TYPES.map(rt => (
-            <button
-              key={rt.value}
-              onClick={() => setReportType(rt.value)}
-              aria-pressed={reportType === rt.value}
-              aria-label={`Selecionar relatorio ${rt.label}`}
-              className={[
-                "rounded-2xl border-2 p-4 text-left transition",
-                reportType === rt.value
-                  ? "border-[var(--ifms-green-500)] bg-[var(--ifms-green-50)]"
-                  : "border-[var(--ifms-green-100)] bg-white hover:border-[var(--ifms-green-300)]",
-              ].join(" ")}
-            >
-              <rt.icon className={`mb-2 h-5 w-5 ${reportType === rt.value ? "text-[var(--ifms-green-700)]" : "text-slate-400"}`} />
-              <p className="text-sm font-semibold text-[var(--ifms-green-900)]">{rt.label}</p>
-              <p className="mt-0.5 text-xs text-[var(--ifms-text-soft)]">{rt.description}</p>
-            </button>
-          ))}
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Relatorios</h1>
+          <p className="mt-1 text-sm text-slate-500">Visualize e exporte relatorios analiticos do PPC.</p>
         </div>
-      </SectionCard>
+        <Button onClick={handleExport} disabled={isExporting} className="bg-green-600 hover:bg-green-700">
+          {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+          Exportar PDF
+        </Button>
+      </div>
 
+      {/* Tipo de relatorio */}
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        {REPORT_TYPES.map(rt => (
+          <button
+            key={rt.value}
+            onClick={() => setReportType(rt.value)}
+            className={[
+              "rounded-xl border-2 p-4 text-left transition",
+              reportType === rt.value
+                ? "border-green-500 bg-green-50"
+                : "border-slate-200 bg-white hover:border-slate-300",
+            ].join(" ")}
+          >
+            <rt.icon className={`mb-2 h-5 w-5 ${reportType === rt.value ? "text-green-700" : "text-slate-400"}`} />
+            <p className="text-sm font-semibold text-slate-900">{rt.label}</p>
+            <p className="mt-0.5 text-xs text-slate-500">{rt.description}</p>
+          </button>
+        ))}
+      </div>
+
+      {/* Filtro de curso (semestre) */}
       {reportType === "by_semester" && (
-        <SectionCard>
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--ifms-green-700)]">Filtro</span>
-            <Select value={filterCourse} onValueChange={setFilterCourse}>
-              <SelectTrigger className="w-72 bg-white">
-                <SelectValue placeholder="Todos os cursos" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os cursos</SelectItem>
-                {courses.map(course => (
-                  <SelectItem key={course.id} value={String(course.id)}>
-                    {course.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </SectionCard>
+        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
+          <span className="text-sm font-medium text-slate-700">Curso:</span>
+          <Select value={filterCourse} onValueChange={setFilterCourse}>
+            <SelectTrigger className="w-72 bg-white"><SelectValue placeholder="Todos os cursos" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os cursos</SelectItem>
+              {courses.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
       )}
 
-      <SectionCard>
+      {/* Conteudo do relatorio */}
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center gap-2">
-          <currentReportType.icon className="h-4 w-4 text-[var(--ifms-green-700)]" />
-          <h2 className="text-lg font-semibold tracking-tight text-[var(--ifms-green-900)]">{currentReportType.label}</h2>
+          <currentType.icon className="h-4 w-4 text-green-700" />
+          <h2 className="text-lg font-semibold text-slate-900">{currentType.label}</h2>
         </div>
 
         {reportType === "by_area" && byArea && byArea.length > 0 && (
@@ -141,10 +116,8 @@ export default function ReportsPage() {
                   <XAxis dataKey="areaName" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
                   <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
                   <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 12 }} formatter={(v: number) => [`${v}`, ""]} />
-                  <Bar dataKey="totalWeeklyClasses" name="Aulas/sem" radius={[4, 4, 0, 0]}>
-                    {byArea.map((entry, index) => (
-                      <Cell key={entry.areaId} fill={entry.color || COLORS[index % COLORS.length]} />
-                    ))}
+                  <Bar dataKey="totalWeeklyClasses" radius={[4, 4, 0, 0]}>
+                    {byArea.map((entry, index) => <Cell key={entry.areaId} fill={entry.color || COLORS[index % COLORS.length]} />)}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
@@ -152,12 +125,12 @@ export default function ReportsPage() {
             rows={byArea.map((row, index) => ({
               key: row.areaId,
               cells: [
-                <div className="flex items-center gap-2" key={`area-${row.areaId}`}>
+                <div className="flex items-center gap-2" key={`a-${row.areaId}`}>
                   <div className="h-3 w-3 rounded-full" style={{ backgroundColor: row.color || COLORS[index % COLORS.length] }} />
                   {row.areaName}
                 </div>,
-                <span key={`subjects-${row.areaId}`}>{(row as any).subjectCount ?? 0}</span>,
-                <strong key={`weekly-${row.areaId}`}>{row.totalWeeklyClasses}</strong>,
+                <span key={`s-${row.areaId}`}>{(row as any).subjectCount ?? 0}</span>,
+                <strong key={`w-${row.areaId}`}>{row.totalWeeklyClasses}</strong>,
               ],
             }))}
           />
@@ -170,14 +143,10 @@ export default function ReportsPage() {
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={bySemester} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="semester" tickFormatter={(value) => `${value}o`} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+                  <XAxis dataKey="semester" tickFormatter={v => `${v}o`} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
                   <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
-                  <Tooltip
-                    contentStyle={{ borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 12 }}
-                    labelFormatter={label => `${label}o semestre`}
-                    formatter={(value: number) => [`${value} aulas/sem`, ""]}
-                  />
-                  <Bar dataKey="totalClasses" name="Aulas/sem" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                  <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 12 }} labelFormatter={l => `${l}o semestre`} formatter={(v: number) => [`${v} aulas/sem`, ""]} />
+                  <Bar dataKey="totalClasses" fill="#2563eb" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             }
@@ -185,8 +154,8 @@ export default function ReportsPage() {
               key: row.semester,
               cells: [
                 `${row.semester}o semestre`,
-                <span key={`subjects-${row.semester}`}>{(row as any).subjectCount ?? 0}</span>,
-                <strong key={`classes-${row.semester}`}>{row.totalClasses}</strong>,
+                <span key={`s-${row.semester}`}>{(row as any).subjectCount ?? 0}</span>,
+                <strong key={`c-${row.semester}`}>{row.totalClasses}</strong>,
               ],
             }))}
           />
@@ -195,16 +164,14 @@ export default function ReportsPage() {
         {reportType === "by_course" && byCourse && byCourse.length > 0 && (
           <DataTable
             headers={["Curso", "Tipo", "Disciplinas", "Aulas/sem", "Sem area"]}
-            rows={byCourse.map((row: any) => ({
+            rows={(byCourse as any[]).map((row: any) => ({
               key: row.courseId,
               cells: [
-                <span key={`name-${row.courseId}`} className="font-medium text-slate-800">{row.courseName}</span>,
+                <span key={`n-${row.courseId}`} className="font-medium text-slate-800">{row.courseName}</span>,
                 row.courseType,
-                <span key={`subject-${row.courseId}`}>{row.subjectCount ?? 0}</span>,
-                <strong key={`weekly-${row.courseId}`}>{row.totalWeeklyClasses}</strong>,
-                <Badge key={`without-${row.courseId}`} className={row.withoutArea > 0 ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"}>
-                  {row.withoutArea ?? 0}
-                </Badge>,
+                <span key={`s-${row.courseId}`}>{row.subjectCount ?? 0}</span>,
+                <strong key={`w-${row.courseId}`}>{row.totalWeeklyClasses}</strong>,
+                <Badge key={`wa-${row.courseId}`} className={row.withoutArea > 0 ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"}>{row.withoutArea ?? 0}</Badge>,
               ],
             }))}
           />
@@ -213,13 +180,13 @@ export default function ReportsPage() {
         {reportType === "by_campus" && byCampus && byCampus.length > 0 && (
           <DataTable
             headers={["Campus", "Cursos", "Disciplinas", "Aulas/sem"]}
-            rows={byCampus.map((row: any) => ({
+            rows={(byCampus as any[]).map((row: any) => ({
               key: row.campusId,
               cells: [
-                <span key={`campus-${row.campusId}`} className="font-medium text-slate-800">{row.campusName}</span>,
+                <span key={`n-${row.campusId}`} className="font-medium text-slate-800">{row.campusName}</span>,
                 row.courseCount,
                 row.subjectCount ?? 0,
-                <strong key={`classes-${row.campusId}`}>{row.totalWeeklyClasses}</strong>,
+                <strong key={`c-${row.campusId}`}>{row.totalWeeklyClasses}</strong>,
               ],
             }))}
           />
@@ -229,26 +196,18 @@ export default function ReportsPage() {
           (reportType === "by_semester" && (!bySemester || bySemester.length === 0)) ||
           (reportType === "by_course" && (!byCourse || byCourse.length === 0)) ||
           (reportType === "by_campus" && (!byCampus || byCampus.length === 0))) && (
-          <EmptyStateInstitutional
-            title="Sem dados para este relatorio"
-            description="Registre dados de PPC e oferta para liberar as analises desta visao."
-            icon={<FileText className="h-5 w-5" />}
-          />
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <FileText className="mb-3 h-10 w-10 text-slate-300" />
+            <p className="font-medium text-slate-500">Sem dados para este relatorio</p>
+            <p className="mt-1 text-sm text-slate-400">Registre dados de PPC e oferta para liberar as analises.</p>
+          </div>
         )}
-      </SectionCard>
+      </div>
     </div>
   );
 }
 
-function ReportTableChart({
-  chart,
-  headers,
-  rows,
-}: {
-  chart: React.ReactNode;
-  headers: string[];
-  rows: { key: string | number; cells: React.ReactNode[] }[];
-}) {
+function ReportTableChart({ chart, headers, rows }: { chart: React.ReactNode; headers: string[]; rows: { key: string | number; cells: React.ReactNode[] }[] }) {
   return (
     <div className="space-y-6">
       {chart}
@@ -257,38 +216,19 @@ function ReportTableChart({
   );
 }
 
-function DataTable({
-  headers,
-  rows,
-}: {
-  headers: string[];
-  rows: { key: string | number; cells: React.ReactNode[] }[];
-}) {
+function DataTable({ headers, rows }: { headers: string[]; rows: { key: string | number; cells: React.ReactNode[] }[] }) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm" aria-label={`Tabela de relatorio: ${headers.join(", ")}`}>
-        <caption className="sr-only">Dados consolidados do relatorio selecionado.</caption>
+      <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-slate-100">
-            {headers.map((header, index) => (
-              <th
-                key={header}
-                scope="col"
-                className={`px-3 py-2 text-xs font-semibold text-slate-500 ${index === 0 ? "text-left" : "text-right"}`}
-              >
-                {header}
-              </th>
-            ))}
+            {headers.map((h, i) => <th key={h} className={`px-3 py-2 text-xs font-semibold text-slate-500 ${i === 0 ? "text-left" : "text-right"}`}>{h}</th>)}
           </tr>
         </thead>
         <tbody>
           {rows.map(row => (
             <tr key={row.key} className="border-b border-slate-50 hover:bg-slate-50">
-              {row.cells.map((cell, index) => (
-                <td key={`${row.key}-${index}`} className={`px-3 py-2 ${index === 0 ? "text-left" : "text-right"}`}>
-                  {cell}
-                </td>
-              ))}
+              {row.cells.map((cell, i) => <td key={`${row.key}-${i}`} className={`px-3 py-2 ${i === 0 ? "text-left" : "text-right"}`}>{cell}</td>)}
             </tr>
           ))}
         </tbody>

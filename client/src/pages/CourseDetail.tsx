@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useParams, useLocation } from "wouter";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,23 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  ArrowLeft, Plus, Trash2, BookOpen, Clock, Layers, ClipboardList,
-  Pencil, ChevronDown, ChevronUp, FileText, Library, Tag
-} from "lucide-react";
+import { ArrowLeft, Plus, Trash2, BookOpen, Clock, Layers, ClipboardList, Pencil, ChevronDown, ChevronUp, FileText, Library, Tag } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 type SubjectForm = {
-  name: string;
-  semester: string;
-  weeklyClasses: string;
-  totalHours: string;
-  areaId: string;
-  isElective: boolean;
-  isRemote: boolean;
-  syllabus: string;
-  bibliography: string;
+  name: string; semester: string; weeklyClasses: string; totalHours: string;
+  areaId: string; isElective: boolean; isRemote: boolean; syllabus: string; bibliography: string;
 };
 
 const emptyForm: SubjectForm = {
@@ -44,7 +33,6 @@ export default function CourseDetailPage() {
   const { data: course } = trpc.courses.get.useQuery({ id: courseId });
   const { data: subjects = [], isLoading } = trpc.subjects.listByCourse.useQuery({ courseId });
   const { data: campuses = [] } = trpc.campus.list.useQuery();
-  // Buscar áreas vinculadas ao campus do curso (somente após ter o curso carregado)
   const { data: areas = [] } = trpc.campus.getAreas.useQuery(
     { campusId: course?.campusId ?? 0 },
     { enabled: !!course?.campusId }
@@ -52,22 +40,22 @@ export default function CourseDetailPage() {
 
   const createSubjectMutation = trpc.subjects.create.useMutation({
     onSuccess: () => { utils.subjects.listByCourse.invalidate({ courseId }); toast.success("Disciplina adicionada!"); setShowForm(false); setForm(emptyForm); },
-    onError: (e) => toast.error(e.message),
+    onError: e => toast.error(e.message),
   });
 
   const updateSubjectMutation = trpc.subjects.update.useMutation({
     onSuccess: () => { utils.subjects.listByCourse.invalidate({ courseId }); toast.success("Disciplina atualizada!"); setEditingSubject(null); },
-    onError: (e) => toast.error(e.message),
+    onError: e => toast.error(e.message),
   });
 
   const deleteSubjectMutation = trpc.subjects.delete.useMutation({
     onSuccess: () => { utils.subjects.listByCourse.invalidate({ courseId }); toast.success("Disciplina removida."); },
-    onError: (e) => toast.error(e.message),
+    onError: e => toast.error(e.message),
   });
 
   const createBulkApprovalMutation = trpc.approval.createBulk.useMutation({
-    onSuccess: (data) => { toast.success(`${data.count} solicitação(ões) criadas para o coordenador!`); },
-    onError: (e) => toast.error(e.message),
+    onSuccess: data => { toast.success(`${data.count} solicitacao(oes) criadas!`); },
+    onError: e => toast.error(e.message),
   });
 
   const [showForm, setShowForm] = useState(false);
@@ -77,9 +65,8 @@ export default function CourseDetailPage() {
   const [expandedSubject, setExpandedSubject] = useState<number | null>(null);
 
   const isAdmin = user?.role === "admin";
-
-  const areaMap = new Map(areas.map((a) => [a.id, a]));
-  const campusName = campuses.find((c) => c.id === course?.campusId)?.name ?? "";
+  const areaMap = new Map(areas.map(a => [a.id, a]));
+  const campusName = campuses.find(c => c.id === course?.campusId)?.name ?? "";
 
   const semesterGroups: Record<number, typeof subjects> = {};
   for (const s of subjects) {
@@ -87,10 +74,10 @@ export default function CourseDetailPage() {
     semesterGroups[s.semester].push(s);
   }
 
-  const subjectsWithoutArea = subjects.filter((s) => !s.areaId);
+  const subjectsWithoutArea = subjects.filter(s => !s.areaId);
 
   const handleSubmit = () => {
-    if (!form.name.trim()) return toast.error("Nome da disciplina é obrigatório.");
+    if (!form.name.trim()) return toast.error("Nome da disciplina e obrigatorio.");
     createSubjectMutation.mutate({
       courseId, name: form.name, semester: Number(form.semester),
       weeklyClasses: Number(form.weeklyClasses),
@@ -105,37 +92,29 @@ export default function CourseDetailPage() {
   const openEdit = (subject: any) => {
     setEditingSubject(subject);
     setEditForm({
-      name: subject.name,
-      semester: String(subject.semester),
-      weeklyClasses: String(subject.weeklyClasses),
+      name: subject.name, semester: String(subject.semester), weeklyClasses: String(subject.weeklyClasses),
       totalHours: subject.totalHours ? String(subject.totalHours) : "",
       areaId: subject.areaId ? String(subject.areaId) : "",
-      isElective: subject.isElective ?? false,
-      isRemote: subject.isRemote ?? false,
-      syllabus: subject.syllabus ?? "",
-      bibliography: subject.bibliography ?? "",
+      isElective: subject.isElective ?? false, isRemote: subject.isRemote ?? false,
+      syllabus: subject.syllabus ?? "", bibliography: subject.bibliography ?? "",
     });
   };
 
   const handleUpdate = () => {
-    if (!editingSubject || !editForm.name.trim()) return toast.error("Nome da disciplina é obrigatório.");
+    if (!editingSubject || !editForm.name.trim()) return toast.error("Nome da disciplina e obrigatorio.");
     updateSubjectMutation.mutate({
-      id: editingSubject.id,
-      name: editForm.name,
-      semester: Number(editForm.semester),
+      id: editingSubject.id, name: editForm.name, semester: Number(editForm.semester),
       weeklyClasses: Number(editForm.weeklyClasses),
       totalHours: editForm.totalHours ? Number(editForm.totalHours) : null,
       areaId: editForm.areaId && editForm.areaId !== "none" ? Number(editForm.areaId) : null,
-      isElective: editForm.isElective,
-      isRemote: editForm.isRemote,
-      syllabus: editForm.syllabus || null,
-      bibliography: editForm.bibliography || null,
+      isElective: editForm.isElective, isRemote: editForm.isRemote,
+      syllabus: editForm.syllabus || null, bibliography: editForm.bibliography || null,
     });
   };
 
   if (!course) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="animate-spin w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full" />
+    <div className="flex h-64 items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-500 border-t-transparent" />
     </div>
   );
 
@@ -143,241 +122,197 @@ export default function CourseDetailPage() {
     <div className="space-y-4">
       <div className="space-y-1.5">
         <Label>Nome da Disciplina *</Label>
-        <Input placeholder="Ex: Cálculo I" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
+        <Input placeholder="Ex: Calculo I" value={f.name} onChange={e => setF({ ...f, name: e.target.value })} />
       </div>
       <div className="grid grid-cols-3 gap-3">
         <div className="space-y-1.5">
           <Label>Semestre *</Label>
-          <Select value={f.semester} onValueChange={(v) => setF({ ...f, semester: v })}>
+          <Select value={f.semester} onValueChange={v => setF({ ...f, semester: v })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>{Array.from({ length: course.duration }, (_, i) => i + 1).map((n) => <SelectItem key={n} value={String(n)}>{n}º</SelectItem>)}</SelectContent>
+            <SelectContent>{Array.from({ length: course.duration }, (_, i) => i + 1).map(n => <SelectItem key={n} value={String(n)}>{n}o</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <div className="space-y-1.5">
           <Label>Aulas/sem *</Label>
-          <Input type="number" min={1} value={f.weeklyClasses} onChange={(e) => setF({ ...f, weeklyClasses: e.target.value })} />
+          <Input type="number" min={1} value={f.weeklyClasses} onChange={e => setF({ ...f, weeklyClasses: e.target.value })} />
         </div>
         <div className="space-y-1.5">
-          <Label>Carga Horária (h)</Label>
-          <Input type="number" min={0} placeholder="Ex: 60" value={f.totalHours} onChange={(e) => setF({ ...f, totalHours: e.target.value })} />
+          <Label>Carga (h)</Label>
+          <Input type="number" min={0} placeholder="Ex: 60" value={f.totalHours} onChange={e => setF({ ...f, totalHours: e.target.value })} />
         </div>
       </div>
       <div className="space-y-1.5">
-        <Label className="flex items-center gap-1.5"><Tag className="w-3.5 h-3.5 text-slate-500" />Área de Ensino</Label>
-        <Select value={f.areaId || "none"} onValueChange={(v) => setF({ ...f, areaId: v === "none" ? "" : v })}>
-          <SelectTrigger><SelectValue placeholder="Selecionar área (opcional)" /></SelectTrigger>
+        <Label className="flex items-center gap-1.5"><Tag className="h-3.5 w-3.5 text-slate-500" />Area de Ensino</Label>
+        <Select value={f.areaId || "none"} onValueChange={v => setF({ ...f, areaId: v === "none" ? "" : v })}>
+          <SelectTrigger><SelectValue placeholder="Selecionar area (opcional)" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="none">Sem área definida</SelectItem>
-            {areas.map((a) => <SelectItem key={a.id} value={String(a.id)}>{a.name}</SelectItem>)}
+            <SelectItem value="none">Sem area definida</SelectItem>
+            {areas.map(a => <SelectItem key={a.id} value={String(a.id)}>{a.name}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
       <div className="flex gap-4">
-        <label className="flex items-center gap-2 cursor-pointer text-sm">
-          <input type="checkbox" checked={f.isElective} onChange={(e) => setF({ ...f, isElective: e.target.checked })} className="rounded" />
+        <label className="flex cursor-pointer items-center gap-2 text-sm">
+          <input type="checkbox" checked={f.isElective} onChange={e => setF({ ...f, isElective: e.target.checked })} className="rounded" />
           Optativa/Eletiva
         </label>
-        <label className="flex items-center gap-2 cursor-pointer text-sm">
-          <input type="checkbox" checked={f.isRemote} onChange={(e) => setF({ ...f, isRemote: e.target.checked })} className="rounded" />
+        <label className="flex cursor-pointer items-center gap-2 text-sm">
+          <input type="checkbox" checked={f.isRemote} onChange={e => setF({ ...f, isRemote: e.target.checked })} className="rounded" />
           EaD/Remota
         </label>
       </div>
       <div className="space-y-1.5">
-        <Label className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5 text-slate-500" />Ementa</Label>
-        <Textarea
-          value={f.syllabus}
-          onChange={(e) => setF({ ...f, syllabus: e.target.value })}
-          placeholder="Descreva os conteúdos programáticos da disciplina..."
-          rows={5}
-          className="resize-none"
-        />
+        <Label className="flex items-center gap-1.5"><FileText className="h-3.5 w-3.5 text-slate-500" />Ementa</Label>
+        <Textarea value={f.syllabus} onChange={e => setF({ ...f, syllabus: e.target.value })} placeholder="Descreva os conteudos programaticos..." rows={4} className="resize-none" />
       </div>
       <div className="space-y-1.5">
-        <Label className="flex items-center gap-1.5"><Library className="w-3.5 h-3.5 text-slate-500" />Referências Bibliográficas</Label>
-        <Textarea
-          value={f.bibliography}
-          onChange={(e) => setF({ ...f, bibliography: e.target.value })}
-          placeholder="Liste as referências básicas e complementares..."
-          rows={5}
-          className="resize-none"
-        />
+        <Label className="flex items-center gap-1.5"><Library className="h-3.5 w-3.5 text-slate-500" />Referencias Bibliograficas</Label>
+        <Textarea value={f.bibliography} onChange={e => setF({ ...f, bibliography: e.target.value })} placeholder="Liste as referencias basicas e complementares..." rows={4} className="resize-none" />
       </div>
     </div>
   );
 
   return (
-    <div className="space-y-4 p-3 md:p-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-start gap-3">
         <Button variant="ghost" size="icon" onClick={() => setLocation("/courses")} className="shrink-0">
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="h-4 w-4" />
         </Button>
-        <div className="flex-1 min-w-0">
-          <h1 className="text-xl font-bold text-slate-900 truncate">{course.name}</h1>
-          <p className="text-sm text-slate-500">{campusName} · {course.type} · {course.duration} semestres</p>
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-2xl font-bold text-slate-900">{course.name}</h1>
+          <p className="mt-0.5 text-sm text-slate-500">
+            {campusName} · <Badge variant="outline" className="text-xs">{course.type}</Badge> · {course.duration} semestres
+          </p>
         </div>
         {isAdmin && (
-          <div className="flex gap-2 shrink-0">
+          <div className="flex shrink-0 gap-2">
             {subjectsWithoutArea.length > 0 && (
               <Button variant="outline" size="sm" className="border-amber-300 text-amber-700 hover:bg-amber-50" onClick={() => createBulkApprovalMutation.mutate({ courseId })}>
-                <ClipboardList className="w-3.5 h-3.5 mr-1.5" />
-                Solicitar Áreas ({subjectsWithoutArea.length})
+                <ClipboardList className="mr-1.5 h-3.5 w-3.5" />
+                Solicitar Areas ({subjectsWithoutArea.length})
               </Button>
             )}
             <Button size="sm" onClick={() => setShowForm(true)} className="bg-green-600 hover:bg-green-700">
-              <Plus className="w-3.5 h-3.5 mr-1.5" /> Disciplina
+              <Plus className="mr-1.5 h-3.5 w-3.5" /> Disciplina
             </Button>
           </div>
         )}
       </div>
 
-      {/* Resumo */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card className="border-slate-100">
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-slate-900">{subjects.length}</p>
-            <p className="text-xs text-slate-500 mt-0.5">Disciplinas</p>
-          </CardContent>
-        </Card>
-        <Card className="border-slate-100">
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-slate-900">{subjects.reduce((s, d) => s + d.weeklyClasses, 0)}</p>
-            <p className="text-xs text-slate-500 mt-0.5">Aulas/semana total</p>
-          </CardContent>
-        </Card>
-        <Card className="border-slate-100">
-          <CardContent className="p-4 text-center">
-            <p className={`text-2xl font-bold ${subjectsWithoutArea.length > 0 ? "text-orange-600" : "text-green-600"}`}>{subjectsWithoutArea.length}</p>
-            <p className="text-xs text-slate-500 mt-0.5">Sem área definida</p>
-          </CardContent>
-        </Card>
-        <Card className="border-slate-100">
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-slate-900">{subjects.filter((s) => (s as any).syllabus).length}</p>
-            <p className="text-xs text-slate-500 mt-0.5">Com ementa</p>
-          </CardContent>
-        </Card>
+      {/* KPIs */}
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        {[
+          { label: "Disciplinas", value: subjects.length, color: "text-slate-900" },
+          { label: "Aulas/sem total", value: subjects.reduce((s, d) => s + d.weeklyClasses, 0), color: "text-slate-900" },
+          { label: "Sem area", value: subjectsWithoutArea.length, color: subjectsWithoutArea.length > 0 ? "text-orange-600" : "text-green-600" },
+          { label: "Com ementa", value: subjects.filter(s => (s as any).syllabus).length, color: "text-slate-900" },
+        ].map(kpi => (
+          <div key={kpi.label} className="rounded-xl border border-slate-200 bg-white p-4 text-center shadow-sm">
+            <p className={`text-2xl font-bold ${kpi.color}`}>{kpi.value}</p>
+            <p className="mt-0.5 text-xs text-slate-500">{kpi.label}</p>
+          </div>
+        ))}
       </div>
 
       {/* Disciplinas por semestre */}
       {isLoading ? (
-        <div className="space-y-4">{[1, 2, 3].map(i => <div key={i} className="h-32 bg-slate-100 rounded-xl animate-pulse" />)}</div>
+        <div className="space-y-4">{[1,2,3].map(i => <div key={i} className="h-32 animate-pulse rounded-xl bg-slate-100" />)}</div>
       ) : subjects.length === 0 ? (
-        <Card className="border-dashed border-2 border-slate-200">
-          <CardContent className="py-16 text-center">
-            <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500 font-medium">Nenhuma disciplina cadastrada</p>
-            {isAdmin && <p className="text-sm text-slate-400 mt-1">Adicione disciplinas ou faça upload do PPC para importar automaticamente</p>}
-          </CardContent>
-        </Card>
+        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-16 text-center">
+          <BookOpen className="mb-3 h-12 w-12 text-slate-300" />
+          <p className="font-medium text-slate-500">Nenhuma disciplina cadastrada</p>
+          {isAdmin && <p className="mt-1 text-sm text-slate-400">Adicione disciplinas ou faca upload do PPC</p>}
+        </div>
       ) : (
         <div className="space-y-4">
           {Object.entries(semesterGroups).sort(([a], [b]) => Number(a) - Number(b)).map(([sem, subs]) => (
-            <Card key={sem} className="border-slate-100">
-              <CardHeader className="pb-2 pt-4 px-5">
-                <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                  <span className="w-6 h-6 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold">{sem}</span>
-                  {Number(sem)}º Semestre
-                  <span className="text-xs text-slate-400 font-normal ml-auto">{subs.reduce((s, d) => s + d.weeklyClasses, 0)} aulas/sem</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="px-5 pb-4 space-y-2">
-                {subs.map((subject) => {
+            <div key={sem} className="rounded-xl border border-slate-200 bg-white shadow-sm">
+              <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-3">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100 text-xs font-bold text-green-700">{sem}</span>
+                <h3 className="text-sm font-semibold text-slate-700">{Number(sem)}o Semestre</h3>
+                <span className="ml-auto text-xs font-normal text-slate-400">{subs.reduce((s, d) => s + d.weeklyClasses, 0)} aulas/sem</span>
+              </div>
+              <div className="space-y-1 p-3">
+                {subs.map(subject => {
                   const area = subject.areaId ? areaMap.get(subject.areaId) : null;
                   const isExpanded = expandedSubject === subject.id;
                   const hasSyllabus = !!(subject as any).syllabus;
                   const hasBibliography = !!(subject as any).bibliography;
                   return (
-                    <div key={subject.id} className="border border-slate-100 rounded-lg bg-white overflow-hidden">
-                      <div
-                        className="flex items-center gap-3 p-3 cursor-pointer hover:bg-slate-50 transition-colors"
-                        onClick={() => setExpandedSubject(isExpanded ? null : subject.id)}
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
+                    <div key={subject.id} className="overflow-hidden rounded-lg border border-slate-100 bg-white">
+                      <div className="flex cursor-pointer items-center gap-3 p-3 hover:bg-slate-50" onClick={() => setExpandedSubject(isExpanded ? null : subject.id)}>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
                             <span className="text-sm font-medium text-slate-800">{subject.name}</span>
-                            {subject.isElective && <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-purple-600 border-purple-200">Optativa</Badge>}
-                            {subject.isRemote && <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-blue-600 border-blue-200">EaD</Badge>}
+                            {subject.isElective && <Badge variant="outline" className="border-purple-200 px-1.5 py-0 text-[10px] text-purple-600">Optativa</Badge>}
+                            {subject.isRemote && <Badge variant="outline" className="border-blue-200 px-1.5 py-0 text-[10px] text-blue-600">EaD</Badge>}
                           </div>
-                          <div className="flex items-center gap-3 mt-1 flex-wrap">
-                            <span className="text-xs text-slate-500 flex items-center gap-1"><Clock className="w-3 h-3" />{subject.weeklyClasses} aulas/sem</span>
-                            {subject.totalHours && <span className="text-xs text-slate-500">{subject.totalHours}h total</span>}
+                          <div className="mt-1 flex flex-wrap items-center gap-3">
+                            <span className="flex items-center gap-1 text-xs text-slate-500"><Clock className="h-3 w-3" />{subject.weeklyClasses} aulas/sem</span>
+                            {(subject as any).totalHours && <span className="text-xs text-slate-500">{(subject as any).totalHours}h total</span>}
                             {area ? (
-                              <span className="text-xs flex items-center gap-1" style={{ color: area.color ?? "#3B82F6" }}>
-                                <Layers className="w-3 h-3" />{area.name}
+                              <span className="flex items-center gap-1 text-xs" style={{ color: area.color ?? "#3B82F6" }}>
+                                <Layers className="h-3 w-3" />{area.name}
                               </span>
                             ) : (
-                              <span className="text-xs text-orange-500 flex items-center gap-1"><Layers className="w-3 h-3" />Sem área</span>
+                              <span className="flex items-center gap-1 text-xs text-orange-500"><Layers className="h-3 w-3" />Sem area</span>
                             )}
-                            {hasSyllabus && <span className="text-xs text-slate-400 flex items-center gap-0.5"><FileText className="w-3 h-3" />Ementa</span>}
-                            {hasBibliography && <span className="text-xs text-slate-400 flex items-center gap-0.5"><Library className="w-3 h-3" />Refs</span>}
+                            {hasSyllabus && <span className="flex items-center gap-0.5 text-xs text-slate-400"><FileText className="h-3 w-3" />Ementa</span>}
+                            {hasBibliography && <span className="flex items-center gap-0.5 text-xs text-slate-400"><Library className="h-3 w-3" />Refs</span>}
                           </div>
                         </div>
-                        <div className="flex items-center gap-1 shrink-0">
+                        <div className="flex shrink-0 items-center gap-1">
                           {isAdmin && (
                             <>
-                              <Button
-                                variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-green-600"
-                                onClick={(e) => { e.stopPropagation(); openEdit(subject); }}
-                                title="Editar disciplina"
-                              >
-                                <Pencil className="w-3 h-3" />
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-green-600" onClick={e => { e.stopPropagation(); openEdit(subject); }} title="Editar">
+                                <Pencil className="h-3 w-3" />
                               </Button>
-                              <Button
-                                variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-red-600"
-                                onClick={(e) => { e.stopPropagation(); deleteSubjectMutation.mutate({ id: subject.id }); }}
-                                title="Remover disciplina"
-                              >
-                                <Trash2 className="w-3 h-3" />
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-red-600" onClick={e => { e.stopPropagation(); deleteSubjectMutation.mutate({ id: subject.id }); }} title="Remover">
+                                <Trash2 className="h-3 w-3" />
                               </Button>
                             </>
                           )}
-                          {isExpanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                          {isExpanded ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
                         </div>
                       </div>
                       {isExpanded && (
-                        <div className="px-3 pb-3 border-t border-slate-100 pt-3 bg-slate-50 space-y-3">
+                        <div className="space-y-3 border-t border-slate-100 bg-slate-50 px-3 pb-3 pt-3">
                           {hasSyllabus ? (
                             <div>
-                              <p className="text-xs font-semibold text-slate-600 mb-1 flex items-center gap-1"><FileText className="w-3 h-3" />Ementa</p>
-                              <p className="text-xs text-slate-700 bg-white rounded p-2 border border-slate-100 whitespace-pre-wrap leading-relaxed">{(subject as any).syllabus}</p>
+                              <p className="mb-1 flex items-center gap-1 text-xs font-semibold text-slate-600"><FileText className="h-3 w-3" />Ementa</p>
+                              <p className="whitespace-pre-wrap rounded border border-slate-100 bg-white p-2 text-xs leading-relaxed text-slate-700">{(subject as any).syllabus}</p>
                             </div>
                           ) : (
-                            <p className="text-xs text-slate-400 italic flex items-center gap-1">
-                              <FileText className="w-3 h-3" />Ementa não cadastrada{isAdmin ? " — clique no ícone de edição para adicionar." : "."}
-                            </p>
+                            <p className="flex items-center gap-1 text-xs italic text-slate-400"><FileText className="h-3 w-3" />Ementa nao cadastrada{isAdmin ? " — clique no icone de edicao para adicionar." : "."}</p>
                           )}
                           {hasBibliography ? (
                             <div>
-                              <p className="text-xs font-semibold text-slate-600 mb-1 flex items-center gap-1"><Library className="w-3 h-3" />Referências Bibliográficas</p>
-                              <p className="text-xs text-slate-700 bg-white rounded p-2 border border-slate-100 whitespace-pre-wrap leading-relaxed">{(subject as any).bibliography}</p>
+                              <p className="mb-1 flex items-center gap-1 text-xs font-semibold text-slate-600"><Library className="h-3 w-3" />Referencias Bibliograficas</p>
+                              <p className="whitespace-pre-wrap rounded border border-slate-100 bg-white p-2 text-xs leading-relaxed text-slate-700">{(subject as any).bibliography}</p>
                             </div>
                           ) : (
-                            <p className="text-xs text-slate-400 italic flex items-center gap-1">
-                              <Library className="w-3 h-3" />Referências não cadastradas{isAdmin ? " — clique no ícone de edição para adicionar." : "."}
-                            </p>
+                            <p className="flex items-center gap-1 text-xs italic text-slate-400"><Library className="h-3 w-3" />Referencias nao cadastradas{isAdmin ? " — clique no icone de edicao para adicionar." : "."}</p>
                           )}
                         </div>
                       )}
                     </div>
                   );
                 })}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       )}
 
       {/* Modal: Nova Disciplina */}
-      <Dialog open={showForm} onOpenChange={(o) => { setShowForm(o); if (!o) setForm(emptyForm); }}>
-        <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
+      <Dialog open={showForm} onOpenChange={o => { setShowForm(o); if (!o) setForm(emptyForm); }}>
+        <DialogContent className="flex max-h-[90vh] flex-col sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Plus className="w-4 h-4 text-green-600" />Nova Disciplina</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Plus className="h-4 w-4 text-green-600" />Nova Disciplina</DialogTitle>
           </DialogHeader>
           <ScrollArea className="flex-1">
-            <div className="py-2 pr-2">
-              <SubjectFormFields f={form} setF={setForm} />
-            </div>
+            <div className="py-2 pr-2"><SubjectFormFields f={form} setF={setForm} /></div>
           </ScrollArea>
           <DialogFooter className="mt-2">
             <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
@@ -387,19 +322,17 @@ export default function CourseDetailPage() {
       </Dialog>
 
       {/* Modal: Editar Disciplina */}
-      <Dialog open={!!editingSubject} onOpenChange={(o) => { if (!o) setEditingSubject(null); }}>
-        <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
+      <Dialog open={!!editingSubject} onOpenChange={o => { if (!o) setEditingSubject(null); }}>
+        <DialogContent className="flex max-h-[90vh] flex-col sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Pencil className="w-4 h-4 text-green-600" />Editar Disciplina</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Pencil className="h-4 w-4 text-green-600" />Editar Disciplina</DialogTitle>
           </DialogHeader>
           <ScrollArea className="flex-1">
-            <div className="py-2 pr-2">
-              <SubjectFormFields f={editForm} setF={setEditForm} />
-            </div>
+            <div className="py-2 pr-2"><SubjectFormFields f={editForm} setF={setEditForm} /></div>
           </ScrollArea>
           <DialogFooter className="mt-2">
             <Button variant="outline" onClick={() => setEditingSubject(null)}>Cancelar</Button>
-            <Button onClick={handleUpdate} disabled={updateSubjectMutation.isPending} className="bg-green-600 hover:bg-green-700">Salvar Alterações</Button>
+            <Button onClick={handleUpdate} disabled={updateSubjectMutation.isPending} className="bg-green-600 hover:bg-green-700">Salvar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
