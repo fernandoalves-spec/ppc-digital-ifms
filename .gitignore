@@ -1,4 +1,5 @@
 --- .gitignore (原始)
+--- .gitignore (原始)
 # Dependencies
 **/node_modules
 .pnpm-store/
@@ -115,3 +116,6 @@ client/public/__manus__/version.json
 
 +++ .gitignore (修改后)
 Nothing should be ignored since only a TypeScript source file was modified and no build artifacts, dependencies, or temporary files were detected in the changes.
+
++++ .gitignore (修改后)
+Nothing should be ignored based on the provided file changes. The modification of 'server/_core/gemini.ts' is a source code file and does not require any additional gitignore rules.
