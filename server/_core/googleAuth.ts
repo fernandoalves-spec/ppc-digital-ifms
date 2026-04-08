@@ -23,6 +23,26 @@ const REDIS_PASSWORD = process.env.REDIS_PASSWORD ?? "";
 
 let redisClient: RedisClientType | null = null;
 
+function validateSessionStoreEnv() {
+  if (IS_PRODUCTION && !REDIS_URL) {
+    throw new Error(
+      "[GoogleAuth] REDIS_URL é obrigatório em produção para armazenar sessões OAuth fora de memória. Configure REDIS_URL (e opcionalmente REDIS_USERNAME/REDIS_PASSWORD)."
+    );
+  }
+
+  if (REDIS_URL && (!REDIS_URL.startsWith("redis://") && !REDIS_URL.startsWith("rediss://"))) {
+    throw new Error(
+      "[GoogleAuth] REDIS_URL inválido. Use um endpoint começando com redis:// ou rediss://."
+    );
+  }
+
+  if ((REDIS_USERNAME && !REDIS_PASSWORD) || (!REDIS_USERNAME && REDIS_PASSWORD)) {
+    console.warn(
+      "[GoogleAuth] REDIS_USERNAME/REDIS_PASSWORD configurados parcialmente. Prefira informar ambos ou apenas REDIS_URL completo."
+    );
+  }
+}
+
 function getSessionStore() {
   if (!REDIS_URL) {
     if (IS_PRODUCTION) {
@@ -43,9 +63,14 @@ function getSessionStore() {
     redisClient.on("error", (err) => {
       console.error("[GoogleAuth] ❌ Erro no cliente Redis:", err);
     });
-    redisClient.connect().catch((err) => {
-      console.error("[GoogleAuth] ❌ Falha ao conectar no Redis:", err);
-    });
+    redisClient
+      .connect()
+      .then(() => {
+        console.log("[GoogleAuth] ✅ Conectado ao Redis para sessão.");
+      })
+      .catch((err) => {
+        console.error("[GoogleAuth] ❌ Falha ao conectar no Redis:", err);
+      });
   }
 
   return new RedisStore({
@@ -56,6 +81,8 @@ function getSessionStore() {
 }
 
 export function setupGoogleAuth(app: Express) {
+  validateSessionStoreEnv();
+
   console.log(`[GoogleAuth] Configurando com APP_URL: ${APP_URL}`);
   console.log(`[GoogleAuth] Callback URL: ${APP_URL}/api/auth/google/callback`);
 
