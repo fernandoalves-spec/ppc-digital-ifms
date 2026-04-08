@@ -35,8 +35,8 @@ const allowedLockupsByOrientation: Record<
   IfmsBrandOrientation,
   Set<IfmsBrandLockup>
 > = {
-  horizontal: new Set(["symbol-left-text-right"]),
-  vertical: new Set(["symbol-top-text-bottom"]),
+  horizontal: new Set<IfmsBrandLockup>(["symbol-left-text-right"]),
+  vertical: new Set<IfmsBrandLockup>(["symbol-top-text-bottom"]),
 };
 
 export const brandPolicyIfms = {
