@@ -16,7 +16,13 @@ const SESSION_SECRET = process.env.JWT_SECRET ?? "ppc-digital-ifms-secret-change
 const APP_URL = (process.env.APP_URL ?? "http://localhost:3000").replace(/\/$/, ""); // remove trailing slash
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
 const SESSION_MAX_AGE_MS = 365 * 24 * 60 * 60 * 1000; // 1 ano
-const SESSION_TTL_SECONDS = Math.floor(SESSION_MAX_AGE_MS / 1000);
+const SESSION_COOKIE_CONFIG = {
+  secure: IS_PRODUCTION,
+  httpOnly: true,
+  maxAge: SESSION_MAX_AGE_MS,
+  sameSite: IS_PRODUCTION ? "none" : "lax",
+} as const;
+const SESSION_TTL_SECONDS = Math.floor(SESSION_COOKIE_CONFIG.maxAge / 1000);
 const REDIS_URL = process.env.REDIS_URL ?? "";
 const REDIS_USERNAME = process.env.REDIS_USERNAME ?? "";
 const REDIS_PASSWORD = process.env.REDIS_PASSWORD ?? "";
@@ -26,11 +32,11 @@ let redisClient: RedisClientType | null = null;
 function validateSessionStoreEnv() {
   if (IS_PRODUCTION && !REDIS_URL) {
     throw new Error(
-      "[GoogleAuth] REDIS_URL é obrigatório em produção para armazenar sessões OAuth fora de memória. Configure REDIS_URL (e opcionalmente REDIS_USERNAME/REDIS_PASSWORD)."
+      "[GoogleAuth] Configuração inválida: REDIS_URL é obrigatório em produção para persistência de sessão OAuth. Sem Redis, o express-session usa MemoryStore (não recomendado e sem persistência)."
     );
   }
 
-  if (REDIS_URL && (!REDIS_URL.startsWith("redis://") && !REDIS_URL.startsWith("rediss://"))) {
+  if (REDIS_URL && !REDIS_URL.startsWith("redis://") && !REDIS_URL.startsWith("rediss://")) {
     throw new Error(
       "[GoogleAuth] REDIS_URL inválido. Use um endpoint começando com redis:// ou rediss://."
     );
@@ -43,14 +49,9 @@ function validateSessionStoreEnv() {
   }
 }
 
-function getSessionStore() {
+function createSessionStore() {
   if (!REDIS_URL) {
-    if (IS_PRODUCTION) {
-      throw new Error(
-        "[GoogleAuth] REDIS_URL é obrigatório em produção para persistência de sessão. Configure REDIS_URL (e opcionalmente REDIS_USERNAME/REDIS_PASSWORD)."
-      );
-    }
-    console.warn("[GoogleAuth] REDIS_URL não configurado. Usando MemoryStore apenas para desenvolvimento.");
+    console.info("[GoogleAuth] Sessão em MemoryStore (apenas desenvolvimento local).");
     return undefined;
   }
 
@@ -66,7 +67,9 @@ function getSessionStore() {
     redisClient
       .connect()
       .then(() => {
-        console.log("[GoogleAuth] ✅ Conectado ao Redis para sessão.");
+        console.log(
+          `[GoogleAuth] ✅ Conectado ao Redis para sessão (ttl=${SESSION_TTL_SECONDS}s).`
+        );
       })
       .catch((err) => {
         console.error("[GoogleAuth] ❌ Falha ao conectar no Redis:", err);
@@ -90,16 +93,11 @@ export function setupGoogleAuth(app: Express) {
   app.use(
     session({
       secret: SESSION_SECRET,
-      store: getSessionStore(),
+      store: createSessionStore(),
       resave: false,
       saveUninitialized: false,
       proxy: true, // necessário para Railway (proxy reverso)
-      cookie: {
-        secure: IS_PRODUCTION,
-        httpOnly: true,
-        maxAge: SESSION_MAX_AGE_MS,
-        sameSite: IS_PRODUCTION ? "none" : "lax",
-      },
+      cookie: SESSION_COOKIE_CONFIG,
     })
   );
 
