@@ -12,6 +12,7 @@ import { ifmsColorTokens } from "@shared/branding/ifmsTokens";
 
 const PRESET_COLORS = [ifmsColorTokens.green.hex, "#2563eb", "#d97706", "#9333ea", ifmsColorTokens.red.hex, "#0891b2", "#65a30d", "#c026d3", "#ea580c", "#0d9488"];
 const DEFAULT_AREA_COLOR = ifmsColorTokens.green.hex;
+type AreaForm = { name: string; description: string; color: string };
 
 export default function AreasPage() {
   const utils = trpc.useUtils();
@@ -31,7 +32,7 @@ export default function AreasPage() {
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [form, setForm] = useState({ name: "", description: "", color: DEFAULT_AREA_COLOR });
+  const [form, setForm] = useState<AreaForm>({ name: "", description: "", color: DEFAULT_AREA_COLOR });
 
   const resetForm = () => setForm({ name: "", description: "", color: DEFAULT_AREA_COLOR });
 
