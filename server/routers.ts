@@ -326,23 +326,22 @@ const ppcRouter = router({
     .mutation(async ({ input, ctx }) => {
       await updatePpcDocument(input.documentId, { status: "processing" });
       try {
-        // Buscar áreas vinculadas ao campus (se informado) para guiar a IA
         let campusAreaNames: string[] = [];
         if (input.campusId) {
           const areas = await getCampusAreas(input.campusId);
-          campusAreaNames = areas.map(a => a.name);
+          campusAreaNames = areas.map((area) => area.name);
         }
-        // Baixar o PDF
+
         const pdfResponse = await fetch(input.fileUrl);
         if (!pdfResponse.ok) throw new Error(`Falha ao baixar PDF: ${pdfResponse.status}`);
         const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
 
-        const ppcJsonSchema = {
+        const ppcJsonSchema: Record<string, unknown> = {
           type: "object",
           properties: {
-            courseName: { type: "string", description: "Nome completo do curso" },
-            courseType: { type: "string", description: "Tipo: Técnico, Subsequente, Graduação, FIC ou Pós-graduação" },
-            duration: { type: "integer", description: "Duração em semestres" },
+            courseName: { type: "string" },
+            courseType: { type: "string" },
+            duration: { type: "integer" },
             subjects: {
               type: "array",
               items: {
@@ -351,59 +350,120 @@ const ppcRouter = router({
                   name: { type: "string" },
                   semester: { type: "integer" },
                   weeklyClasses: { type: "integer" },
-                  totalHours: { type: "integer", nullable: true },
+                  totalHours: { type: ["integer", "null"] },
                   isElective: { type: "boolean" },
                   isRemote: { type: "boolean" },
-                  server/routers.ts
-                strict: true,
-                schema: {
-                  type: "object",
-                  properties: {
-                    courseName: { type: "string" },
-                    courseType: { type: "string" },
-                    duration: { type: "integer" },
-                    subjects: {
-                      type: "array",
-                      items: {
-                        type: "object",
-                        properties: {
-                          name: { type: "string" },
-                          semester: { type: "integer" },
-                          weeklyClasses: { type: "integer" },
-                          totalHours: { type: ["integer", "null"] },
-                          isElective: { type: "boolean" },
-                          isRemote: { type: "boolean" },
-                          suggestedArea: { type: "string" },
-                          syllabus: { type: ["string", "null"] },
-                          bibliography: { type: ["string", "null"] },
-                        },
-                        required: ["name", "semester", "weeklyClasses", "isElective", "isRemote", "suggestedArea", "syllabus", "bibliography"],
-                        additionalProperties: false,
-                      },
-                    },
-                  },
-                  required: ["courseName", "courseType", "duration", "subjects"],
-                  additionalProperties: false,
+                  suggestedArea: { type: "string" },
+                  syllabus: { type: ["string", "null"] },
+                  bibliography: { type: ["string", "null"] },
                 },
+                required: [
+                  "name",
+                  "semester",
+                  "weeklyClasses",
+                  "isElective",
+                  "isRemote",
+                  "suggestedArea",
+                  "syllabus",
+                  "bibliography",
+                ],
+                additionalProperties: false,
+              },
+            },
+          },
+          required: ["courseName", "courseType", "duration", "subjects"],
+          additionalProperties: false,
+        };
+
+        const areaHint =
+          campusAreaNames.length > 0
+            ? `Use preferencialmente estas areas: ${campusAreaNames.join(", ")}.`
+            : "Nao invente areas. Se nao houver area clara, use string vazia em suggestedArea.";
+
+        const systemPrompt =
+          "Voce e um especialista em PPC. Extraia os dados estruturados e retorne JSON valido.";
+        const userPrompt = [
+          "Analise o PDF do PPC e preencha o schema solicitado.",
+          "Classifique courseType como: Tecnico, Subsequente, Graduacao, FIC ou Pos-graduacao.",
+          areaHint,
+          "Para cada disciplina, extraia ementa em syllabus e referencias em bibliography quando existirem.",
+        ].join(" ");
+
+        const parseModelJson = (raw: string): unknown => {
+          try {
+            return JSON.parse(raw);
+          } catch {
+            const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+            if (fenced) return JSON.parse(fenced[1]);
+            throw new Error("Resposta do modelo nao retornou JSON valido.");
+          }
+        };
+
+        let extractedData: any;
+        if (isGeminiAvailable()) {
+          extractedData = await extractPdfWithGemini({
+            pdfBuffer,
+            systemPrompt,
+            userPrompt,
+            jsonSchema: ppcJsonSchema,
+            schemaName: "ppc_extraction",
+          });
+        } else {
+          const response = await invokeLLM({
+            messages: [
+              { role: "system", content: systemPrompt },
+              {
+                role: "user",
+                content: [
+                  { type: "text", text: userPrompt },
+                  { type: "file_url", file_url: { url: input.fileUrl, mime_type: "application/pdf" } },
+                ],
+              },
+            ],
+            response_format: {
+              type: "json_schema",
+              json_schema: {
+                name: "ppc_extraction",
+                strict: true,
+                schema: ppcJsonSchema,
               },
             },
           });
+
           const content = response.choices[0]?.message?.content;
-          extractedData = typeof content === "string" ? JSON.parse(content) : content;
+          if (!content) throw new Error("LLM retornou resposta vazia.");
+
+          const rawText =
+            typeof content === "string"
+              ? content
+              : content
+                  .filter((part: any) => part.type === "text")
+                  .map((part: any) => part.text)
+                  .join("\n");
+
+          if (!rawText) throw new Error("LLM nao retornou texto parseavel.");
+          extractedData = parseModelJson(rawText);
         }
+
         await updatePpcDocument(input.documentId, {
           status: "extracted",
           extractedData,
           processedAt: new Date(),
         });
-        await audit(ctx, "EXTRACT", "ppc_document", input.documentId, null, { courseName: extractedData.courseName });
+        await audit(ctx, "EXTRACT", "ppc_document", input.documentId, null, {
+          courseName: extractedData?.courseName,
+        });
         return { success: true, data: extractedData };
       } catch (error: any) {
         console.error("[PPC Extract Error]", error);
         await updatePpcDocument(input.documentId, { status: "rejected" });
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: `Erro na extração: ${error.message}` });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Erro na extracao: ${error.message}`,
+        });
       }
     }),
+
   applyExtraction: adminProcedure
     .input(z.object({
       documentId: z.number(),
@@ -861,3 +921,4 @@ export const appRouter = router({
 });
 
 export type AppRouter = typeof appRouter;
+
