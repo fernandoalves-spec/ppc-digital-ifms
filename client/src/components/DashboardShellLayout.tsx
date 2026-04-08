@@ -18,7 +18,6 @@ import {
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
@@ -205,7 +204,7 @@ const pageMeta = [
   {
     matcher: (path: string) => path.startsWith("/areas"),
     title: "Áreas de ensino",
-    description: "Gerencie a distribuição de responsabilidade acadêmica entre áreas.",
+    description: "Gerencie a distribuição de responsibility acadêmica entre áreas.",
     badge: "Estrutura acadêmica",
   },
   {
@@ -447,12 +446,11 @@ function DashboardLayoutContent({
 
                     return (
                       <SidebarMenuItem key={item.path}>
-                        <SidebarMenuButton
-                          isActive={isActive}
+                        <button
                           onClick={() => setLocation(item.path)}
-                          tooltip={item.label}
+                          title={item.label}
                           className={[
-                            "h-10 rounded-xl px-3 py-2 text-left transition-colors",
+                            "flex h-10 w-full items-center gap-2 rounded-xl px-3 py-2 text-left transition-colors",
                             isActive
                               ? "bg-white text-slate-900 shadow-lg shadow-black/10"
                               : "text-emerald-50/85 hover:bg-white/8 hover:text-white",
@@ -466,7 +464,7 @@ function DashboardLayoutContent({
                             </span>
                           )}
                           {!isCollapsed && isActive && <ChevronRight className="h-3.5 w-3.5 shrink-0 text-emerald-600" />}
-                        </SidebarMenuButton>
+                        </button>
                       </SidebarMenuItem>
                     );
                   })}
@@ -579,7 +577,9 @@ function DashboardLayoutContent({
                           className="flex w-full items-center justify-between rounded-xl bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
                         >
                           <span className="truncate">{action.label}</span>
-                          <ArrowRight className="h-3.5 w-3.5 shrink-0" />
+                          <span className="ml-2 flex items-center justify-center shrink-0">
+                            <ArrowRight className="h-3.5 w-3.5" />
+                          </span>
                         </button>
                       ))}
                     </div>
