@@ -353,71 +353,7 @@ const ppcRouter = router({
                   totalHours: { type: "integer", nullable: true },
                   isElective: { type: "boolean" },
                   isRemote: { type: "boolean" },
-                  suggestedArea: { type: "string" },
-                  syllabus: { type: "string", nullable: true },
-                  bibliography: { type: "string", nullable: true },
-                },
-                required: ["name", "semester", "weeklyClasses", "isElective", "isRemote", "suggestedArea"],
-              },
-            },
-          },
-          required: ["courseName", "courseType", "duration", "subjects"],
-        };
-
-        const systemPrompt = `Você é um especialista em análise de Projetos Pedagógicos de Curso (PPC) de institutos federais brasileiros.
-Analise o documento PPC e extraia TODAS as informações em formato JSON estruturado.
-
-Para cada disciplina/unidade curricular, extraia:
-1. name: nome completo da disciplina
-2. semester: semestre em que é ofertada (inteiro, 1 a 12)
-3. weeklyClasses: número de aulas semanais (inteiro). Se não encontrar explicitamente, calcule dividindo a carga horária semanal ou estime com base na carga horária total e semanas letivas (tipicamente 20 semanas). Se não for possível, use 2.
-4. totalHours: carga horária total em horas (inteiro ou null)
-5. isElective: se é optativa/eletiva (boolean)
-6. isRemote: se é EaD/remota (boolean)
-7. suggestedArea: área de conhecimento da disciplina. ${campusAreaNames.length > 0 ? `IMPORTANTE: Use APENAS um dos seguintes nomes de área (exatamente como escrito): ${campusAreaNames.map(n => `"${n}"`).join(", ")}. Se a disciplina não se encaixar claramente em nenhuma dessas áreas, use "Não identificada".` : `Classifique baseado no conteúdo. Se não identificar, use "Não identificada".`}
-8. syllabus: ementa completa da disciplina (texto do PPC, ou null se não encontrar)
-9. bibliography: referências bibliográficas (básica e complementar, texto do PPC, ou null se não encontrar)
-
-Retorne APENAS JSON válido conforme o schema fornecido.`;
-
-        const userPrompt = `Extraia TODAS as informações do PPC: curso (nome e tipo) e para cada disciplina extraia também a ementa e referências bibliográficas completas. O campus já foi informado pelo usuário, NÃO é necessário extrair o campus.`;
-
-        let extractedData: any;
-
-        if (isGeminiAvailable()) {
-          // Modo Railway/externo: usa Gemini SDK diretamente com o PDF nativo
-          console.log("[PPC Extract] Usando Google Gemini SDK direto");
-          extractedData = await extractPdfWithGemini({
-            pdfBuffer,
-            systemPrompt,
-            userPrompt,
-            jsonSchema: ppcJsonSchema,
-            schemaName: "ppc_extraction",
-          });
-        } else {
-          // Modo Manus: extrai texto do PDF e envia via invokeLLM
-          console.log("[PPC Extract] Usando invokeLLM (Manus)");
-          const { PDFParse } = await import("pdf-parse");
-          const parser = new PDFParse({ data: pdfBuffer });
-          const textResult = await parser.getText();
-          const pdfText = textResult.pages.map((p: any) => p.text || "").join("\n");
-
-          if (!pdfText || pdfText.trim().length < 100) {
-            throw new Error("O PDF não contém texto extraível suficiente. Verifique se o arquivo é um PPC válido.");
-          }
-
-          const maxChars = 120000;
-          const truncatedText = pdfText.length > maxChars ? pdfText.substring(0, maxChars) + "\n[... texto truncado ...]" : pdfText;
-
-          const response = await invokeLLM({
-            messages: [
-              { role: "system", content: systemPrompt },
-              { role: "user", content: `${userPrompt}\n\n--- TEXTO DO PPC ---\n${truncatedText}` },
-            ],
-            response_format: {
-              type: "json_schema",
-              json_schema: {
-                name: "ppc_extraction",
+                  server/routers.ts
                 strict: true,
                 schema: {
                   type: "object",
