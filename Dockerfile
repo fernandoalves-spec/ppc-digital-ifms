@@ -10,7 +10,7 @@ COPY package.json pnpm-lock.yaml ./
 COPY patches/ ./patches/
 
 # Instalar TODAS as dependências (incluindo devDependencies para o build)
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
 
 # Copiar código fonte
 COPY . .
