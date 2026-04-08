@@ -8,9 +8,19 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Building2, Plus, Pencil, Trash2, MapPin, Tags, Search } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
+
+const ESTRUTURAS_ASSINATURA = [
+  "Campus",
+  "Centro de Referência",
+  "Polo",
+  "Polo de Inovação",
+  "Campus Avançado",
+  "Estruturas Oficiais",
+] as const;
 
 export default function CampusPage() {
   const { user } = useAuth();
@@ -23,6 +33,8 @@ export default function CampusPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState({ name: "", city: "", state: "" });
+  const [assinaturaEstrutura, setAssinaturaEstrutura] = useState<(typeof ESTRUTURAS_ASSINATURA)[number]>("Campus");
+  const [assinaturaUnidade, setAssinaturaUnidade] = useState("Campo Grande");
   const [managingAreas, setManagingAreas] = useState<{ id: number; name: string } | null>(null);
   const [areaSearch, setAreaSearch] = useState("");
 
@@ -102,6 +114,8 @@ export default function CampusPage() {
   const filteredAreas = (allAreas as any[]).filter((a: any) =>
     a.name.toLowerCase().includes(areaSearch.toLowerCase())
   );
+
+  const estruturaComposta = `${assinaturaEstrutura} ${assinaturaUnidade.trim() || "Nome da Unidade"}`;
 
   return (
     <div className="space-y-4 p-3 md:p-6">
@@ -289,6 +303,93 @@ export default function CampusPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Card className="border-blue-100">
+        <CardHeader>
+          <CardTitle className="text-base md:text-lg">Estrutura de assinatura institucional</CardTitle>
+          <p className="text-sm text-slate-500">
+            Apenas os campos de identificação variam (<strong>tipo de estrutura</strong> e <strong>nome da unidade</strong>), mantendo base visual fixa.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="tipo-estrutura">Tipo da estrutura (campo substituível)</Label>
+              <Select value={assinaturaEstrutura} onValueChange={(value) => setAssinaturaEstrutura(value as (typeof ESTRUTURAS_ASSINATURA)[number])}>
+                <SelectTrigger id="tipo-estrutura">
+                  <SelectValue placeholder="Selecione um tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ESTRUTURAS_ASSINATURA.map((tipo) => (
+                    <SelectItem key={tipo} value={tipo}>
+                      {tipo}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="nome-unidade">Nome da unidade (campo substituível)</Label>
+              <Input
+                id="nome-unidade"
+                value={assinaturaUnidade}
+                onChange={(e) => setAssinaturaUnidade(e.target.value)}
+                placeholder="Ex: Dourados"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="space-y-1.5">
+              <Label>Composição base (fixa)</Label>
+              <Input value="Símbolo IFMS + assinatura institucional" disabled />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Posicionamento (fixo)</Label>
+              <Input value="Símbolo à esquerda" disabled />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Alinhamentos (fixo)</Label>
+              <Input value="Horizontal e eixo central" disabled />
+            </div>
+          </div>
+
+          <div className="rounded-xl border bg-slate-50 p-4 space-y-3">
+            <p className="text-sm font-medium text-slate-700">Pré-visualização com grid / módulo x</p>
+            <div className="rounded-lg border bg-white p-4 md:p-6 relative overflow-hidden">
+              <div
+                className="absolute inset-0 opacity-60 pointer-events-none"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(to right, rgba(148,163,184,0.25) 1px, transparent 1px), linear-gradient(to bottom, rgba(148,163,184,0.25) 1px, transparent 1px)",
+                  backgroundSize: "24px 24px",
+                }}
+              />
+              <div className="relative z-10">
+                <div className="inline-flex items-center border border-dashed border-slate-300 px-2 py-1 rounded text-[11px] text-slate-500 mb-2">
+                  margem de proteção = 1x
+                </div>
+                <div className="flex items-center gap-4 rounded border border-slate-200 bg-white p-4">
+                  <div className="h-16 w-16 rounded bg-green-600 text-white text-[10px] font-semibold flex items-center justify-center shrink-0">
+                    SÍMBOLO
+                  </div>
+                  <div className="h-14 w-px bg-slate-200" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold uppercase tracking-wide text-slate-700">Instituto Federal</p>
+                    <p className="text-sm font-semibold uppercase tracking-wide text-slate-700">Mato Grosso do Sul</p>
+                    <p className="text-xs text-slate-500">{estruturaComposta}</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-slate-500">
+                  <span className="rounded border border-dashed px-2 py-1">altura símbolo = 4x</span>
+                  <span className="rounded border border-dashed px-2 py-1">espaço entre blocos = 1x</span>
+                  <span className="rounded border border-dashed px-2 py-1">área externa mínima = 1x</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
