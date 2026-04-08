@@ -70,7 +70,7 @@ export default function PublicHome() {
         <div className="container flex min-h-16 items-center justify-between gap-4 py-3">
           <BrandMark variant="horizontal" imgClassName="h-10 w-auto" />
 
-          <nav className="hidden items-center gap-6 lg:flex">
+          <nav className="hidden items-center gap-6 md:flex">
             <a href="#modulos" className="text-sm text-[var(--ifms-text-soft)] hover:text-[var(--ifms-green-900)]">
               Modulos
             </a>
@@ -91,12 +91,12 @@ export default function PublicHome() {
       </header>
 
       <main className="pb-10">
-        <section className="container grid gap-8 py-10 md:py-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+        <section className="container grid gap-8 py-10 md:grid-cols-[1.02fr_0.98fr] md:items-center md:py-14">
           <div className="space-y-6">
             <span className="eyebrow">Plataforma institucional IFMS</span>
 
             <div className="space-y-4">
-              <h1 className="text-3xl font-extrabold tracking-tight text-[var(--ifms-green-900)] sm:text-4xl lg:text-5xl">
+              <h1 className="text-3xl font-extrabold tracking-tight text-[var(--ifms-green-900)] sm:text-4xl md:text-[2.8rem]">
                 Gestao de PPC mais clara, rapida e confiavel.
               </h1>
               <p className="max-w-2xl text-base leading-7 text-[var(--ifms-text-soft)] sm:text-lg">

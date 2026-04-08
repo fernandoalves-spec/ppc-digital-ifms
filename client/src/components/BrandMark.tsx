@@ -27,10 +27,13 @@ export default function BrandMark({
   const src = useMemo(() => getBrandAssetByVariant(variant), [variant]);
 
   if (failed) {
+    const isVertical = variant === "vertical";
+
     return (
       <div
         className={cn(
-          "inline-flex items-center gap-2 rounded-xl border border-[var(--ifms-green-100)] bg-white px-3 py-2 text-[var(--ifms-green-900)]",
+          "inline-flex items-center rounded-xl border border-[var(--ifms-green-100)] bg-white text-[var(--ifms-green-900)] shadow-[var(--ifms-shadow-soft)]",
+          isVertical ? "flex-col gap-2 px-4 py-4 text-center" : "gap-2 px-3 py-2.5",
           fallbackClassName,
           className,
         )}
@@ -38,8 +41,11 @@ export default function BrandMark({
         <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--ifms-green-600)] text-white">
           <GraduationCap className="h-4 w-4" />
         </span>
-        <span className="text-sm font-semibold tracking-tight">
-          {brandInstitution.product} {brandInstitution.shortName}
+        <span className={cn("min-w-0", isVertical ? "space-y-1" : "space-y-0.5")}>
+          <span className="block truncate text-sm font-bold tracking-tight">{brandInstitution.product}</span>
+          <span className="block truncate text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--ifms-green-700)]">
+            {brandInstitution.shortName}
+          </span>
         </span>
       </div>
     );
