@@ -87,6 +87,12 @@ const createOAuthHttpClient = (): AxiosInstance =>
     timeout: AXIOS_TIMEOUT_MS,
   });
 
+const assertOAuthServerUrlConfigured = () => {
+  if (!ENV.oAuthServerUrl) {
+    throw new Error("OAUTH_SERVER_URL is not configured");
+  }
+};
+
 class SDKServer {
   private readonly client: AxiosInstance;
   private readonly oauthService: OAuthService;
@@ -240,6 +246,8 @@ class SDKServer {
   async getUserInfoWithJwt(
     jwtToken: string
   ): Promise<GetUserInfoWithJwtResponse> {
+    assertOAuthServerUrlConfigured();
+
     const payload: GetUserInfoWithJwtRequest = {
       jwtToken,
       projectId: ENV.appId,
