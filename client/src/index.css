@@ -1,4 +1,166 @@
-.flex {
-    display: flex;
-    flex-wrap: wrap;
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 142 36% 12%;
+  --muted: 138 12% 94%;
+  --muted-foreground: 142 12% 36%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 142 36% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 142 36% 12%;
+  --border: 142 16% 86%;
+  --input: 142 18% 88%;
+  --primary: 138 73% 29%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 142 23% 96%;
+  --secondary-foreground: 142 36% 18%;
+  --accent: 142 28% 93%;
+  --accent-foreground: 142 36% 18%;
+  --destructive: 0 72% 46%;
+  --destructive-foreground: 0 0% 100%;
+  --ring: 138 73% 29%;
+  --radius: 1rem;
+
+  --ifms-green-900: #0f3d28;
+  --ifms-green-800: #14532d;
+  --ifms-green-700: #166534;
+  --ifms-green-600: #15803d;
+  --ifms-green-500: #16a34a;
+  --ifms-green-100: #dcfce7;
+  --ifms-green-50: #f2fbf5;
+  --ifms-red: #e11d48;
+  --ifms-surface: #f5f7f4;
+  --ifms-panel: rgba(255, 255, 255, 0.92);
+  --ifms-panel-strong: rgba(255, 255, 255, 0.98);
+  --ifms-border: rgba(15, 61, 40, 0.12);
+  --ifms-text: #163020;
+  --ifms-text-soft: #4a6351;
+  --ifms-sidebar: linear-gradient(180deg, #0f3d28 0%, #14532d 52%, #0a2418 100%);
+  --ifms-sidebar-foreground: rgba(255, 255, 255, 0.94);
+  --ifms-sidebar-muted: rgba(220, 252, 231, 0.72);
+  --ifms-shadow: 0 20px 55px rgba(15, 61, 40, 0.12);
+  --ifms-shadow-soft: 0 8px 24px rgba(15, 61, 40, 0.08);
+  --sidebar-background: 138 55% 18%;
+  --sidebar-foreground: 0 0% 100%;
+  --sidebar-primary: 138 73% 52%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 138 38% 24%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: 138 73% 52%;
+}
+
+.dark {
+  --background: 142 28% 8%;
+  --foreground: 0 0% 98%;
+  --muted: 142 18% 16%;
+  --muted-foreground: 142 12% 72%;
+  --popover: 142 28% 8%;
+  --popover-foreground: 0 0% 98%;
+  --card: 142 24% 10%;
+  --card-foreground: 0 0% 98%;
+  --border: 142 18% 20%;
+  --input: 142 18% 18%;
+  --primary: 138 61% 45%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 142 18% 16%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 142 18% 18%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 63% 31%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 138 61% 45%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: "Inter", sans-serif;
+    background:
+      radial-gradient(circle at top left, rgba(34, 197, 94, 0.14), transparent 22%),
+      radial-gradient(circle at right, rgba(20, 83, 45, 0.08), transparent 28%),
+      linear-gradient(180deg, #f3f7f2 0%, #eef3ef 100%);
+    color: var(--ifms-text);
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+}
+
+@layer utilities {
+  .app-shell {
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at top right, rgba(22, 163, 74, 0.14), transparent 24%),
+      linear-gradient(180deg, #f4f8f3 0%, #eef3ef 48%, #f6f8f4 100%);
+  }
+
+  .glass-panel {
+    background: var(--ifms-panel);
+    border: 1px solid var(--ifms-border);
+    box-shadow: var(--ifms-shadow-soft);
+    backdrop-filter: blur(14px);
+  }
+
+  .institutional-panel {
+    background: var(--ifms-panel-strong);
+    border: 1px solid rgba(15, 61, 40, 0.1);
+    box-shadow: var(--ifms-shadow);
+  }
+
+  .hero-strip {
+    background: linear-gradient(135deg, rgba(15, 61, 40, 0.95), rgba(21, 128, 61, 0.92));
+    color: white;
+  }
+
+  .kpi-card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 249, 245, 0.98));
+    border: 1px solid rgba(15, 61, 40, 0.1);
+    box-shadow: var(--ifms-shadow-soft);
+  }
+
+  .kpi-card-dark {
+    background: linear-gradient(180deg, rgba(15, 61, 40, 0.98), rgba(20, 83, 45, 0.98));
+    color: white;
+    border: 1px solid rgba(220, 252, 231, 0.08);
+    box-shadow: var(--ifms-shadow);
+  }
+
+  .section-title {
+    color: var(--ifms-green-900);
+    letter-spacing: -0.02em;
+  }
+
+  .section-subtitle {
+    color: var(--ifms-text-soft);
+  }
+
+  .menu-active {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.96), rgba(220, 252, 231, 0.96));
+    color: var(--ifms-green-900);
+    box-shadow: 0 10px 24px rgba(10, 36, 24, 0.14);
+  }
+
+  .status-dot {
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 9999px;
+    display: inline-flex;
+    background: var(--ifms-green-500);
+    box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.12);
+  }
 }
