@@ -13,4 +13,6 @@ export const ENV = {
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
   appUrl: process.env.APP_URL ?? "http://localhost:3000",
   geminiApiKey: process.env.GEMINI_API_KEY ?? "",
+  geminiMaxOutputTokens: Number(process.env.GEMINI_MAX_OUTPUT_TOKENS ?? "8192"),
+  geminiThinkingBudget: Number(process.env.GEMINI_THINKING_BUDGET ?? "0"),
 };
