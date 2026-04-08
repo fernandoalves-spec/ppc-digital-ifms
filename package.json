@@ -1,3 +1,4 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
 diff --git a/package.json b/package.json
 index df7c7ae62541199ca427e8bf59bc342fb240fa70..5d36d20b1e3a75ddfb9d1274ed23104418de3893 100644
 --- a/package.json
@@ -67,3 +68,6 @@ index df7c7ae62541199ca427e8bf59bc342fb240fa70..5d36d20b1e3a75ddfb9d1274ed231044
 -}
 \ No newline at end of file
 +}
+ 
+EOF
+)
