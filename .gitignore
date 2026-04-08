@@ -1,5 +1,4 @@
 --- .gitignore (原始)
---- .gitignore (原始)
 # Dependencies
 **/node_modules
 .pnpm-store/
