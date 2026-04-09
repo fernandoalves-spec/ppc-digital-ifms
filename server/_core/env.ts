@@ -16,10 +16,7 @@ export const ENV = {
   redisUsername: process.env.REDIS_USERNAME ?? "",
   redisPassword: process.env.REDIS_PASSWORD ?? "",
   geminiApiKey: process.env.GEMINI_API_KEY ?? "",
-<<<<<<< Updated upstream
   geminiMaxOutputTokens: Number(process.env.GEMINI_MAX_OUTPUT_TOKENS ?? "8192"),
   geminiThinkingBudget: Number(process.env.GEMINI_THINKING_BUDGET ?? "0"),
-=======
   openaiApiKey: process.env.OPENAI_API_KEY ?? "",
->>>>>>> Stashed changes
 };
