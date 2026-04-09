@@ -45,8 +45,51 @@ function ensureTrailingSlash(value: string): string {
   return value.endsWith("/") ? value : `${value}/`;
 }
 
+/** Remove barras iniciais — usado apenas para chamadas ao Manus Storage Proxy (não para filesystem local). */
 function normalizeKey(relKey: string): string {
   return relKey.replace(/^\/+/, "");
+}
+
+/**
+ * Sanitiza e valida uma chave de arquivo para uso no sistema de arquivos local.
+ *
+ * Segurança:
+ *  - Rejeita explicitamente qualquer chave que contenha segmentos ".." (path traversal).
+ *  - Rejeita chaves com caracteres nulos ou barras duplas que possam confundir o parser.
+ *  - Verifica via path.resolve que o caminho resultante está dentro de baseDir.
+ *
+ * @throws {Error} se a chave for inválida ou tentar sair do diretório base.
+ */
+function sanitizeLocalKey(relKey: string, baseDir: string): string {
+  // Rejeição explícita de padrões de path traversal antes de qualquer normalização
+  if (relKey.includes("..")) {
+    throw new Error(`Invalid file key: path traversal detected ("${relKey}")`);
+  }
+  if (relKey.includes("\0")) {
+    throw new Error(`Invalid file key: null byte detected ("${relKey}")`);
+  }
+
+  // Remove barras iniciais e filtra segmentos vazios
+  const stripped = relKey.replace(/^\/+/, "");
+  const segments = stripped.split("/").filter(Boolean);
+
+  // Rejeita segmentos que sejam apenas "." (referência ao diretório atual)
+  for (const seg of segments) {
+    if (seg === ".") {
+      throw new Error(`Invalid file key: current-directory segment detected ("${relKey}")`);
+    }
+  }
+
+  const safeKey = segments.join("/");
+
+  // Verificação dupla via path.resolve: garante que o path resultante está dentro de baseDir
+  const resolvedBase = path.resolve(baseDir);
+  const resolvedFile = path.resolve(path.join(baseDir, safeKey));
+  if (!resolvedFile.startsWith(resolvedBase + path.sep) && resolvedFile !== resolvedBase) {
+    throw new Error(`Blocked path traversal attempt in file key: "${relKey}"`);
+  }
+
+  return safeKey;
 }
 
 function toFormData(
@@ -82,10 +125,10 @@ export async function storagePut(
   contentType = "application/octet-stream"
 ): Promise<{ key: string; url: string }> {
   const config = getStorageConfig();
-  const key = normalizeKey(relKey);
 
-  // Modo Manus Storage Proxy
+  // Modo Manus Storage Proxy — normalização simples (sem acesso ao filesystem)
   if (config) {
+    const key = normalizeKey(relKey);
     const uploadUrl = buildUploadUrl(config.baseUrl, key);
     const formData = toFormData(data, contentType, key.split("/").pop() ?? key);
     const response = await fetch(uploadUrl, {
@@ -104,8 +147,9 @@ export async function storagePut(
     return { key, url };
   }
 
-  // Modo local: salva em disco
-  const filePath = path.join(LOCAL_UPLOADS_DIR, key);
+  // Modo local: sanitiza a chave antes de qualquer operação de filesystem
+  const safeLocalKey = sanitizeLocalKey(relKey, LOCAL_UPLOADS_DIR);
+  const filePath = path.join(LOCAL_UPLOADS_DIR, safeLocalKey);
   const dir = path.dirname(filePath);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
@@ -115,26 +159,28 @@ export async function storagePut(
     : Buffer.from(data as any);
   fs.writeFileSync(filePath, buffer);
 
-  const url = `${getAppUrl()}/uploads/${key}`;
-  return { key, url };
+  const url = `${getAppUrl()}/uploads/${safeLocalKey}`;
+  return { key: safeLocalKey, url };
 }
 
 /**
  * Obtém a URL de download de um arquivo.
  * - Se BUILT_IN_FORGE_API_URL/KEY estiverem configurados: usa o Manus Storage Proxy.
- * - Caso contrário: retorna URL local do servidor.
+ * - Caso contrário: retorna URL local do servidor (com sanitização da chave).
  */
-export async function storageGet(relKey: string): Promise<{ key: string; url: string; }> {
+export async function storageGet(relKey: string): Promise<{ key: string; url: string }> {
   const config = getStorageConfig();
-  const key = normalizeKey(relKey);
 
   if (config) {
+    const key = normalizeKey(relKey);
     return {
       key,
       url: await buildDownloadUrl(config.baseUrl, key, config.apiKey),
     };
   }
 
-  const url = `${getAppUrl()}/uploads/${key}`;
-  return { key, url };
+  // Modo local: sanitiza a chave para evitar path traversal na URL gerada
+  const safeLocalKey = sanitizeLocalKey(relKey, LOCAL_UPLOADS_DIR);
+  const url = `${getAppUrl()}/uploads/${safeLocalKey}`;
+  return { key: safeLocalKey, url };
 }

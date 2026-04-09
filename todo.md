@@ -165,3 +165,18 @@
 - [x] Gemini processa o PDF nativo (base64) sem precisar extrair texto manualmente
 - [x] Adicionar GEMINI_API_KEY ao env.ts e configurar no ambiente
 - [x] Adicionar mock do módulo gemini nos testes (23 testes passando)
+
+## v1.22 — Configurar chave OpenAI como alternativa para extração no Railway
+- [ ] Buscar chaves hardcoded ou referências a APIs no código
+- [ ] Configurar OPENAI_API_KEY como variável de ambiente
+- [ ] Adaptar sistema para usar OpenAI quando OPENAI_API_KEY disponível (prioridade: Gemini > OpenAI > invokeLLM Manus)
+- [ ] Testar e salvar checkpoint
+
+## v1.22 — Correções da Revisão Técnica (P1 + P2)
+- [x] P1: Adicionar migrações incrementais (ALTER TABLE) ao init-db.mjs para evitar drift de schema no Railway
+- [x] P1: Adicionar índices em subjects.courseId, subjects.areaId, courses.campusId
+- [x] P1: Adicionar constraint UNIQUE em campus_areas(campusId, areaId)
+- [x] P2: Corrigir path traversal em storage.ts com sanitização de relKey
+- [x] P1 hardening: deduplicar campus_areas antes de criar índice UNIQUE
+- [x] P2 hardening: rejeitar chaves com segmentos inválidos em sanitizeLocalKey
+- [x] P2 completeness: aplicar sanitização em storageGet modo local + testes automatizados
