@@ -122,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
           conteudoTarget.classList.remove('escondido');
           if (cabecalhoTarget) {
             cabecalhoTarget.classList.add('aberta');
+            cabecalhoTarget.setAttribute('aria-expanded', 'true');
           }
         }
 
@@ -226,13 +227,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (resultadoBusca) {
       if (totalEncontrado > 0) {
-        resultadoBusca.innerHTML = `<strong>🔍 Busca:</strong> "${campoBusca.value}" — <strong>${totalEncontrado}</strong> ocorrência(s) encontrada(s) em: ${secoesEncontradas.join(', ')}. <button onclick="limparBusca()" style="margin-left:10px; padding:2px 10px; border:1px solid #999; border-radius:4px; cursor:pointer; background:#fff;">Limpar</button>`;
+        resultadoBusca.replaceChildren();
+        const msg = document.createElement('span');
+        const strong1 = document.createElement('strong');
+        strong1.textContent = '🔍 Busca:';
+        msg.appendChild(strong1);
+        msg.appendChild(document.createTextNode(` "${campoBusca.value}" — `));
+        const strong2 = document.createElement('strong');
+        strong2.textContent = String(totalEncontrado);
+        msg.appendChild(strong2);
+        msg.appendChild(document.createTextNode(` ocorrência(s) encontrada(s) em: ${secoesEncontradas.join(', ')}.`));
+        resultadoBusca.appendChild(msg);
+        resultadoBusca.appendChild(criarBotaoLimpar());
         resultadoBusca.classList.add('visivel');
       } else {
-        resultadoBusca.innerHTML = `<strong>🔍 Busca:</strong> Nenhum resultado encontrado para "<em>${campoBusca.value}</em>". <button onclick="limparBusca()" style="margin-left:10px; padding:2px 10px; border:1px solid #999; border-radius:4px; cursor:pointer; background:#fff;">Limpar</button>`;
+        resultadoBusca.replaceChildren();
+        const msg = document.createElement('span');
+        const strong = document.createElement('strong');
+        strong.textContent = '🔍 Busca:';
+        msg.appendChild(strong);
+        msg.appendChild(document.createTextNode(' Nenhum resultado encontrado para "'));
+        const em = document.createElement('em');
+        em.textContent = campoBusca.value;
+        msg.appendChild(em);
+        msg.appendChild(document.createTextNode('".'));
+        resultadoBusca.appendChild(msg);
+        resultadoBusca.appendChild(criarBotaoLimpar());
         resultadoBusca.classList.add('visivel');
       }
     }
+  }
+
+  function criarBotaoLimpar() {
+    const btn = document.createElement('button');
+    btn.textContent = 'Limpar';
+    btn.style.cssText = 'margin-left:10px; padding:2px 10px; border:1px solid #999; border-radius:4px; cursor:pointer; background:#fff;';
+    btn.addEventListener('click', () => window.limparBusca());
+    return btn;
   }
 
   function marcarTexto(elemento, termo) {
@@ -257,9 +288,21 @@ document.addEventListener('DOMContentLoaded', () => {
       const matches = texto.match(regex);
       if (matches) count += matches.length;
 
-      const span = document.createElement('span');
-      span.innerHTML = texto.replace(regex, match => `<mark>${match}</mark>`);
-      no.parentNode.replaceChild(span, no);
+      const fragment = document.createDocumentFragment();
+      let lastIndex = 0;
+      texto.replace(regex, (match, offset) => {
+        if (offset > lastIndex) {
+          fragment.appendChild(document.createTextNode(texto.slice(lastIndex, offset)));
+        }
+        const mark = document.createElement('mark');
+        mark.textContent = match;
+        fragment.appendChild(mark);
+        lastIndex = offset + match.length;
+      });
+      if (lastIndex < texto.length) {
+        fragment.appendChild(document.createTextNode(texto.slice(lastIndex)));
+      }
+      no.parentNode.replaceChild(fragment, no);
     });
 
     return count;
@@ -274,14 +317,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const parent = mark.parentNode;
       parent.replaceChild(document.createTextNode(mark.textContent), mark);
       parent.normalize();
-    });
-
-    document.querySelectorAll('span').forEach(span => {
-      if (span.querySelector('mark') === null && span.dataset.busca) {
-        const parent = span.parentNode;
-        parent.replaceChild(document.createTextNode(span.textContent), span);
-        parent.normalize();
-      }
     });
   }
 
