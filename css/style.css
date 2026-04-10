@@ -1,0 +1,1035 @@
+/* =============================================
+   PPC Digital IFMS - Estilos Principais
+   Instituto Federal de Mato Grosso do Sul
+   ============================================= */
+
+/* ---- Variáveis CSS ---- */
+:root {
+  --ifms-verde: #1a7f4b;
+  --ifms-verde-escuro: #0f5c35;
+  --ifms-verde-claro: #2ea86b;
+  --ifms-verde-bg: #e8f5ee;
+  --ifms-cinza: #f5f5f5;
+  --ifms-cinza-escuro: #4a4a4a;
+  --ifms-branco: #ffffff;
+  --ifms-preto: #1a1a1a;
+  --ifms-azul: #1565c0;
+  --sombra: 0 2px 8px rgba(0,0,0,0.12);
+  --sombra-hover: 0 4px 16px rgba(0,0,0,0.18);
+  --borda: 1px solid #e0e0e0;
+  --radius: 8px;
+  --transicao: all 0.3s ease;
+}
+
+/* ---- Reset e Base ---- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: var(--ifms-preto);
+  background-color: #f8f9fa;
+  line-height: 1.7;
+}
+
+a {
+  color: var(--ifms-verde);
+  text-decoration: none;
+  transition: var(--transicao);
+}
+
+a:hover {
+  color: var(--ifms-verde-escuro);
+  text-decoration: underline;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* ---- Barra de Acessibilidade ---- */
+#barra-acessibilidade {
+  background-color: var(--ifms-verde-escuro);
+  color: var(--ifms-branco);
+  padding: 4px 20px;
+  font-size: 0.78rem;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+}
+
+#barra-acessibilidade a,
+#barra-acessibilidade button {
+  color: var(--ifms-branco);
+  background: none;
+  border: 1px solid rgba(255,255,255,0.4);
+  padding: 2px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  transition: var(--transicao);
+}
+
+#barra-acessibilidade a:hover,
+#barra-acessibilidade button:hover {
+  background-color: rgba(255,255,255,0.2);
+  text-decoration: none;
+}
+
+/* ---- Cabeçalho ---- */
+#cabecalho {
+  background: linear-gradient(135deg, var(--ifms-verde-escuro) 0%, var(--ifms-verde) 100%);
+  color: var(--ifms-branco);
+  padding: 20px 40px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  box-shadow: var(--sombra);
+}
+
+#logo-ifms {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-decoration: none;
+  color: inherit;
+}
+
+#logo-ifms:hover {
+  text-decoration: none;
+  color: inherit;
+}
+
+.logo-icon {
+  width: 70px;
+  height: 70px;
+  background-color: var(--ifms-branco);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--ifms-verde-escuro);
+  flex-shrink: 0;
+  border: 3px solid rgba(255,255,255,0.4);
+}
+
+.logo-texto h1 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.5px;
+}
+
+.logo-texto p {
+  font-size: 0.82rem;
+  opacity: 0.85;
+  margin-top: 2px;
+}
+
+.cabecalho-titulo {
+  margin-left: auto;
+  text-align: right;
+}
+
+.cabecalho-titulo h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.cabecalho-titulo p {
+  font-size: 0.85rem;
+  opacity: 0.85;
+  margin-top: 4px;
+}
+
+/* ---- Navegação ---- */
+#nav-principal {
+  background-color: var(--ifms-verde);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: var(--sombra);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  flex-wrap: wrap;
+}
+
+.nav-links > li > a {
+  display: block;
+  color: var(--ifms-branco);
+  padding: 14px 14px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: var(--transicao);
+  white-space: nowrap;
+  text-decoration: none;
+  letter-spacing: 0.3px;
+}
+
+.nav-links > li > a:hover,
+.nav-links > li > a.ativo {
+  background-color: var(--ifms-verde-escuro);
+  text-decoration: none;
+  color: var(--ifms-branco);
+}
+
+.nav-busca {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#campo-busca {
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: none;
+  background-color: rgba(255,255,255,0.2);
+  color: var(--ifms-branco);
+  font-size: 0.85rem;
+  width: 200px;
+  outline: none;
+  transition: var(--transicao);
+}
+
+#campo-busca::placeholder {
+  color: rgba(255,255,255,0.7);
+}
+
+#campo-busca:focus {
+  background-color: rgba(255,255,255,0.3);
+  width: 240px;
+}
+
+.btn-busca {
+  background: none;
+  border: none;
+  color: var(--ifms-branco);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 4px 8px;
+}
+
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--ifms-branco);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 10px;
+}
+
+/* ---- Breadcrumb ---- */
+#breadcrumb {
+  background-color: var(--ifms-cinza);
+  border-bottom: var(--borda);
+  padding: 8px 40px;
+  font-size: 0.82rem;
+  color: var(--ifms-cinza-escuro);
+}
+
+#breadcrumb a {
+  color: var(--ifms-verde);
+}
+
+#breadcrumb span {
+  margin: 0 6px;
+  color: #aaa;
+}
+
+/* ---- Layout Principal ---- */
+#container-principal {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 20px;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 30px;
+  align-items: start;
+}
+
+/* ---- Sumário Lateral ---- */
+#sumario-lateral {
+  position: sticky;
+  top: 56px;
+  background-color: var(--ifms-branco);
+  border-radius: var(--radius);
+  box-shadow: var(--sombra);
+  overflow: hidden;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+}
+
+#sumario-lateral h3 {
+  background-color: var(--ifms-verde);
+  color: var(--ifms-branco);
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.sumario-lista {
+  list-style: none;
+  padding: 8px 0;
+}
+
+.sumario-lista li a {
+  display: block;
+  padding: 7px 16px;
+  font-size: 0.84rem;
+  color: var(--ifms-cinza-escuro);
+  transition: var(--transicao);
+  border-left: 3px solid transparent;
+  text-decoration: none;
+}
+
+.sumario-lista li a:hover,
+.sumario-lista li a.ativo {
+  background-color: var(--ifms-verde-bg);
+  border-left-color: var(--ifms-verde);
+  color: var(--ifms-verde-escuro);
+  text-decoration: none;
+}
+
+.sumario-lista .numero-secao {
+  font-weight: 700;
+  color: var(--ifms-verde);
+  margin-right: 6px;
+}
+
+/* ---- Conteúdo Principal ---- */
+#conteudo-principal {
+  min-width: 0;
+}
+
+/* ---- Banner/Hero ---- */
+#banner-hero {
+  background: linear-gradient(135deg, var(--ifms-verde-escuro) 0%, var(--ifms-verde) 60%, var(--ifms-verde-claro) 100%);
+  border-radius: var(--radius);
+  color: var(--ifms-branco);
+  padding: 40px;
+  margin-bottom: 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+#banner-hero::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 200px;
+  height: 200px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 50%;
+}
+
+#banner-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -60px;
+  right: 60px;
+  width: 300px;
+  height: 300px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 50%;
+}
+
+#banner-hero h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.3;
+  position: relative;
+  z-index: 1;
+}
+
+#banner-hero p {
+  font-size: 1rem;
+  opacity: 0.9;
+  max-width: 600px;
+  position: relative;
+  z-index: 1;
+}
+
+.banner-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.badge {
+  background-color: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.4);
+  color: var(--ifms-branco);
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+/* ---- Seções do PPC ---- */
+.secao-ppc {
+  background-color: var(--ifms-branco);
+  border-radius: var(--radius);
+  box-shadow: var(--sombra);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.secao-cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 24px;
+  cursor: pointer;
+  user-select: none;
+  transition: var(--transicao);
+  background-color: var(--ifms-branco);
+}
+
+.secao-cabecalho:hover {
+  background-color: var(--ifms-verde-bg);
+}
+
+.secao-numero {
+  background-color: var(--ifms-verde);
+  color: var(--ifms-branco);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.secao-titulo {
+  flex: 1;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ifms-verde-escuro);
+}
+
+.secao-toggle {
+  color: var(--ifms-verde);
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.secao-cabecalho.aberta .secao-toggle {
+  transform: rotate(180deg);
+}
+
+.secao-conteudo {
+  padding: 0 24px 24px 24px;
+  border-top: var(--borda);
+  animation: fadeIn 0.3s ease;
+}
+
+.secao-conteudo.escondido {
+  display: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- Tipografia do Conteúdo ---- */
+.secao-conteudo h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ifms-verde-escuro);
+  margin: 20px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--ifms-verde-bg);
+}
+
+.secao-conteudo h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ifms-cinza-escuro);
+  margin: 16px 0 8px;
+}
+
+.secao-conteudo p {
+  font-size: 0.92rem;
+  color: #444;
+  margin-bottom: 12px;
+  text-align: justify;
+}
+
+.secao-conteudo ul,
+.secao-conteudo ol {
+  margin: 10px 0 14px 20px;
+  font-size: 0.92rem;
+  color: #444;
+}
+
+.secao-conteudo li {
+  margin-bottom: 6px;
+}
+
+/* ---- Tabelas ---- */
+.tabela-ppc {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 0.88rem;
+}
+
+.tabela-ppc th {
+  background-color: var(--ifms-verde);
+  color: var(--ifms-branco);
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.tabela-ppc td {
+  padding: 9px 14px;
+  border-bottom: var(--borda);
+  color: #444;
+}
+
+.tabela-ppc tr:nth-child(even) td {
+  background-color: var(--ifms-verde-bg);
+}
+
+.tabela-ppc tr:hover td {
+  background-color: #d4edda;
+}
+
+/* ---- Cards de Informação ---- */
+.cards-grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.card-info {
+  background-color: var(--ifms-verde-bg);
+  border: 1px solid #c8e6c9;
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+}
+
+.card-info .card-valor {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--ifms-verde-escuro);
+  display: block;
+}
+
+.card-info .card-label {
+  font-size: 0.78rem;
+  color: #555;
+  margin-top: 4px;
+  display: block;
+}
+
+/* ---- Alerta/Destaque ---- */
+.destaque {
+  background-color: var(--ifms-verde-bg);
+  border-left: 4px solid var(--ifms-verde);
+  padding: 14px 18px;
+  margin: 16px 0;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: 0.9rem;
+}
+
+.destaque strong {
+  color: var(--ifms-verde-escuro);
+}
+
+.aviso {
+  background-color: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 14px 18px;
+  margin: 16px 0;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: 0.9rem;
+}
+
+/* ---- Progressão Curricular ---- */
+.periodo-grade {
+  margin: 16px 0;
+}
+
+.periodo-titulo {
+  background-color: var(--ifms-verde);
+  color: var(--ifms-branco);
+  padding: 8px 14px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.disciplinas-lista {
+  border: 1px solid #c8e6c9;
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  overflow: hidden;
+}
+
+.disciplina-item {
+  display: grid;
+  grid-template-columns: 1fr 80px 80px 80px;
+  padding: 10px 14px;
+  border-bottom: var(--borda);
+  font-size: 0.86rem;
+  align-items: center;
+  transition: var(--transicao);
+}
+
+.disciplina-item:last-child {
+  border-bottom: none;
+}
+
+.disciplina-item:hover {
+  background-color: var(--ifms-verde-bg);
+}
+
+.disciplina-item:nth-child(even) {
+  background-color: #f9fff9;
+}
+
+.disciplina-item:nth-child(even):hover {
+  background-color: var(--ifms-verde-bg);
+}
+
+.disciplina-nome {
+  font-weight: 500;
+  color: var(--ifms-preto);
+}
+
+.disciplina-ch,
+.disciplina-creditos,
+.disciplina-tipo {
+  text-align: center;
+  color: #555;
+  font-size: 0.82rem;
+}
+
+.cabecalho-disciplinas {
+  display: grid;
+  grid-template-columns: 1fr 80px 80px 80px;
+  padding: 8px 14px;
+  background-color: #e8f5ee;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ifms-verde-escuro);
+  border: 1px solid #c8e6c9;
+  border-bottom: none;
+}
+
+.tag-obrigatoria {
+  background-color: var(--ifms-verde);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.72rem;
+}
+
+.tag-optativa {
+  background-color: #1565c0;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.72rem;
+}
+
+.tag-extensao {
+  background-color: #6a1b9a;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.72rem;
+}
+
+/* ---- Carga Horária Summary ---- */
+.ch-resumo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.ch-item {
+  background: var(--ifms-branco);
+  border: 2px solid var(--ifms-verde);
+  border-radius: var(--radius);
+  padding: 14px;
+  text-align: center;
+}
+
+.ch-item .ch-valor {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ifms-verde-escuro);
+}
+
+.ch-item .ch-desc {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* ---- Botões ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transicao);
+  border: none;
+  text-decoration: none;
+}
+
+.btn-primario {
+  background-color: var(--ifms-verde);
+  color: var(--ifms-branco);
+}
+
+.btn-primario:hover {
+  background-color: var(--ifms-verde-escuro);
+  color: var(--ifms-branco);
+  text-decoration: none;
+}
+
+.btn-secundario {
+  background-color: transparent;
+  color: var(--ifms-verde);
+  border: 2px solid var(--ifms-verde);
+}
+
+.btn-secundario:hover {
+  background-color: var(--ifms-verde-bg);
+  text-decoration: none;
+}
+
+.acoes-topo {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+/* ---- Rodapé ---- */
+#rodape {
+  background-color: var(--ifms-verde-escuro);
+  color: rgba(255,255,255,0.85);
+  margin-top: 60px;
+}
+
+.rodape-principal {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 30px;
+}
+
+.rodape-coluna h4 {
+  color: var(--ifms-branco);
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.rodape-coluna p,
+.rodape-coluna a {
+  color: rgba(255,255,255,0.75);
+  font-size: 0.84rem;
+  display: block;
+  margin-bottom: 6px;
+  text-decoration: none;
+  transition: var(--transicao);
+}
+
+.rodape-coluna a:hover {
+  color: var(--ifms-branco);
+  text-decoration: none;
+}
+
+.rodape-base {
+  border-top: 1px solid rgba(255,255,255,0.15);
+  padding: 16px 20px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.6);
+}
+
+/* ---- Busca - Resultados ---- */
+.resultado-busca {
+  background-color: #fff9e6;
+  border: 1px solid #ffd54f;
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: none;
+}
+
+.resultado-busca.visivel {
+  display: block;
+}
+
+mark {
+  background-color: #ffe082;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+/* ---- Botão Voltar ao Topo ---- */
+#btn-topo {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background-color: var(--ifms-verde);
+  color: var(--ifms-branco);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: var(--sombra-hover);
+  transition: var(--transicao);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#btn-topo.visivel {
+  opacity: 1;
+  pointer-events: all;
+}
+
+#btn-topo:hover {
+  background-color: var(--ifms-verde-escuro);
+  transform: translateY(-2px);
+}
+
+/* ---- Impressão ---- */
+@media print {
+  #barra-acessibilidade,
+  #nav-principal,
+  #breadcrumb,
+  #sumario-lateral,
+  .acoes-topo,
+  #btn-topo,
+  #rodape {
+    display: none !important;
+  }
+
+  #container-principal {
+    grid-template-columns: 1fr;
+    padding: 0;
+  }
+
+  .secao-conteudo.escondido {
+    display: block !important;
+  }
+
+  .secao-cabecalho {
+    cursor: default;
+  }
+
+  .secao-toggle {
+    display: none;
+  }
+
+  .secao-ppc {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    page-break-inside: avoid;
+  }
+
+  #banner-hero {
+    background: var(--ifms-verde-escuro) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* ---- Responsividade ---- */
+@media (max-width: 900px) {
+  #container-principal {
+    grid-template-columns: 1fr;
+  }
+
+  #sumario-lateral {
+    display: none;
+    position: static;
+  }
+
+  #sumario-lateral.aberto {
+    display: block;
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  #cabecalho {
+    padding: 16px 20px;
+    flex-wrap: wrap;
+  }
+
+  .cabecalho-titulo {
+    width: 100%;
+    text-align: left;
+    margin-left: 0;
+  }
+
+  .cabecalho-titulo h2 {
+    font-size: 1.1rem;
+  }
+
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .nav-links.aberto {
+    display: flex;
+  }
+
+  .nav-container {
+    flex-wrap: wrap;
+    padding: 0;
+  }
+
+  .menu-toggle {
+    display: block;
+    padding: 14px 16px;
+  }
+
+  .nav-busca {
+    display: none;
+  }
+
+  #banner-hero {
+    padding: 24px 20px;
+  }
+
+  #banner-hero h1 {
+    font-size: 1.5rem;
+  }
+
+  .disciplina-item {
+    grid-template-columns: 1fr 70px 70px;
+  }
+
+  .disciplina-creditos {
+    display: none;
+  }
+
+  .cabecalho-disciplinas {
+    grid-template-columns: 1fr 70px 70px;
+  }
+
+  .cabecalho-disciplinas .col-creditos {
+    display: none;
+  }
+
+  .cards-grade {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  #breadcrumb {
+    padding: 8px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  #cabecalho {
+    padding: 12px 16px;
+  }
+
+  .logo-texto h1 {
+    font-size: 0.95rem;
+  }
+
+  .logo-icon {
+    width: 55px;
+    height: 55px;
+    font-size: 1.1rem;
+  }
+
+  .secao-titulo {
+    font-size: 0.95rem;
+  }
+
+  .cards-grade {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- Modo de alto contraste ---- */
+body.alto-contraste {
+  --ifms-verde: #007700;
+  --ifms-verde-escuro: #005500;
+  --ifms-verde-claro: #009900;
+  --ifms-verde-bg: #ccffcc;
+  --ifms-preto: #000000;
+  background-color: #ffffff;
+}
+
+body.alto-contraste .secao-conteudo p,
+body.alto-contraste .secao-conteudo li,
+body.alto-contraste .tabela-ppc td {
+  color: #000000;
+}
+
+/* ---- Tamanho de Fonte Ajustável ---- */
+body.fonte-grande {
+  font-size: 18px;
+}
+
+body.fonte-maior {
+  font-size: 20px;
+}

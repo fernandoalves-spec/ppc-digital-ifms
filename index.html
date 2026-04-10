@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Projeto Pedagógico de Curso (PPC) Digital do Instituto Federal de Mato Grosso do Sul — IFMS" />
+  <meta name="author" content="Instituto Federal de Mato Grosso do Sul — IFMS" />
+  <title>PPC Digital — IFMS | Instituto Federal de Mato Grosso do Sul</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%231a7f4b'/><text y='.9em' font-size='80' x='10' fill='white' font-weight='bold'>I</text></svg>" />
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div id="barra-acessibilidade" role="navigation" aria-label="Acessibilidade">
+    <span>Acessibilidade:</span>
+    <button id="fonte-normal" title="Tamanho de fonte normal" aria-label="Fonte normal">A</button>
+    <button id="fonte-grande" title="Aumentar fonte" aria-label="Fonte grande" style="font-size:1rem;">A+</button>
+    <button id="fonte-maior" title="Fonte ainda maior" aria-label="Fonte maior" style="font-size:1.1rem;">A++</button>
+    <button id="alto-contraste" title="Alternar alto contraste" aria-label="Alto contraste">◑ Alto contraste</button>
+    <a href="#conteudo-principal" title="Ir direto ao conteúdo">Ir ao conteúdo</a>
+  </div>
+
+  <!-- Cabeçalho -->
+  <header id="cabecalho" role="banner">
+    <a id="logo-ifms" href="index.html" aria-label="IFMS — Início">
+      <div class="logo-icon" aria-hidden="true">IFMS</div>
+      <div class="logo-texto">
+        <h1>Instituto Federal de Mato Grosso do Sul</h1>
+        <p>Pró-Reitoria de Ensino — PROEN</p>
+      </div>
+    </a>
+    <div class="cabecalho-titulo">
+      <h2>PPC DIGITAL</h2>
+      <p>Projeto Pedagógico de Curso</p>
+    </div>
+  </header>
+
+  <!-- Navegação Principal -->
+  <nav id="nav-principal" role="navigation" aria-label="Navegação principal">
+    <div class="nav-container">
+      <button class="menu-toggle" id="menu-toggle" aria-controls="nav-links" aria-expanded="false" aria-label="Menu">☰</button>
+      <ul class="nav-links" id="nav-links" role="list">
+        <li><a href="#identificacao">Identificação</a></li>
+        <li><a href="#apresentacao">Apresentação</a></li>
+        <li><a href="#objetivos">Objetivos</a></li>
+        <li><a href="#perfil-egresso">Perfil do Egresso</a></li>
+        <li><a href="#organizacao-curricular">Organização Curricular</a></li>
+        <li><a href="#metodologia">Metodologia</a></li>
+        <li><a href="#avaliacao">Avaliação</a></li>
+        <li><a href="#infraestrutura">Infraestrutura</a></li>
+        <li><a href="#bibliografia">Bibliografia</a></li>
+      </ul>
+      <div class="nav-busca">
+        <input
+          type="search"
+          id="campo-busca"
+          placeholder="🔍 Buscar no PPC..."
+          aria-label="Buscar no PPC"
+          autocomplete="off"
+        />
+      </div>
+    </div>
+  </nav>
+
+  <!-- Breadcrumb -->
+  <div id="breadcrumb" aria-label="Localização">
+    <a href="index.html">Início</a>
+    <span aria-hidden="true">›</span>
+    <a href="index.html">PPC Digital</a>
+    <span aria-hidden="true">›</span>
+    <span id="breadcrumb-secao">Início</span>
+  </div>
+
+  <!-- Container Principal -->
+  <div id="container-principal">
+
+    <!-- Sumário Lateral -->
+    <aside id="sumario-lateral" aria-label="Sumário do documento">
+      <h3>📋 Sumário</h3>
+      <ul class="sumario-lista" role="list">
+        <li><a href="#identificacao"><span class="numero-secao">1.</span> Identificação do Curso</a></li>
+        <li><a href="#apresentacao"><span class="numero-secao">2.</span> Apresentação</a></li>
+        <li><a href="#bases-legais"><span class="numero-secao">3.</span> Bases Legais</a></li>
+        <li><a href="#justificativa"><span class="numero-secao">4.</span> Justificativa</a></li>
+        <li><a href="#objetivos"><span class="numero-secao">5.</span> Objetivos</a></li>
+        <li><a href="#perfil-egresso"><span class="numero-secao">6.</span> Perfil do Egresso</a></li>
+        <li><a href="#organizacao-curricular"><span class="numero-secao">7.</span> Organização Curricular</a></li>
+        <li><a href="#metodologia"><span class="numero-secao">8.</span> Metodologia</a></li>
+        <li><a href="#avaliacao"><span class="numero-secao">9.</span> Avaliação</a></li>
+        <li><a href="#estagio"><span class="numero-secao">10.</span> Estágio</a></li>
+        <li><a href="#atividades-complementares"><span class="numero-secao">11.</span> Atividades Complementares</a></li>
+        <li><a href="#tcc"><span class="numero-secao">12.</span> TCC</a></li>
+        <li><a href="#infraestrutura"><span class="numero-secao">13.</span> Infraestrutura</a></li>
+        <li><a href="#corpo-docente"><span class="numero-secao">14.</span> Corpo Docente</a></li>
+        <li><a href="#bibliography"><span class="numero-secao">15.</span> Bibliografia</a></li>
+      </ul>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <main id="conteudo-principal">
+
+      <!-- Banner Hero -->
+      <section id="banner-hero" aria-label="Destaque do curso">
+        <h1>Projeto Pedagógico de Curso<br>PPC Digital — IFMS</h1>
+        <p>
+          O Projeto Pedagógico de Curso (PPC) é o documento que orienta e fundamenta todas as
+          ações pedagógicas desenvolvidas no curso. Apresenta a identidade, os objetivos,
+          a organização curricular e as diretrizes que norteiam a formação dos estudantes
+          no Instituto Federal de Mato Grosso do Sul.
+        </p>
+        <div class="banner-badges">
+          <span class="badge">📚 Ensino Superior</span>
+          <span class="badge">🏛️ IFMS</span>
+          <span class="badge">📋 Versão 2024</span>
+          <span class="badge">✅ Aprovado pelo Conselho</span>
+        </div>
+      </section>
+
+      <!-- Aviso de Busca -->
+      <div id="resultado-busca" class="resultado-busca" role="alert" aria-live="polite"></div>
+
+      <!-- Ações Rápidas -->
+      <div class="acoes-topo" role="group" aria-label="Ações rápidas">
+        <button class="btn btn-primario" id="btn-imprimir">🖨️ Imprimir / PDF</button>
+        <button class="btn btn-secundario" id="btn-expandir-tudo">📂 Expandir tudo</button>
+        <button class="btn btn-secundario" id="btn-recolher-tudo">📁 Recolher tudo</button>
+        <button class="btn btn-secundario" id="btn-sumario" aria-controls="sumario-lateral">📋 Sumário</button>
+      </div>
+
+      <!-- =============================================
+           SEÇÃO 1 — IDENTIFICAÇÃO DO CURSO
+      ============================================= -->
+      <section class="secao-ppc" id="identificacao">
+        <div class="secao-cabecalho" role="button" tabindex="0" aria-expanded="false" aria-controls="conteudo-identificacao">
+          <span class="secao-numero" aria-hidden="true">1</span>
+          <h2 class="secao-titulo">Identificação do Curso</h2>
+          <span class="secao-toggle" aria-hidden="true">▼</span>
+        </div>
+        <div class="secao-conteudo escondido" id="conteudo-identificacao">
+          <div class="cards-grade">
+            <div class="card-info">
+              <span class="card-valor">4</span>
+              <span class="card-label">Anos de duração</span>
+            </div>
+            <div class="card-info">
+              <span class="card-valor">3.200</span>
+              <span class="card-label">Horas totais</span>
+            </div>
+            <div class="card-info">
+              <span class="card-valor">40</span>
+              <span class="card-label">Vagas por semestre</span>
+            </div>
+            <div class="card-info">
+              <span class="card-valor">8</span>
+              <span class="card-label">Semestres letivos</span>
+            </div>
+          </div>
+
+          <table class="tabela-ppc" aria-label="Dados de identificação do curso">
+            <tbody>
+              <tr>
+                <td><strong>Instituição</strong></td>
+                <td>Instituto Federal de Educação, Ciência e Tecnologia de Mato Grosso do Sul — IFMS</td>
+              </tr>
+              <tr>
+                <td><strong>Câmpus Ofertante</strong></td>
+                <td>Câmpus Campo Grande / Câmpus Corumbá / Câmpus Dourados / Câmpus Três Lagoas</td>
+              </tr>
+              <tr>
+                <td><strong>Nome do Curso</strong></td>
+                <td>Tecnologia em Análise e Desenvolvimento de Sistemas</td>
+              </tr>
+              <tr>
+                <td><strong>Habilitação</strong></td>
+                <td>Tecnólogo em Análise e Desenvolvimento de Sistemas</td>
+              </tr>
+              <tr>
+                <td><strong>Grau</strong></td>
+                <td>Tecnólogo</td>
+              </tr>
+              <tr>
+                <td><strong>Modalidade</strong></td>
+                <td>Presencial</td>
+              </tr>
+              <tr>
+                <td><strong>Turno</strong></td>
+                <td>Noturno</td>
+              </tr>
+              <tr>
+                <td><strong>Periodicidade</strong></td>
+                <td>Semestral</td>
+              </tr>
+              <tr>
+                <td><strong>Número de Semestres</strong></td>
+                <td>5 (cinco) semestres — integralização mínima</td>
+              </tr>
+              <tr>
+                <td><strong>Carga Horária Total</strong></td>
+                <td>2.000 horas-relógio</td>
+              </tr>
+              <tr>
+                <td><strong>Número de Vagas</strong></td>
+                <td>40 vagas por semestre (ingresso via SISU/ENEM)</td>
+              </tr>
+              <tr>
+                <td><strong>Forma de Ingresso</strong></td>
+                <td>SISU — Sistema de Seleção Unificada (ENEM)</td>
+              </tr>
+              <tr>
+                <td><strong>Código e-MEC</strong></td>
+                <td>Conforme registro no e-MEC/MEC</td>
+              </tr>
+              <tr>
+                <td><strong>Ato de Criação</strong></td>
+                <td>Resolução do Conselho Superior do IFMS</td>
+              </tr>
+              <tr>
+                <td><strong>Ano de Criação</strong></td>
+                <td>2010</td>
+              </tr>
+              <tr>
+                <td><strong>Versão do PPC</strong></td>
+                <td>2024.1</td>
+              </tr>
+              <tr>
+                <td><strong>Eixo Tecnológico</strong></td>
+                <td>Informação e Comunicação</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- =============================================
+           SEÇÃO 2 — APRESENTAÇÃO
+      ============================================= -->
+      <section class="secao-ppc" id="apresentacao">
+        <div class="secao-cabecalho" role="button" tabindex="0" aria-expanded="false" aria-controls="conteudo-apresentacao">
+          <span class="secao-numero" aria-hidden="true">2</span>
+          <h2 class="secao-titulo">Apresentação</h2>
+          <span class="secao-toggle" aria-hidden="true">▼</span>
+        </div>
+        <div class="secao-conteudo escondido" id="conteudo-apresentacao">
+          <p>
+            O Instituto Federal de Educação, Ciência e Tecnologia de Mato Grosso do Sul (IFMS) é uma
+            instituição de educação superior, básica e profissional, pluricurricular e multicampi,
+            especializada na oferta de educação profissional e tecnológica nas diferentes modalidades
+            de ensino, com base na conjugação de conhecimentos técnicos e tecnológicos com as suas
+            práticas pedagógicas.
+          </p>
+          <p>
+            Criado pela Lei nº 11.892, de 29 de dezembro de 2008, o IFMS possui câmpus nas principais
+            cidades do estado de Mato Grosso do Sul, contribuindo para o desenvolvimento socioeconômico
+            regional por meio da formação de profissionais qualificados e da geração de conhecimento
+            científico e tecnológico.
+          </p>
+          <p>
+            O presente Projeto Pedagógico de Curso (PPC) tem por finalidade apresentar as diretrizes
+            e a organização do curso de Tecnologia em Análise e Desenvolvimento de Sistemas (TADS),
+            fundamentando as ações pedagógicas, administrativas e acadêmicas que orientam a formação
+            dos estudantes neste âmbito.
+          </p>
+
+          <h3>Missão do IFMS</h3>
+          <p>
+            Promover a educação profissional, científica e tecnológica, pública, gratuita e de qualidade,
+            por meio do ensino, pesquisa e extensão, em prol do desenvolvimento humano sustentável.
+          </p>
+
+          <h3>Visão</h3>
+          <p>
+            Ser reconhecido como instituição de excelência na educação profissional, científica e
+            tecnológica, contribuindo para o desenvolvimento econômico, social e ambiental do Estado
+            de Mato Grosso do Sul e do Brasil.
+          </p>
+
+          <h3>Valores</h3>
+          <ul>
+            <li>Ética e transparência na gestão e nas relações institucionais</li>
+            <li>Compromisso com a educação pública de qualidade</li>
+            <li>Respeito à diversidade e inclusão social</li>
+            <li>Inovação e criatividade no ensino, pesquisa e extensão</li>
+            <li>Responsabilidade socioambiental</li>
+            <li>Democracia e participação coletiva</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- =============================================
+           SEÇÃO 3 — BASES LEGAIS
+      ============================================= -->
+      <section class="secao-ppc" id="bases-legais">
+        <div class="secao-cabecalho" role="button" tabindex="0" aria-expanded="false" aria-controls="conteudo-bases-legais">
+          <span class="secao-numero" aria-hidden="true">3</span>
+          <h2 class="secao-titulo">Bases Legais</h2>
+          <span class="secao-toggle" aria-hidden="true">▼</span>
+        </div>
+        <div class="secao-conteudo escondido" id="conteudo-bases-legais">
+          <p>
+            Este PPC foi elaborado em conformidade com o arcabouço legal e normativo vigente,
+            destacando-se os seguintes instrumentos:
+          </p>
+
+          <h3>Legislação Federal</h3>
+          <ul>
+            <li><strong>Lei nº 9.394/1996</strong> — Lei de Diretrizes e Bases da Educação Nacional (LDB)</li>
+            <li><strong>Lei nº 10.861/2004</strong> — Sistema Nacional de Avaliação da Educação Superior (SINAES)</li>
+            <li><strong>Lei nº 11.892/2008</strong> — Institui a Rede Federal de Educação Profissional, Científica e Tecnológica e cria os Institutos Federais</li>
+            <li><strong>Lei nº 12.711/2012</strong> — Política de cotas para ingresso nas universidades federais e institutos federais</li>
+            <li><strong>Lei nº 13.005/2014</strong> — Plano Nacional de Educação (PNE 2014–2024)</li>
+            <li><strong>Decreto nº 5.154/2004</strong> — Regulamenta o § 2° do art. 36 e os arts. 39 a 41 da Lei nº 9.394/1996</li>
+            <li><strong>Decreto nº 5.773/2006</strong> — Regulamenta as funções de regulação, supervisão e avaliação de instituições de educação superior</li>
+            <li><strong>Decreto nº 9.235/2017</strong> — Regulamenta o exercício das funções de regulação, supervisão e avaliação das IES e dos cursos superiores de graduação</li>
+          </ul>
+
+          <h3>Diretrizes Curriculares Nacionais</h3>
+          <ul>
+            <li><strong>Resolução CNE/CP nº 1/2021</strong> — Diretrizes Curriculares Nacionais Gerais para a Educação Profissional e Tecnológica</li>
+            <li><strong>Resolução CNE/CES nº 5/2016</strong> — Diretrizes Curriculares Nacionais para os cursos de graduação na área de Computação</li>
+            <li><strong>Resolução CNE/CP nº 1/2004</strong> — Diretrizes Curriculares Nacionais para a Educação das Relações Étnico-Raciais</li>
+            <li><strong>Resolução CNE/CP nº 2/2012</strong> — Diretrizes Curriculares Nacionais para a Educação Ambiental</li>
+          </ul>
+
+          <h3>Normas Internas do IFMS</h3>
+          <ul>
+            <li>Estatuto do IFMS</li>
+            <li>Regimento Geral do IFMS</li>
+            <li>Regulamento Didático-Pedagógico dos cursos de graduação do IFMS</li>
+            <li>Resolução do Conselho Superior — Aprovação do PPC</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- =============================================
+           SEÇÃO 4 — JUSTIFICATIVA
+      ============================================= -->
+      <section class="secao-ppc" id="justificativa">
+        <div class="secao-cabecalho" role="button" tabindex="0" aria-expanded="false" aria-controls="conteudo-justificativa">
+          <span class="secao-numero" aria-hidden="true">4</span>
+          <h2 class="secao-titulo">Justificativa</h2>
+          <span class="secao-toggle" aria-hidden="true">▼</span>
+        </div>
+        <div class="secao-conteudo escondido" id="conteudo-justificativa">
+          <p>
+            A área de Tecnologia da Informação e Comunicação (TIC) destaca-se como um dos setores
+            de maior crescimento e geração de empregos no Brasil e no mundo. A transformação digital
+            que permeia todas as áreas da economia demanda profissionais cada vez mais qualificados
+            para desenvolver, manter e inovar sistemas e soluções tecnológicas.
+          </p>
+          <p>
+            Em Mato Grosso do Sul, o mercado de TIC tem apresentado crescimento consistente,
+            impulsionado especialmente pelos setores do agronegócio, serviços, comércio e governo,
+            que necessitam de sistemas de informação robustos e soluções digitais inovadoras.
+            Entretanto, há escassez de profissionais formados para atender a esta demanda crescente.
+          </p>
+          <p>
+            Nesse contexto, o Curso Superior de Tecnologia em Análise e Desenvolvimento de Sistemas
+            do IFMS justifica-se pela necessidade de formar tecnólogos com sólida base técnica e
+            humanística, capazes de atuar no desenvolvimento, implantação e manutenção de sistemas
+            de software, contribuindo para o desenvolvimento regional e para a inclusão digital.
+          </p>
+
+          <div class="destaque">
+            <strong>💡 Relevância regional:</strong> O IFMS é uma das poucas instituições públicas
+            gratuitas a ofertar este curso em diversas cidades do interior do estado, democratizando
+            o acesso ao ensino superior em TI.
+          </div>
+        </div>
+      </section>
+
+      <!-- =============================================
+           SEÇÃO 5 — OBJETIVOS
+      ============================================= -->
+      <section class="secao-ppc" id="objetivos">
+        <div class="secao-cabecalho" role="button" tabindex="0" aria-expanded="false" aria-controls="conteudo-objetivos">
+          <span class="secao-numero" aria-hidden="true">5</span>
+          <h2 class="secao-titulo">Objetivos do Curso</h2>
+          <span class="secao-toggle" aria-hidden="true">▼</span>
+        </div>
+        <div class="secao-conteudo escondido" id="conteudo-objetivos">
+          <h3>Objetivo Geral</h3>
+          <p>
+            Formar tecnólogos em Análise e Desenvolvimento de Sistemas com conhecimentos técnicos
+            e científicos sólidos, habilidades práticas para o desenvolvimento de software e sistemas
+            de informação, e atitude ética, crítica e reflexiva, capazes de contribuir para a
+            transformação digital da sociedade e para o desenvolvimento socioeconômico regional.
+          </p>
+
+          <h3>Objetivos Específicos</h3>
+          <ul>
+            <li>Capacitar o estudante para analisar, projetar, implementar, testar e manter sistemas de software;</li>
+            <li>Desenvolver competências em metodologias ágeis e tradicionais de desenvolvimento de software;</li>
+            <li>Proporcionar conhecimentos em bancos de dados, redes de computadores, segurança da informação e computação em nuvem;</li>
+            <li>Estimular o empreendedorismo tecnológico e a inovação como ferramentas de desenvolvimento regional;</li>
+            <li>Fomentar a pesquisa aplicada e a extensão tecnológica em parceria com empresas e comunidade;</li>
+            <li>Desenvolver habilidades de comunicação, trabalho em equipe e liderança em projetos de TI;</li>
+            <li>Promover a formação ética, cidadã e humanística do profissional de tecnologia;</li>
+            <li>Incentivar a atualização contínua e o desenvolvimento profissional ao longo da vida.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- =============================================
+           SEÇÃO 6 — PERFIL DO EGRESSO
+      ============================================= -->
+      <section class="secao-ppc" id="perfil-egresso">
+        <div class="secao-cabecalho" role="button" tabindex="0" aria-expanded="false" aria-controls="conteudo-perfil-egresso">
+          <span class="secao-numero" aria-hidden="true">6</span>
+          <h2 class="secao-titulo">Perfil do Egresso</h2>
+          <span class="secao-toggle" aria-hidden="true">▼</span>
+        </div>
+        <div class="secao-conteudo escondido" id="conteudo-perfil-egresso">
+          <p>
+            O egresso do Curso Superior de Tecnologia em Análise e Desenvolvimento de Sistemas do
+            IFMS será um profissional com sólida formação técnica e humanística, capaz de atuar
+            nas diferentes fases do ciclo de vida do software e de outras soluções tecnológicas.
+          </p>
+
+          <h3>Competências e Habilidades</h3>
+
+          <h4>Competências Técnicas</h4>
+          <ul>
+            <li>Analisar requisitos de sistemas e propor soluções tecnológicas adequadas;</li>
+            <li>Projetar arquiteturas de software orientadas a objetos e baseadas em serviços;</li>
+            <li>Desenvolver sistemas web, mobile e desktop utilizando linguagens e frameworks modernos;</li>
+            <li>Gerenciar bancos de dados relacionais e não relacionais;</li>
+            <li>Implementar práticas de DevOps, integração e entrega contínuas (CI/CD);</li>
+            <li>Aplicar técnicas de segurança da informação no desenvolvimento de software;</li>
+            <li>Utilizar metodologias ágeis (Scrum, Kanban, XP) em projetos de software;</li>
+            <li>Realizar testes de software (unitários, integração, aceitação);</li>
+            <li>Trabalhar com computação em nuvem e serviços como AWS, Azure ou GCP.</li>
+          </ul>
+
+          <h4>Competências Transversais</h4>
+          <ul>
+            <li>Comunicar-se de forma eficaz, oral e escrita, em português e inglês técnico;</li>
+            <li>Trabalhar em equipes multidisciplinares e multiculturais;</li>
+            <li>Exercer liderança e gestão de projetos de tecnologia;</li>
+            <li>Aprender continuamente e adaptar-se às mudanças tecnológicas;</li>
+            <li>Agir com responsabilidade ética e social no exercício da profissão.</li>
+          </ul>
+
+          <h3>Áreas de Atuação</h3>
+          <ul>
+            <li>Desenvolvimento de sistemas web e mobile;</li>
+            <li>Análise de sistemas e requisitos;</li>
+            <li>Gerência e administração de projetos de TI;</li>
+            <li>Análise e administração de bancos de dados;</li>
+            <li>Suporte e manutenção de sistemas;</li>
+            <li>Empreendedorismo em startups de tecnologia;</li>
+            <li>Consultoria em transformação digital.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- =============================================
+           SEÇÃO 7 — ORGANIZAÇÃO CURRICULAR
+      ============================================= -->
+      <section class="secao-ppc" id="organizacao-curricular">
+        <div class="secao-cabecalho" role="button" tabindex="0" aria-expanded="false" aria-controls="conteudo-organizacao-curricular">
+          <span class="secao-numero" aria-hidden="true">7</span>
+          <h2 class="secao-titulo">Organização Curricular</h2>
+          <span class="secao-toggle" aria-hidden="true">▼</span>
+        </div>
+        <div class="secao-conteudo escondido" id="conteudo-organizacao-curricular">
+
+          <div class="ch-resumo">
+            <div class="ch-item">
+              <div class="ch-valor">1.760h</div>
+              <div class="ch-desc">Componentes Obrigatórios</div>
+            </div>
+            <div class="ch-item">
+              <div class="ch-valor">160h</div>
+              <div class="ch-desc">Componentes Optativos</div>
+            </div>
+            <div class="ch-item">
+              <div class="ch-valor">400h</div>
+              <div class="ch-desc">Estágio Supervisionado</div>
+            </div>
+            <div class="ch-item">
+              <div class="ch-valor">80h</div>
+              <div class="ch-desc">Atividades Complementares</div>
+            </div>
+            <div class="ch-item">
+              <div class="ch-valor">200h</div>
+              <div class="ch-desc">Extensão (10% do total)</div>
+            </div>
+            <div class="ch-item">
+              <div class="ch-valor">2.000h</div>
+              <div class="ch-desc">Carga Horária Total</div>
+            </div>
+          </div>
+
+          <div class="aviso">
+            ⚠️ <strong>Nota:</strong> A integralização mínima é de 5 semestres (2,5 anos) e a
+            máxima de 10 semestres (5 anos), conforme Regulamento Didático-Pedagógico do IFMS.
+          </div>
+
+          <!-- 1º Semestre -->
+          <div class="periodo-grade">
+            <div class="periodo-titulo">📅 1º Semestre</div>
+            <div class="cabecalho-disciplinas" aria-hidden="true">
+              <span>Disciplina</span>
+              <span style="text-align:center">CH</span>
+              <span class="col-creditos" style="text-align:center">Créditos</span>
+              <span style="text-align:center">Tipo</span>
+            </div>
+            <div class="disciplinas-lista" role="list" aria-label="Disciplinas do 1º semestre">
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Algoritmos e Programação</span>
+                <span class="disciplina-ch">80h</span>
+                <span class="disciplina-creditos">4</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Fundamentos de Sistemas de Informação</span>
+                <span class="disciplina-ch">40h</span>
+                <span class="disciplina-creditos">2</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Arquitetura de Computadores</span>
+                <span class="disciplina-ch">60h</span>
+                <span class="disciplina-creditos">3</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Matemática Discreta</span>
+                <span class="disciplina-ch">60h</span>
+                <span class="disciplina-creditos">3</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Inglês Técnico para TI</span>
+                <span class="disciplina-ch">40h</span>
+                <span class="disciplina-creditos">2</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Metodologia Científica e Tecnológica</span>
+                <span class="disciplina-ch">40h</span>
+                <span class="disciplina-creditos">2</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2º Semestre -->
+          <div class="periodo-grade">
+            <div class="periodo-titulo">📅 2º Semestre</div>
+            <div class="cabecalho-disciplinas" aria-hidden="true">
+              <span>Disciplina</span>
+              <span style="text-align:center">CH</span>
+              <span class="col-creditos" style="text-align:center">Créditos</span>
+              <span style="text-align:center">Tipo</span>
+            </div>
+            <div class="disciplinas-lista" role="list" aria-label="Disciplinas do 2º semestre">
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Programação Orientada a Objetos</span>
+                <span class="disciplina-ch">80h</span>
+                <span class="disciplina-creditos">4</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Banco de Dados I</span>
+                <span class="disciplina-ch">80h</span>
+                <span class="disciplina-creditos">4</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Engenharia de Software I</span>
+                <span class="disciplina-ch">60h</span>
+                <span class="disciplina-creditos">3</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Redes de Computadores</span>
+                <span class="disciplina-ch">60h</span>
+                <span class="disciplina-creditos">3</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Estruturas de Dados</span>
+                <span class="disciplina-ch">60h</span>
+                <span class="disciplina-creditos">3</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3º Semestre -->
+          <div class="periodo-grade">
+            <div class="periodo-titulo">📅 3º Semestre</div>
+            <div class="cabecalho-disciplinas" aria-hidden="true">
+              <span>Disciplina</span>
+              <span style="text-align:center">CH</span>
+              <span class="col-creditos" style="text-align:center">Créditos</span>
+              <span style="text-align:center">Tipo</span>
+            </div>
+            <div class="disciplinas-lista" role="list" aria-label="Disciplinas do 3º semestre">
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Desenvolvimento Web Front-end</span>
+                <span class="disciplina-ch">80h</span>
+                <span class="disciplina-creditos">4</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Banco de Dados II</span>
+                <span class="disciplina-ch">60h</span>
+                <span class="disciplina-creditos">3</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Engenharia de Software II</span>
+                <span class="disciplina-ch">60h</span>
+                <span class="disciplina-creditos">3</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Sistemas Operacionais</span>
+                <span class="disciplina-ch">60h</span>
+                <span class="disciplina-creditos">3</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Segurança da Informação</span>
+                <span class="disciplina-ch">60h</span>
+                <span class="disciplina-creditos">3</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Empreendedorismo e Inovação</span>
+                <span class="disciplina-ch">40h</span>
+                <span class="disciplina-creditos">2</span>
+                <span class="disciplina-tipo"><span class="tag-extensao">EXT</span></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4º Semestre -->
+          <div class="periodo-grade">
+            <div class="periodo-titulo">📅 4º Semestre</div>
+            <div class="cabecalho-disciplinas" aria-hidden="true">
+              <span>Disciplina</span>
+              <span style="text-align:center">CH</span>
+              <span class="col-creditos" style="text-align:center">Créditos</span>
+              <span style="text-align:center">Tipo</span>
+            </div>
+            <div class="disciplinas-lista" role="list" aria-label="Disciplinas do 4º semestre">
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Desenvolvimento Web Back-end</span>
+                <span class="disciplina-ch">80h</span>
+                <span class="disciplina-creditos">4</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Desenvolvimento Mobile</span>
+                <span class="disciplina-ch">80h</span>
+                <span class="disciplina-creditos">4</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Gestão de Projetos de Software</span>
+                <span class="disciplina-ch">60h</span>
+                <span class="disciplina-creditos">3</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Inteligência Artificial</span>
+                <span class="disciplina-ch">60h</span>
+                <span class="disciplina-creditos">3</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Tópicos Especiais em TI</span>
+                <span class="disciplina-ch">40h</span>
+                <span class="disciplina-creditos">2</span>
+                <span class="disciplina-tipo"><span class="tag-optativa">OPT</span></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5º Semestre -->
+          <div class="periodo-grade">
+            <div class="periodo-titulo">📅 5º Semestre</div>
+            <div class="cabecalho-disciplinas" aria-hidden="true">
+              <span>Disciplina</span>
+              <span style="text-align:center">CH</span>
+              <span class="col-creditos" style="text-align:center">Créditos</span>
+              <span style="text-align:center">Tipo</span>
+            </div>
+            <div class="disciplinas-lista" role="list" aria-label="Disciplinas do 5º semestre">
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Computação em Nuvem</span>
+                <span class="disciplina-ch">60h</span>
+                <span class="disciplina-creditos">3</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Trabalho de Conclusão de Curso (TCC)</span>
+                <span class="disciplina-ch">80h</span>
+                <span class="disciplina-creditos">4</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Estágio Supervisionado</span>
+                <span class="disciplina-ch">400h</span>
+                <span class="disciplina-creditos">20</span>
+                <span class="disciplina-tipo"><span class="tag-obrigatoria">OBR</span></span>
+              </div>
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Atividades de Extensão</span>
+                <span class="disciplina-ch">160h</span>
+                <span class="disciplina-creditos">8</span>
+                <span class="disciplina-tipo"><span class="tag-extensao">EXT</span></span>
+              </div>
+              <div class="disciplina-item" role="listitem">
+                <span class="disciplina-nome">Componente Optativo</span>
+                <span class="disciplina-ch">40h</span>
+                <span class="disciplina-creditos">2</span>
+                <span class="disciplina-tipo"><span class="tag-optativa">OPT</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="destaque">
+            <strong>Legenda:</strong>
+            <span class="tag-obrigatoria" style="margin:0 4px;">OBR</span> Obrigatória &nbsp;|&nbsp;
+            <span class="tag-optativa" style="margin:0 4px;">OPT</span> Optativa &nbsp;|&nbsp;
+            <span class="tag-extensao" style="margin:0 4px;">EXT</span> Extensão
+          </div>
+        </div>
+      </section>
+
+      <!-- =============================================
+           SEÇÃO 8 — METODOLOGIA
+      ============================================= -->
+      <section class="secao-ppc" id="metodologia">
+        <div class="secao-cabecalho" role="button" tabindex="0" aria-expanded="false" aria-controls="conteudo-metodologia">
+          <span class="secao-numero" aria-hidden="true">8</span>
+          <h2 class="secao-titulo">Metodologia</h2>
+          <span class="secao-toggle" aria-hidden="true">▼</span>
+        </div>
+        <div class="secao-conteudo escondido" id="conteudo-metodologia">
+          <p>
+            A proposta metodológica do curso baseia-se numa concepção de ensino que articula teoria e
+            prática, privilegiando a aprendizagem ativa e o desenvolvimento de competências profissionais
+            concretas. O processo ensino-aprendizagem é orientado pela problematização da realidade,
+            pelo protagonismo do estudante e pela integração entre os diferentes saberes.
+          </p>
+
+          <h3>Estratégias de Ensino</h3>
+          <ul>
+            <li><strong>Aprendizagem Baseada em Projetos (ABP/PBL):</strong> Os estudantes desenvolvem projetos reais ou simulados que integram competências de múltiplas disciplinas;</li>
+            <li><strong>Sala de aula invertida (Flipped Classroom):</strong> O conteúdo é estudado antes da aula e o tempo em sala é dedicado à prática e resolução de problemas;</li>
+            <li><strong>Desenvolvimento de software em equipes:</strong> Simulando ambientes reais de trabalho com metodologias ágeis;</li>
+            <li><strong>Estudos de caso:</strong> Análise de situações-problema reais do mercado de TI;</li>
+            <li><strong>Hackathons e maratonas de programação:</strong> Competições internas e externas que estimulam a criatividade e o trabalho em equipe;</li>
+            <li><strong>Visitas técnicas:</strong> A empresas de tecnologia e centros de inovação da região;</li>
+            <li><strong>Palestras com profissionais do mercado:</strong> Integração com o setor produtivo;</li>
+            <li><strong>Uso de plataformas de ensino online:</strong> Complementação das aulas presenciais com recursos digitais.</li>
+          </ul>
+
+          <h3>Tecnologias e Ferramentas Pedagógicas</h3>
+          <p>
+            O curso utiliza laboratórios de informática equipados com ferramentas de desenvolvimento
+            de software, ambientes de desenvolvimento integrado (IDEs), sistemas de controle de versão,
+            plataformas de gestão de projetos e ambientes de computação em nuvem para fins pedagógicos.
+          </p>
+
+          <h3>Educação para as Relações Étnico-Raciais e Educação Ambiental</h3>
+          <p>
+            As temáticas de Educação para as Relações Étnico-Raciais (Lei nº 10.639/2003 e nº 11.645/2008)
+            e Educação Ambiental (Lei nº 9.795/1999) são tratadas de forma transversal em todos os
+            componentes curriculares, integrando-se ao processo formativo do tecnólogo.
+          </p>
+        </div>
+      </section>
+
+      <!-- =============================================
+           SEÇÃO 9 — AVALIAÇÃO
+      ============================================= -->
+      <section class="secao-ppc" id="avaliacao">
+        <div class="secao-cabecalho" role="button" tabindex="0" aria-expanded="false" aria-controls="conteudo-avaliacao">
+          <span class="secao-numero" aria-hidden="true">9</span>
+          <h2 class="secao-titulo">Sistema de Avaliação</h2>
+          <span class="secao-toggle" aria-hidden="true">▼</span>
+        </div>
+        <div class="secao-conteudo escondido" id="conteudo-avaliacao">
+          <h3>Avaliação da Aprendizagem</h3>
+          <p>
+            A avaliação da aprendizagem no curso é concebida como um processo contínuo, diagnóstico,
+            formativo e somativo, voltado para o acompanhamento do desenvolvimento das competências
+            do estudante ao longo do processo formativo.
+          </p>
+          <p>
+            Conforme o Regulamento Didático-Pedagógico do IFMS, o aproveitamento é expresso em notas
+            de 0 (zero) a 10 (dez), sendo aprovado o estudante que obtiver:
+          </p>
+
+          <div class="cards-grade">
+            <div class="card-info">
+              <span class="card-valor">≥ 6,0</span>
+              <span class="card-label">Nota mínima para aprovação</span>
+            </div>
+            <div class="card-info">
+              <span class="card-valor">75%</span>
+              <span class="card-label">Frequência mínima obrigatória</span>
+            </div>
+          </div>
+
+          <h3>Instrumentos de Avaliação</h3>
+          <ul>
+            <li>Provas escritas e práticas;</li>
+            <li>Desenvolvimento de projetos e sistemas;</li>
+            <li>Trabalhos individuais e em grupo;</li>
+            <li>Apresentações e seminários;</li>
+            <li>Participação em atividades em sala de aula e laboratório;</li>
+            <li>Portfólios de aprendizagem;</li>
+            <li>Avaliação entre pares (peer review).</li>
+          </ul>
+
+          <h3>Avaliação Institucional</h3>
+          <p>
+            O curso é avaliado periodicamente pelo Sistema Nacional de Avaliação da Educação Superior
+            (SINAES), que contempla a autoavaliação institucional, a avaliação externa e o ENADE
+            (Exame Nacional de Desempenho dos Estudantes).
+          </p>
+        </div>
+      </section>
+
+      <!-- =============================================
+           SEÇÃO 10 — ESTÁGIO
+      ============================================= -->
+      <section class="secao-ppc" id="estagio">
+        <div class="secao-cabecalho" role="button" tabindex="0" aria-expanded="false" aria-controls="conteudo-estagio">
+          <span class="secao-numero" aria-hidden="true">10</span>
+          <h2 class="secao-titulo">Estágio Supervisionado</h2>
+          <span class="secao-toggle" aria-hidden="true">▼</span>
+        </div>
+        <div class="secao-conteudo escondido" id="conteudo-estagio">
+          <p>
+            O Estágio Supervisionado é componente curricular obrigatório do curso, com carga horária
+            de <strong>400 horas</strong>, conforme previsto nas Diretrizes Curriculares Nacionais e
+            no Regulamento de Estágios do IFMS.
+          </p>
+
+          <h3>Objetivos do Estágio</h3>
+          <ul>
+            <li>Proporcionar ao estudante a vivência prática das atividades profissionais em situações reais de trabalho;</li>
+            <li>Integrar os conhecimentos teóricos adquiridos ao longo do curso com a prática profissional;</li>
+            <li>Desenvolver competências técnicas, relacionais e comportamentais demandadas pelo mercado de trabalho;</li>
+            <li>Contribuir para a empregabilidade do egresso.</li>
+          </ul>
+
+          <h3>Requisitos para Realização do Estágio</h3>
+          <ul>
+            <li>Ter concluído, no mínimo, 50% da carga horária total do curso;</li>
+            <li>Firmar Termo de Compromisso de Estágio (TCE) entre o estudante, a empresa concedente e o IFMS;</li>
+            <li>Ter orientação de professor do curso designado para acompanhamento;</li>
+            <li>Entregar relatório parcial e relatório final ao término do estágio.</li>
+          </ul>
+
+          <div class="destaque">
+            💼 <strong>Mercado de Trabalho:</strong> O IFMS mantém parcerias com empresas de TI,
+            órgãos públicos e startups da região para oferecer oportunidades de estágio aos estudantes.
+          </div>
+        </div>
+      </section>
+
+      <!-- =============================================
+           SEÇÃO 11 — ATIVIDADES COMPLEMENTARES
+      ============================================= -->
+      <section class="secao-ppc" id="atividades-complementares">
+        <div class="secao-cabecalho" role="button" tabindex="0" aria-expanded="false" aria-controls="conteudo-atividades-complementares">
+          <span class="secao-numero" aria-hidden="true">11</span>
+          <h2 class="secao-titulo">Atividades Complementares</h2>
+          <span class="secao-toggle" aria-hidden="true">▼</span>
+        </div>
+        <div class="secao-conteudo escondido" id="conteudo-atividades-complementares">
+          <p>
+            As Atividades Complementares (AC) constituem um componente curricular obrigatório com
+            carga horária de <strong>80 horas</strong>, a serem integralizadas ao longo do curso.
+            Têm por finalidade enriquecer o processo de ensino-aprendizagem e complementar a
+            formação profissional e humanística do estudante.
+          </p>
+
+          <h3>Atividades Aceitas</h3>
+          <table class="tabela-ppc" aria-label="Tipos de atividades complementares">
+            <thead>
+              <tr>
+                <th>Tipo de Atividade</th>
+                <th>CH Máxima</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Participação em eventos científicos e tecnológicos (seminários, congressos, workshops)</td>
+                <td>30h</td>
+              </tr>
+              <tr>
+                <td>Publicação de artigos científicos ou técnicos</td>
+                <td>20h</td>
+              </tr>
+              <tr>
+                <td>Participação em projetos de pesquisa e extensão do IFMS</td>
+                <td>40h</td>
+              </tr>
+              <tr>
+                <td>Cursos de extensão e capacitações (presenciais ou EAD)</td>
+                <td>30h</td>
+              </tr>
+              <tr>
+                <td>Participação em competições de programação (hackathons, maratonas)</td>
+                <td>20h</td>
+              </tr>
+              <tr>
+                <td>Monitoria e tutoria acadêmica</td>
+                <td>30h</td>
+              </tr>
+              <tr>
+                <td>Certificações profissionais em TI</td>
+                <td>20h</td>
+              </tr>
+              <tr>
+                <td>Visitas técnicas não previstas no plano de ensino</td>
+                <td>10h</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- =============================================
+           SEÇÃO 12 — TCC
+      ============================================= -->
+      <section class="secao-ppc" id="tcc">
+        <div class="secao-cabecalho" role="button" tabindex="0" aria-expanded="false" aria-controls="conteudo-tcc">
+          <span class="secao-numero" aria-hidden="true">12</span>
+          <h2 class="secao-titulo">Trabalho de Conclusão de Curso (TCC)</h2>
+          <span class="secao-toggle" aria-hidden="true">▼</span>
+        </div>
+        <div class="secao-conteudo escondido" id="conteudo-tcc">
+          <p>
+            O Trabalho de Conclusão de Curso (TCC) é componente curricular obrigatório com carga
+            horária de <strong>80 horas</strong>, desenvolvido no último semestre do curso. O TCC
+            consiste na elaboração de um trabalho científico ou tecnológico, individual ou em grupo
+            de até 3 estudantes, sob orientação de um professor do curso.
+          </p>
+
+          <h3>Modalidades do TCC</h3>
+          <ul>
+            <li><strong>Monografia ou Artigo Científico:</strong> Trabalho acadêmico com revisão bibliográfica e metodologia científica;</li>
+            <li><strong>Projeto de Sistema:</strong> Desenvolvimento de um sistema de software completo com documentação técnica;</li>
+            <li><strong>Startup/Produto Digital:</strong> Desenvolvimento de um produto tecnológico inovador com modelo de negócios;</li>
+            <li><strong>Relatório Técnico de Pesquisa:</strong> Resultado de pesquisa desenvolvida no âmbito do IFMS.</li>
+          </ul>
+
+          <h3>Processo de Avaliação do TCC</h3>
+          <p>
+            O TCC é avaliado por uma banca examinadora composta pelo orientador e por dois professores
+            ou profissionais externos convidados. A avaliação considera: qualidade técnica do trabalho,
+            relevância do tema, apresentação oral e capacidade de defesa.
+          </p>
+        </div>
+      </section>
+
+      <!-- =============================================
+           SEÇÃO 13 — INFRAESTRUTURA
+      ============================================= -->
+      <section class="secao-ppc" id="infraestrutura">
+        <div class="secao-cabecalho" role="button" tabindex="0" aria-expanded="false" aria-controls="conteudo-infraestrutura">
+          <span class="secao-numero" aria-hidden="true">13</span>
+          <h2 class="secao-titulo">Infraestrutura</h2>
+          <span class="secao-toggle" aria-hidden="true">▼</span>
+        </div>
+        <div class="secao-conteudo escondido" id="conteudo-infraestrutura">
+          <h3>Laboratórios de Informática</h3>
+          <p>
+            O curso conta com laboratórios de informática equipados com computadores modernos, com
+            acesso à internet de alta velocidade, instalados com ferramentas e ambientes de desenvolvimento
+            necessários para as atividades práticas do curso.
+          </p>
+
+          <table class="tabela-ppc" aria-label="Laboratórios disponíveis">
+            <thead>
+              <tr>
+                <th>Laboratório</th>
+                <th>Capacidade</th>
+                <th>Recursos Principais</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Laboratório de Programação I</td>
+                <td>30 estações</td>
+                <td>IDEs, compiladores, Git, Docker</td>
+              </tr>
+              <tr>
+                <td>Laboratório de Programação II</td>
+                <td>30 estações</td>
+                <td>Desenvolvimento Web e Mobile</td>
+              </tr>
+              <tr>
+                <td>Laboratório de Redes</td>
+                <td>20 estações</td>
+                <td>Equipamentos de rede, simuladores (Cisco Packet Tracer)</td>
+              </tr>
+              <tr>
+                <td>Laboratório de Banco de Dados</td>
+                <td>30 estações</td>
+                <td>SGBDs (PostgreSQL, MySQL, MongoDB)</td>
+              </tr>
+              <tr>
+                <td>Sala de Inovação</td>
+                <td>25 estações</td>
+                <td>IoT, Raspberry Pi, Arduino, realidade virtual</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Biblioteca</h3>
+          <p>
+            A biblioteca do câmpus dispõe de acervo físico e digital em tecnologia da informação,
+            com acesso ao Portal CAPES para consulta de periódicos científicos nacionais e internacionais,
+            além de assinaturas de plataformas de livros digitais.
+          </p>
+
+          <h3>Acesso à Internet e Conectividade</h3>
+          <p>
+            O câmpus disponibiliza acesso à internet via Wi-Fi em todas as dependências, com link
+            dedicado de alta velocidade. Estudantes têm acesso a créditos em plataformas de computação
+            em nuvem (AWS Academy, Google Cloud for Education, Microsoft Azure for Students) para
+            fins de aprendizagem.
+          </p>
+        </div>
+      </section>
+
+      <!-- =============================================
+           SEÇÃO 14 — CORPO DOCENTE
+      ============================================= -->
+      <section class="secao-ppc" id="corpo-docente">
+        <div class="secao-cabecalho" role="button" tabindex="0" aria-expanded="false" aria-controls="conteudo-corpo-docente">
+          <span class="secao-numero" aria-hidden="true">14</span>
+          <h2 class="secao-titulo">Corpo Docente e Técnico-Administrativo</h2>
+          <span class="secao-toggle" aria-hidden="true">▼</span>
+        </div>
+        <div class="secao-conteudo escondido" id="conteudo-corpo-docente">
+          <h3>Perfil do Corpo Docente</h3>
+          <p>
+            O curso conta com professores efetivos do quadro do IFMS, com titulação mínima de
+            especialização, sendo a maioria com título de mestre ou doutor em áreas correlatas à
+            Computação e à Educação Profissional e Tecnológica.
+          </p>
+
+          <div class="cards-grade">
+            <div class="card-info">
+              <span class="card-valor">100%</span>
+              <span class="card-label">Professores efetivos</span>
+            </div>
+            <div class="card-info">
+              <span class="card-valor">80%</span>
+              <span class="card-label">Mestres e Doutores</span>
+            </div>
+            <div class="card-info">
+              <span class="card-valor">20%</span>
+              <span class="card-label">Especialistas</span>
+            </div>
+          </div>
+
+          <h3>Formação Continuada</h3>
+          <p>
+            O IFMS incentiva e apoia a formação continuada dos docentes por meio de licenças para
+            pós-graduação, participação em eventos científicos, capacitações pedagógicas e
+            intercâmbios institucionais.
+          </p>
+
+          <h3>Coordenação do Curso</h3>
+          <p>
+            O curso é gerenciado por um Coordenador de Curso, eleito ou designado conforme normas
+            internas, responsável pela gestão pedagógica, administrativa e pelo relacionamento com
+            estudantes, docentes e comunidade. Conta com o suporte do Colegiado de Curso, composto
+            por professores, técnico-administrativos e representantes discentes.
+          </p>
+        </div>
+      </section>
+
+      <!-- =============================================
+           SEÇÃO 15 — BIBLIOGRAFIA
+      ============================================= -->
+      <section class="secao-ppc" id="bibliography">
+        <div class="secao-cabecalho" role="button" tabindex="0" aria-expanded="false" aria-controls="conteudo-bibliography">
+          <span class="secao-numero" aria-hidden="true">15</span>
+          <h2 class="secao-titulo">Bibliografia de Referência do PPC</h2>
+          <span class="secao-toggle" aria-hidden="true">▼</span>
+        </div>
+        <div class="secao-conteudo escondido" id="conteudo-bibliography">
+          <h3>Documentos Institucionais</h3>
+          <ul>
+            <li>BRASIL. <em>Lei nº 9.394, de 20 de dezembro de 1996.</em> Lei de Diretrizes e Bases da Educação Nacional. Brasília, DF, 1996.</li>
+            <li>BRASIL. <em>Lei nº 11.892, de 29 de dezembro de 2008.</em> Institui a Rede Federal de Educação Profissional, Científica e Tecnológica e cria os Institutos Federais. Brasília, DF, 2008.</li>
+            <li>BRASIL. MEC. Conselho Nacional de Educação. <em>Resolução CNE/CES nº 5, de 16 de novembro de 2016.</em> Diretrizes Curriculares Nacionais para os cursos de graduação na área de Computação. Brasília, DF, 2016.</li>
+            <li>IFMS. <em>Estatuto do Instituto Federal de Mato Grosso do Sul.</em> Campo Grande, MS: IFMS, 2009.</li>
+            <li>IFMS. <em>Regulamento Didático-Pedagógico dos cursos de graduação.</em> Campo Grande, MS: IFMS, 2023.</li>
+          </ul>
+
+          <h3>Referências Pedagógicas</h3>
+          <ul>
+            <li>FREIRE, Paulo. <em>Pedagogia do Oprimido.</em> 50. ed. Rio de Janeiro: Paz e Terra, 2011.</li>
+            <li>PERRENOUD, Philippe. <em>Construir competências desde a escola.</em> Porto Alegre: Artmed, 1999.</li>
+            <li>PACHECO, Eliezer (Org.). <em>Institutos Federais: uma revolução na educação profissional e tecnológica.</em> Brasília: MEC, 2010.</li>
+            <li>ZABALA, Antoni. <em>A prática educativa: como ensinar.</em> Porto Alegre: Artmed, 1998.</li>
+          </ul>
+
+          <h3>Referências Técnicas</h3>
+          <ul>
+            <li>PRESSMAN, Roger S.; MAXIM, Bruce R. <em>Engenharia de Software: uma abordagem profissional.</em> 8. ed. Porto Alegre: AMGH, 2016.</li>
+            <li>SOMMERVILLE, Ian. <em>Engenharia de Software.</em> 10. ed. São Paulo: Pearson, 2018.</li>
+            <li>ELMASRI, Ramez; NAVATHE, Shamkant B. <em>Sistemas de Banco de Dados.</em> 7. ed. São Paulo: Pearson, 2018.</li>
+            <li>TANENBAUM, Andrew S. <em>Redes de Computadores.</em> 5. ed. São Paulo: Pearson, 2011.</li>
+          </ul>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Botão Voltar ao Topo -->
+  <button id="btn-topo" aria-label="Voltar ao topo da página" title="Voltar ao topo">▲</button>
+
+  <!-- Rodapé -->
+  <footer id="rodape" role="contentinfo">
+    <div class="rodape-principal">
+      <div class="rodape-coluna">
+        <h4>IFMS</h4>
+        <p>Instituto Federal de Educação, Ciência e Tecnologia de Mato Grosso do Sul</p>
+        <p>Reitoria: Campo Grande — MS</p>
+        <a href="https://www.ifms.edu.br" target="_blank" rel="noopener noreferrer">www.ifms.edu.br</a>
+      </div>
+      <div class="rodape-coluna">
+        <h4>PPC Digital</h4>
+        <a href="#identificacao">Identificação do Curso</a>
+        <a href="#organizacao-curricular">Organização Curricular</a>
+        <a href="#estagio">Estágio Supervisionado</a>
+        <a href="#infraestrutura">Infraestrutura</a>
+      </div>
+      <div class="rodape-coluna">
+        <h4>Links Úteis</h4>
+        <a href="https://www.ifms.edu.br" target="_blank" rel="noopener noreferrer">Portal IFMS</a>
+        <a href="https://mec.gov.br" target="_blank" rel="noopener noreferrer">MEC</a>
+        <a href="https://emec.mec.gov.br" target="_blank" rel="noopener noreferrer">e-MEC</a>
+        <a href="https://portal.capes.gov.br" target="_blank" rel="noopener noreferrer">Portal CAPES</a>
+      </div>
+      <div class="rodape-coluna">
+        <h4>Contato</h4>
+        <p>Pró-Reitoria de Ensino — PROEN</p>
+        <p>E-mail: proen@ifms.edu.br</p>
+        <p>Fone: (67) 3378-0300</p>
+      </div>
+    </div>
+    <div class="rodape-base">
+      <p>
+        © <span id="ano-atual"></span> Instituto Federal de Mato Grosso do Sul — IFMS.
+        Documento gerado eletronicamente. Versão 2024.1.
+        Aprovado pelo Conselho Superior do IFMS.
+      </p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script>
+    document.getElementById('ano-atual').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
