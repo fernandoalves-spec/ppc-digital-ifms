@@ -1823,3 +1823,11 @@
 [2026-04-09T00:07:21.566Z] }
 [2026-04-09T00:07:21.566Z] 
 [2026-04-09T00:07:21.567Z] Node.js v22.13.0
+[2026-04-11T00:08:53.026Z] Dev server process group stopped
+[2026-04-11T00:08:56.040Z] Starting dev server with command: pnpm run dev
+[2026-04-11T00:08:56.615Z] 
+[2026-04-11T00:08:56.616Z] > ppc-digital-ifms@1.0.0 dev /home/ubuntu/ppc-digital-ifms
+[2026-04-11T00:08:56.616Z] > NODE_ENV=development tsx watch server/_core/index.ts
+[2026-04-11T00:08:56.616Z] 
+[2026-04-11T00:08:58.306Z] [Auth] Manus OAuth ativado
+[2026-04-11T00:08:58.346Z] Server running on http://0.0.0.0:3000/
