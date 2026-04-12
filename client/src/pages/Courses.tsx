@@ -10,13 +10,13 @@ import { GraduationCap, Plus, Pencil, Trash2, ChevronRight } from "lucide-react"
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 
-const COURSE_TYPES = ["Tecnico", "Subsequente", "Graduacao", "FIC", "Pos-graduacao"] as const;
+const COURSE_TYPES = ["Técnico", "Subsequente", "Graduação", "FIC", "Pós-graduação"] as const;
 const TYPE_COLORS: Record<string, string> = {
-  "Tecnico": "bg-blue-100 text-blue-700",
+  "Técnico": "bg-blue-100 text-blue-700",
   "Subsequente": "bg-purple-100 text-purple-700",
-  "Graduacao": "bg-green-100 text-green-700",
+  "Graduação": "bg-green-100 text-green-700",
   "FIC": "bg-amber-100 text-amber-700",
-  "Pos-graduacao": "bg-red-100 text-red-700",
+  "Pós-graduação": "bg-red-100 text-red-700",
 };
 
 type FormState = {
@@ -29,7 +29,7 @@ type FormState = {
 };
 
 const EMPTY_FORM: FormState = {
-  name: "", type: "Tecnico", campusId: "", duration: "6",
+  name: "", type: "Técnico", campusId: "", duration: "6",
   classesFirstHalfYear: "1", classesSecondHalfYear: "0",
 };
 

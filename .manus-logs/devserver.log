@@ -1831,3 +1831,18 @@
 [2026-04-11T00:08:56.616Z] 
 [2026-04-11T00:08:58.306Z] [Auth] Manus OAuth ativado
 [2026-04-11T00:08:58.346Z] Server running on http://0.0.0.0:3000/
+[2026-04-11T00:11:14.954Z] [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[2026-04-11T00:11:58.101Z] 8:11:58 PM [tsx] change in ./server/routers.ts Restarting...
+[2026-04-11T00:11:59.841Z] c[Auth] Manus OAuth ativado
+[2026-04-11T00:11:59.872Z] Server running on http://0.0.0.0:3000/
+[2026-04-11T00:12:10.585Z] 8:12:10 PM [tsx] change in ./server/routers.ts Restarting...
+[2026-04-11T00:12:12.104Z] c[Auth] Manus OAuth ativado
+[2026-04-11T00:12:12.137Z] Server running on http://0.0.0.0:3000/
+[2026-04-12T21:51:56.066Z] Dev server process group stopped
+[2026-04-12T21:51:59.085Z] Starting dev server with command: pnpm run dev
+[2026-04-12T21:51:59.663Z] 
+[2026-04-12T21:51:59.663Z] > ppc-digital-ifms@1.0.0 dev /home/ubuntu/ppc-digital-ifms
+[2026-04-12T21:51:59.664Z] > NODE_ENV=development tsx watch server/_core/index.ts
+[2026-04-12T21:51:59.664Z] 
+[2026-04-12T21:52:01.527Z] [Auth] Manus OAuth ativado
+[2026-04-12T21:52:01.562Z] Server running on http://0.0.0.0:3000/

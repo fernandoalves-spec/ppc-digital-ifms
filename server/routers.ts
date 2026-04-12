@@ -58,7 +58,7 @@ import {
   getClassesBySemesterFromOfferings,
 } from "./db";
 import { invokeLLM } from "./_core/llm";
-import { extractPdfWithGemini, isGeminiAvailable } from "./_core/gemini";
+import { extractPdfWithGemini, extractPdfWithOpenAI, getAvailableProvider } from "./_core/ai-extract";
 import { storagePut } from "./storage";
 import { nanoid } from "nanoid";
 import { validateBrandPolicyIfms } from "./domain/branding/ifmsPolicy";
@@ -400,9 +400,20 @@ const ppcRouter = router({
         };
 
         let extractedData: any;
-        if (isGeminiAvailable()) {
+        const aiProvider = getAvailableProvider();
+        if (aiProvider === "gemini") {
           extractedData = await extractPdfWithGemini({
             pdfBuffer,
+            systemPrompt,
+            userPrompt,
+            jsonSchema: ppcJsonSchema,
+          });
+        } else if (aiProvider === "openai") {
+          // OpenAI não suporta PDF nativo — extrai texto primeiro
+          const pdfParse = await import("pdf-parse") as any;
+          const pdfData = await (pdfParse.default ?? pdfParse)(pdfBuffer);
+          extractedData = await extractPdfWithOpenAI({
+            pdfText: pdfData.text,
             systemPrompt,
             userPrompt,
             jsonSchema: ppcJsonSchema,

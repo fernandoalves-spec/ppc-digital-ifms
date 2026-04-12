@@ -301,10 +301,9 @@ vi.mock("pdf-parse", () => ({
   })),
 }));
 
-// ── Mock do módulo Gemini ────────────────────────────────────────────────────
-vi.mock("./_core/gemini", () => ({
-  isGeminiAvailable: vi.fn().mockReturnValue(false),
-  extractPdfWithGemini: vi.fn().mockResolvedValue({
+// ── Mock do módulo ai-extract ────────────────────────────────────────────────
+vi.mock("./_core/ai-extract", () => {
+  const data = {
     courseName: "Técnico em Informática",
     courseType: "Técnico",
     duration: 6,
@@ -319,8 +318,15 @@ vi.mock("./_core/gemini", () => ({
       syllabus: "Lógica de programação, estruturas de dados",
       bibliography: "CORMEN, T. Algoritmos. 3ª ed.",
     }],
-  }),
-}));
+  };
+  return {
+    getAvailableProvider: vi.fn().mockReturnValue("gemini"),
+    extractPdfWithGemini: vi.fn().mockResolvedValue(data),
+    extractPdfWithOpenAI: vi.fn().mockResolvedValue(data),
+    isGeminiAvailable: vi.fn().mockReturnValue(true),
+    isOpenAIAvailable: vi.fn().mockReturnValue(false),
+  };
+});
 
 // ── Mock do invokeLLM ──────────────────────────────────────────────────────
 vi.mock("./_core/llm", () => ({

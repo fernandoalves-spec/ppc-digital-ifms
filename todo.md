@@ -167,10 +167,10 @@
 - [x] Adicionar mock do módulo gemini nos testes (23 testes passando)
 
 ## v1.22 — Configurar chave OpenAI como alternativa para extração no Railway
-- [ ] Buscar chaves hardcoded ou referências a APIs no código
-- [ ] Configurar OPENAI_API_KEY como variável de ambiente
-- [ ] Adaptar sistema para usar OpenAI quando OPENAI_API_KEY disponível (prioridade: Gemini > OpenAI > invokeLLM Manus)
-- [ ] Testar e salvar checkpoint
+- [x] Buscar chaves hardcoded ou referências a APIs no código
+- [x] Configurar OPENAI_API_KEY como variável de ambiente
+- [x] Adaptar sistema para usar OpenAI quando OPENAI_API_KEY disponível (prioridade: Gemini > OpenAI > invokeLLM Manus)
+- [x] Testar e salvar checkpoint
 
 ## v1.22 — Correções da Revisão Técnica (P1 + P2)
 - [x] P1: Adicionar migrações incrementais (ALTER TABLE) ao init-db.mjs para evitar drift de schema no Railway

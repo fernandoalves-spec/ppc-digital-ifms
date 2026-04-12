@@ -26,7 +26,7 @@ describe("layout components", () => {
 
   it("renders section and stat card tokens", () => {
     const sectionHtml = renderToStaticMarkup(<SectionCard>Conteudo</SectionCard>);
-    const statHtml = renderToStaticMarkup(<StatCard label="Pendencias" value={3} tone="danger" />);
+    const statHtml = renderToStaticMarkup(<StatCard label="Pendencias" value={3} color="text-red-600" bg="bg-red-50" />);
     expect(sectionHtml).toContain("Conteudo");
     expect(statHtml).toContain("Pendencias");
     expect(statHtml).toContain(">3<");
