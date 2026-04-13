@@ -11,12 +11,33 @@ type SectionCardProps = {
 
 export default function SectionCard({ title, description, actions, children, className }: SectionCardProps) {
   return (
-    <div className={cn("rounded-xl border border-slate-200 bg-white shadow-sm", className)}>
+    <div
+      className={cn("rounded-xl", className)}
+      style={{
+        background: "linear-gradient(135deg, rgba(19,19,42,0.97) 0%, rgba(26,26,53,0.97) 100%)",
+        border: "1px solid rgba(107,95,160,0.25)",
+        boxShadow: "0 4px 20px rgba(74,63,122,0.2)",
+      }}
+    >
       {(title || actions) && (
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div
+          className="flex items-center justify-between px-5 py-4"
+          style={{ borderBottom: "1px solid rgba(107,95,160,0.2)" }}
+        >
           <div>
-            {title && <h2 className="text-base font-semibold text-slate-800">{title}</h2>}
-            {description && <p className="mt-0.5 text-sm text-slate-500">{description}</p>}
+            {title && (
+              <h2
+                className="text-base font-semibold"
+                style={{ fontFamily: "'Rajdhani', sans-serif", color: "#e8e6f0", letterSpacing: "0.03em" }}
+              >
+                {title}
+              </h2>
+            )}
+            {description && (
+              <p className="mt-0.5 text-sm" style={{ color: "#9e9ab8" }}>
+                {description}
+              </p>
+            )}
           </div>
           {actions && <div className="flex items-center gap-2">{actions}</div>}
         </div>

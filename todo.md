@@ -180,3 +180,12 @@
 - [x] P1 hardening: deduplicar campus_areas antes de criar índice UNIQUE
 - [x] P2 hardening: rejeitar chaves com segmentos inválidos em sanitizeLocalKey
 - [x] P2 completeness: aplicar sanitização em storageGet modo local + testes automatizados
+
+## v1.23 — Redesign Tema Jujutsu Kaisen
+- [x] Gerar assets visuais (logo, background, ícones) com tema JJK
+- [x] Redesenhar tokens de design: paleta escura roxo/azul, tipografia, variáveis CSS
+- [x] Redesenhar DashboardLayout e sidebar com tema JJK
+- [x] Redesenhar páginas principais com elementos visuais JJK
+- [x] Testar responsividade e salvar checkpoint
+- [ ] v1.23: Concluir redesign das demais páginas (Subjects, Offerings, Approvals, Reports) para consistência visual total
+- [ ] v1.23: Salvar checkpoint após finalizar o redesign completo
