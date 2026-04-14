@@ -10,11 +10,11 @@ import { trpc } from "@/lib/trpc";
 import { CheckCircle, ClipboardList, Clock, Layers, MessageSquare, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  pending: { label: "Pendente", color: "bg-amber-100 text-amber-700", icon: Clock },
-  responded: { label: "Respondido", color: "bg-blue-100 text-blue-700", icon: MessageSquare },
-  approved: { label: "Aprovado", color: "bg-green-100 text-green-700", icon: CheckCircle },
-  rejected: { label: "Rejeitado", color: "bg-red-100 text-red-600", icon: XCircle },
+const STATUS_CONFIG: Record<string, { label: string; bg: string; color: string; icon: React.ElementType }> = {
+  pending: { label: "Pendente", bg: "rgba(212,160,23,0.15)", color: "#f0c040", icon: Clock },
+  responded: { label: "Respondido", bg: "rgba(41,182,212,0.15)", color: "#29b6d4", icon: MessageSquare },
+  approved: { label: "Aprovado", bg: "rgba(41,182,100,0.15)", color: "#4ade80", icon: CheckCircle },
+  rejected: { label: "Rejeitado", bg: "rgba(239,68,68,0.15)", color: "#f87171", icon: XCircle },
 };
 
 export default function ApprovalsPage() {
@@ -68,19 +68,19 @@ export default function ApprovalsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Solicitacoes de Indicacao</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#e8e6f0", letterSpacing: "0.04em" }}>Solicitacoes de Indicacao</h1>
+          <p className="mt-1 text-sm" style={{ color: "#9e9ab8" }}>
             {isCoordinator ? "Solicitacoes para voce indicar a area do docente." : "Fluxo de aprovacao de areas por disciplina."}
           </p>
         </div>
         {pendingCount > 0 && (
-          <Badge className="bg-red-50 text-red-700" aria-live="polite">{pendingCount} pendente(s)</Badge>
+          <Badge aria-live="polite" style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }}>{pendingCount} pendente(s)</Badge>
         )}
       </div>
 
       <div className="flex items-center gap-3">
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-56 bg-white"><SelectValue placeholder="Todos os status" /></SelectTrigger>
+          <SelectTrigger className="w-56" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}><SelectValue placeholder="Todos os status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos os status</SelectItem>
             {Object.entries(STATUS_CONFIG).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
@@ -89,12 +89,12 @@ export default function ApprovalsPage() {
       </div>
 
       {isLoading ? (
-        <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-24 animate-pulse rounded-xl bg-slate-100" />)}</div>
+        <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-24 animate-pulse rounded-xl" style={{ background: "rgba(26,26,53,0.8)" }} />)}</div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-16 text-center">
-          <ClipboardList className="mb-3 h-12 w-12 text-slate-300" />
-          <p className="font-medium text-slate-500">Nenhuma solicitacao encontrada</p>
-          <p className="mt-1 text-sm text-slate-400">
+        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[rgba(107,95,160,0.25)] py-16 text-center">
+          <ClipboardList className="mb-3 h-12 w-12" style={{ color: "#6b5fa0" }} />
+          <p className="font-medium" style={{ color: "#9e9ab8" }}>Nenhuma solicitacao encontrada</p>
+          <p className="mt-1 text-sm" style={{ color: "#6a6685" }}>
             {isAdmin ? 'Va ao detalhe de um curso e clique em "Solicitar Areas".' : "Sem pendencias para o filtro atual."}
           </p>
         </div>
@@ -107,22 +107,22 @@ export default function ApprovalsPage() {
             const subject = subjectMap.get(req.subjectId);
 
             return (
-              <div key={req.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div key={req.id} className="rounded-xl p-4 shadow-sm" style={{ background: "linear-gradient(135deg, rgba(19,19,42,0.97), rgba(26,26,53,0.97))", border: "1px solid rgba(107,95,160,0.22)" }}>
                 <div className="flex items-start gap-3">
-                  <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${statusCfg.color}`}>
-                    <StatusIcon className="h-4 w-4" />
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: (statusCfg as any).bg }}>
+                    <StatusIcon className="h-4 w-4" style={{ color: (statusCfg as any).color }} />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-semibold text-slate-800">{subject?.name ?? `Disciplina #${req.subjectId}`}</span>
-                      <Badge className={`px-2 py-0 text-[10px] ${statusCfg.color}`}>{statusCfg.label}</Badge>
-                      {subject && <span className="text-[10px] text-slate-500">{subject.semester}o sem · {subject.weeklyClasses} aulas/sem</span>}
+                      <span className="text-sm font-semibold" style={{ color: "#e8e6f0" }}>{subject?.name ?? `Disciplina #${req.subjectId}`}</span>
+                      <Badge className="px-2 py-0 text-[10px]" style={{ background: (statusCfg as any).bg, color: (statusCfg as any).color, border: `1px solid ${(statusCfg as any).color}40` }}>{statusCfg.label}</Badge>
+                      {subject && <span className="text-[10px]" style={{ color: "#9e9ab8" }}>{subject.semester}o sem · {subject.weeklyClasses} aulas/sem</span>}
                     </div>
-                    <p className="mt-0.5 text-xs text-slate-600">
+                    <p className="mt-0.5 text-xs" style={{ color: "#9e9ab8" }}>
                       {courseMap.get(req.courseId) ?? `#${req.courseId}`} · {new Date(req.createdAt).toLocaleDateString("pt-BR")}
                     </p>
                     {req.adminNotes && (
-                      <p className="mt-1.5 rounded bg-slate-50 px-2 py-1 text-xs text-slate-700">
+                      <p className="mt-1.5 rounded px-2 py-1 text-xs" style={{ background: "rgba(107,95,160,0.12)", color: "#c8c4e0" }}>
                         <strong>Nota admin:</strong> {req.adminNotes}
                       </p>
                     )}
@@ -132,13 +132,13 @@ export default function ApprovalsPage() {
                       </p>
                     )}
                     {req.coordinatorNotes && (
-                      <p className="mt-1 rounded bg-blue-50 px-2 py-1 text-xs text-slate-700">
+                      <p className="mt-1 rounded px-2 py-1 text-xs" style={{ background: "rgba(41,182,212,0.1)", color: "#c8c4e0" }}>
                         <strong>Nota coordenador:</strong> {req.coordinatorNotes}
                       </p>
                     )}
                   </div>
                   {(isCoordinator || isAdmin) && req.status === "pending" && (
-                    <Button size="sm" onClick={() => setRespondingId(req.id)} className="shrink-0 bg-blue-600 hover:bg-blue-700">
+                    <Button size="sm" onClick={() => setRespondingId(req.id)} className="shrink-0" style={{ background: "linear-gradient(135deg, #4a3f7a, #6b5fa0)", color: "#e8e6f0" }}>
                       Indicar area
                     </Button>
                   )}
@@ -154,15 +154,15 @@ export default function ApprovalsPage() {
           <DialogHeader><DialogTitle>Indicar area do docente</DialogTitle></DialogHeader>
           <div className="space-y-4 py-2">
             {respondingSubject && (
-              <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
-                <p className="text-sm font-medium text-slate-800">{respondingSubject.name}</p>
-                <p className="mt-0.5 text-xs text-slate-600">
+              <div className="rounded-lg p-3" style={{ background: "rgba(26,26,53,0.8)", border: "1px solid rgba(107,95,160,0.25)" }}>
+                <p className="text-sm font-medium" style={{ color: "#e8e6f0" }}>{respondingSubject.name}</p>
+                <p className="mt-0.5 text-xs" style={{ color: "#9e9ab8" }}>
                   {respondingSubject.semester}o semestre · {respondingSubject.weeklyClasses} aulas/semana
                   {respondingSubject.totalHours ? ` · ${respondingSubject.totalHours}h total` : ""}
                 </p>
               </div>
             )}
-            <p className="text-sm text-slate-700">Selecione a area de ensino do docente responsavel por esta disciplina.</p>
+            <p className="text-sm" style={{ color: "#c8c4e0" }}>Selecione a area de ensino do docente responsavel por esta disciplina.</p>
             <div className="space-y-1.5">
               <Label>Area de ensino *</Label>
               <Select value={responseForm.suggestedAreaId} onValueChange={value => setResponseForm({ ...responseForm, suggestedAreaId: value })}>
@@ -186,7 +186,7 @@ export default function ApprovalsPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRespondingId(null)}>Cancelar</Button>
-            <Button onClick={handleRespond} disabled={respondMutation.isPending || !responseForm.suggestedAreaId} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={handleRespond} disabled={respondMutation.isPending || !responseForm.suggestedAreaId} style={{ background: "linear-gradient(135deg, #4a3f7a, #6b5fa0)", color: "#e8e6f0" }}>
               Confirmar indicacao
             </Button>
           </DialogFooter>

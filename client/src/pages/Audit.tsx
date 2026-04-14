@@ -37,12 +37,12 @@ export default function AuditPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Historico de Auditoria</h1>
-        <p className="mt-1 text-sm text-slate-500">Rastreamento completo de todas as alteracoes realizadas no sistema</p>
+        <h1 className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#e8e6f0", letterSpacing: "0.04em" }}>Historico de Auditoria</h1>
+        <p className="mt-1 text-sm" style={{ color: "#9e9ab8" }}>Rastreamento completo de todas as alteracoes realizadas no sistema</p>
       </div>
 
       <Select value={filterEntity} onValueChange={setFilterEntity}>
-        <SelectTrigger className="w-52 bg-white"><SelectValue placeholder="Todas as entidades" /></SelectTrigger>
+        <SelectTrigger className="w-52" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}><SelectValue placeholder="Todas as entidades" /></SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Todas as entidades</SelectItem>
           {Object.entries(ENTITY_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
@@ -52,9 +52,9 @@ export default function AuditPage() {
       {isLoading ? (
         <div className="space-y-2">{[1,2,3,4,5].map(i => <div key={i} className="h-14 animate-pulse rounded-xl bg-slate-100" />)}</div>
       ) : logs.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-16 text-center">
+        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[rgba(107,95,160,0.25)] py-16 text-center">
           <Shield className="mb-3 h-12 w-12 text-slate-300" />
-          <p className="text-slate-500">Nenhum registro encontrado</p>
+          <p className="" style={{ color: "#9e9ab8" }}>Nenhum registro encontrado</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -62,7 +62,7 @@ export default function AuditPage() {
             const actionColor = ACTION_COLORS[log.action] ?? "bg-slate-100 text-slate-600";
             const entityLabel = ENTITY_LABELS[log.entity] ?? log.entity;
             return (
-              <div key={log.id} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+              <div key={log.id} className="flex items-center gap-3 rounded-xl border border-[rgba(107,95,160,0.25)] p-3 shadow-sm" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}>
                 <Badge className={`shrink-0 text-[10px] ${actionColor}`}>{log.action}</Badge>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">

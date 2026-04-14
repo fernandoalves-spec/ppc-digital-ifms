@@ -105,27 +105,30 @@ export default function Offerings() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Quadro de Oferta</h1>
-          <p className="mt-1 text-sm text-slate-500">Registre as turmas ofertadas desde 2020 por campus e curso</p>
+          <h1 className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#e8e6f0", letterSpacing: "0.04em" }}>Quadro de Oferta</h1>
+          <p className="mt-1 text-sm" style={{ color: "#9e9ab8" }}>Registre as turmas ofertadas desde 2020 por campus e curso</p>
         </div>
         {selectedCourse && (
-          <Button onClick={() => openAddDialog()} className="bg-green-600 hover:bg-green-700">
+          <Button
+            onClick={() => openAddDialog()}
+            style={{ background: "linear-gradient(135deg, #4a3f7a, #6b5fa0)", border: "1px solid rgba(139,126,192,0.4)", color: "#e8e6f0" }}
+          >
             <Plus className="mr-2 h-4 w-4" /> Nova Oferta
           </Button>
         )}
       </div>
 
       {/* Filtros */}
-      <div className="grid grid-cols-1 gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 rounded-xl border border-[rgba(107,95,160,0.25)] p-4 shadow-sm md:grid-cols-2" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}>
         <div className="space-y-1.5">
-          <Label className="flex items-center gap-2 text-sm"><Building2 className="h-4 w-4 text-slate-500" />Campus</Label>
+          <Label className="flex items-center gap-2 text-sm" style={{ color: "#c8c4e0" }}><Building2 className="h-4 w-4" style={{ color: "#8b7ec0" }} />Campus</Label>
           <Select value={selectedCampus} onValueChange={v => { setSelectedCampus(v); setSelectedCourse(""); }}>
             <SelectTrigger><SelectValue placeholder="Selecione o campus..." /></SelectTrigger>
             <SelectContent>{campuses.data?.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label className="flex items-center gap-2 text-sm"><GraduationCap className="h-4 w-4 text-slate-500" />Curso</Label>
+          <Label className="flex items-center gap-2 text-sm" style={{ color: "#c8c4e0" }}><GraduationCap className="h-4 w-4" style={{ color: "#8b7ec0" }} />Curso</Label>
           <Select value={selectedCourse} onValueChange={setSelectedCourse} disabled={!selectedCampus}>
             <SelectTrigger><SelectValue placeholder={!selectedCampus ? "Selecione o campus primeiro..." : "Selecione o curso..."} /></SelectTrigger>
             <SelectContent>{courses.data?.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name} ({c.type})</SelectItem>)}</SelectContent>
@@ -137,15 +140,15 @@ export default function Offerings() {
       {selectedCourse && (
         <div className="grid gap-4 sm:grid-cols-3">
           {[
-            { icon: Calendar, label: "Ofertas Registradas", value: activeCount, bg: "bg-green-50", color: "text-green-600" },
-            { icon: Users, label: "Total de Entradas", value: totalEntries, bg: "bg-emerald-50", color: "text-emerald-600" },
-            { icon: FileText, label: "Editais Distintos", value: distinctNotices, bg: "bg-amber-50", color: "text-amber-600" },
+            { icon: Calendar, label: "Ofertas Registradas", value: activeCount, iconColor: "#4ade80", iconBg: "rgba(41,182,100,0.12)" },
+            { icon: Users, label: "Total de Entradas", value: totalEntries, iconColor: "#29b6d4", iconBg: "rgba(41,182,212,0.12)" },
+            { icon: FileText, label: "Editais Distintos", value: distinctNotices, iconColor: "#d4a017", iconBg: "rgba(212,160,23,0.12)" },
           ].map(kpi => (
-            <div key={kpi.label} className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-              <div className={`rounded-lg p-3 ${kpi.bg}`}><kpi.icon className={`h-5 w-5 ${kpi.color}`} /></div>
+            <div key={kpi.label} className="flex items-center gap-4 rounded-xl border border-[rgba(107,95,160,0.25)] p-4 shadow-sm" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}>
+              <div className="rounded-lg p-3" style={{ background: (kpi as any).iconBg }}><kpi.icon className="h-5 w-5" style={{ color: (kpi as any).iconColor }} /></div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">{kpi.value}</p>
-                <p className="text-sm text-slate-500">{kpi.label}</p>
+                <p className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#e8e6f0", letterSpacing: "0.04em" }}>{kpi.value}</p>
+                <p className="text-sm" style={{ color: "#9e9ab8" }}>{kpi.label}</p>
               </div>
             </div>
           ))}
@@ -154,10 +157,10 @@ export default function Offerings() {
 
       {/* Timeline */}
       {selectedCourse && (
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-4">
-            <Calendar className="h-5 w-5 text-slate-500" />
-            <h2 className="font-semibold text-slate-900">Linha do Tempo de Ofertas</h2>
+        <div className="rounded-xl shadow-sm" style={{ background: "linear-gradient(135deg, rgba(19,19,42,0.97), rgba(26,26,53,0.97))", border: "1px solid rgba(107,95,160,0.22)" }}>
+          <div className="flex items-center gap-2 border-b border-[rgba(107,95,160,0.18)] px-5 py-4">
+            <Calendar className="h-5 w-5" style={{ color: "#8b7ec0" }} />
+            <h2 className="font-semibold" style={{ color: "#e8e6f0" }}>Linha do Tempo de Ofertas</h2>
           </div>
           <div className="space-y-1 p-3">
             {[...allTerms].reverse().map(term => {
@@ -165,57 +168,73 @@ export default function Offerings() {
               const hasOfferings = termOfferings.length > 0;
               const isExpanded = expandedTerms.has(term);
               return (
-                <div key={term} className={`overflow-hidden rounded-lg border transition-colors ${hasOfferings ? "border-green-200 bg-green-50/50" : "border-slate-100 hover:border-slate-200"}`}>
+                <div
+                  key={term}
+                  className="overflow-hidden rounded-lg border transition-all"
+                  style={hasOfferings
+                    ? { background: "rgba(41,182,100,0.07)", border: "1px solid rgba(41,182,100,0.3)" }
+                    : { background: "rgba(19,19,42,0.5)", border: "1px solid rgba(107,95,160,0.18)" }
+                  }
+                >
                   <div
                     className="flex cursor-pointer items-center justify-between p-3"
                     onClick={() => hasOfferings ? toggleTerm(term) : openAddDialog(term)}
                   >
                     <div className="flex items-center gap-3">
-                      <Badge variant={hasOfferings ? "default" : "outline"} className={hasOfferings ? "bg-green-600 text-white" : "text-slate-500"}>
+                      <Badge
+                          variant="outline"
+                          style={hasOfferings
+                            ? { background: "rgba(41,182,100,0.2)", border: "1px solid rgba(41,182,100,0.5)", color: "#4ade80" }
+                            : { background: "rgba(107,95,160,0.1)", border: "1px solid rgba(107,95,160,0.3)", color: "#8b7ec0" }
+                          }
+                        >
                         {term}
                       </Badge>
                       {hasOfferings ? (
-                        <span className="text-sm font-medium text-slate-700">
+                          <span className="text-sm font-medium" style={{ color: "#c8c4e0" }}>
                           {termOfferings.length} oferta(s) — {termOfferings.reduce((s, o) => s + o.numberOfEntries, 0)} entrada(s)
                         </span>
                       ) : (
-                        <span className="text-sm text-slate-400">Nenhuma oferta — clique para adicionar</span>
+                        <span className="text-sm" style={{ color: "#6a6685" }}>Nenhuma oferta — clique para adicionar</span>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
                       {!hasOfferings && (
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-green-600" onClick={e => { e.stopPropagation(); openAddDialog(term); }}>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" style={{ color: "#6a6685" }} onClick={e => { e.stopPropagation(); openAddDialog(term); }}>
                           <Plus className="h-3.5 w-3.5" />
                         </Button>
                       )}
-                      {hasOfferings && (isExpanded ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />)}
+                      {hasOfferings && (isExpanded
+                          ? <ChevronUp className="h-4 w-4" style={{ color: "#8b7ec0" }} />
+                          : <ChevronDown className="h-4 w-4" style={{ color: "#8b7ec0" }} />
+                        )}
                     </div>
                   </div>
                   {isExpanded && hasOfferings && (
-                    <div className="border-t border-green-100 px-3 pb-3">
+                    <div className="border-t px-3 pb-3" style={{ borderColor: "rgba(41,182,100,0.2)" }}>
                       {termOfferings.map((offering: any) => {
                         const course = courseMap.get(offering.courseId);
                         return (
-                          <div key={offering.id} className="mt-2 flex items-center gap-3 rounded-lg border border-slate-100 bg-white p-3">
+                          <div key={offering.id} className="mt-2 flex items-center gap-3 rounded-lg border border-[rgba(107,95,160,0.18)] p-3" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}>
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-medium text-slate-800">{course?.name ?? `Curso #${offering.courseId}`}</p>
-                              <div className="mt-0.5 flex flex-wrap gap-2 text-xs text-slate-500">
+                              <p className="truncate text-sm font-medium" style={{ color: "#e8e6f0" }}>{course?.name ?? `Curso #${offering.courseId}`}</p>
+                              <div className="mt-0.5 flex flex-wrap gap-2 text-xs" style={{ color: "#9e9ab8" }}>
                                 <span>{offering.numberOfEntries} entrada(s)</span>
                                 {offering.selectionNotice && <span>Edital: {offering.selectionNotice}</span>}
                               </div>
                             </div>
                             <div className="flex shrink-0 gap-1">
-                              <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-blue-600" onClick={() => openEditDialog(offering)}>
+                              <Button variant="ghost" size="icon" className="h-7 w-7" style={{ color: "#6a6685" }} onClick={() => openEditDialog(offering)}>
                                 <Pencil className="h-3.5 w-3.5" />
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-red-600" onClick={() => deleteMutation.mutate({ id: offering.id })}>
+                              <Button variant="ghost" size="icon" className="h-7 w-7" style={{ color: "#6a6685" }} onClick={() => deleteMutation.mutate({ id: offering.id })}>
                                 <Trash2 className="h-3.5 w-3.5" />
                               </Button>
                             </div>
                           </div>
                         );
                       })}
-                      <Button variant="ghost" size="sm" className="mt-2 text-xs text-green-600 hover:bg-green-50" onClick={() => openAddDialog(term)}>
+                      <Button variant="ghost" size="sm" className="mt-2 text-xs" style={{ color: "#4ade80" }} onClick={() => openAddDialog(term)}>
                         <Plus className="mr-1 h-3.5 w-3.5" /> Adicionar outra oferta neste semestre
                       </Button>
                     </div>
@@ -228,15 +247,15 @@ export default function Offerings() {
       )}
 
       {!selectedCampus && (
-        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-16 text-center">
-          <Building2 className="mb-3 h-12 w-12 text-slate-300" />
-          <p className="font-medium text-slate-500">Selecione um campus para visualizar as ofertas</p>
+        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[rgba(107,95,160,0.25)] py-16 text-center">
+          <Building2 className="mb-3 h-12 w-12" style={{ color: "#6b5fa0" }} />
+          <p className="font-medium" style={{ color: "#9e9ab8" }}>Selecione um campus para visualizar as ofertas</p>
         </div>
       )}
       {selectedCampus && !selectedCourse && (
-        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-16 text-center">
-          <GraduationCap className="mb-3 h-12 w-12 text-slate-300" />
-          <p className="font-medium text-slate-500">Selecione um curso para visualizar a linha do tempo</p>
+        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[rgba(107,95,160,0.25)] py-16 text-center">
+          <GraduationCap className="mb-3 h-12 w-12" style={{ color: "#6b5fa0" }} />
+          <p className="font-medium" style={{ color: "#9e9ab8" }}>Selecione um curso para visualizar a linha do tempo</p>
         </div>
       )}
 

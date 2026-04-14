@@ -208,7 +208,7 @@ export default function CourseDetailPage() {
           { label: "Sem area", value: subjectsWithoutArea.length, color: subjectsWithoutArea.length > 0 ? "text-orange-600" : "text-green-600" },
           { label: "Com ementa", value: subjects.filter(s => (s as any).syllabus).length, color: "text-slate-900" },
         ].map(kpi => (
-          <div key={kpi.label} className="rounded-xl border border-slate-200 bg-white p-4 text-center shadow-sm">
+          <div key={kpi.label} className="rounded-xl p-4 text-center shadow-sm" style={{ background: "linear-gradient(135deg, rgba(19,19,42,0.97), rgba(26,26,53,0.97))", border: "1px solid rgba(107,95,160,0.22)" }}>
             <p className={`text-2xl font-bold ${kpi.color}`}>{kpi.value}</p>
             <p className="mt-0.5 text-xs text-slate-500">{kpi.label}</p>
           </div>
@@ -219,7 +219,7 @@ export default function CourseDetailPage() {
       {isLoading ? (
         <div className="space-y-4">{[1,2,3].map(i => <div key={i} className="h-32 animate-pulse rounded-xl bg-slate-100" />)}</div>
       ) : subjects.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-16 text-center">
+        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[rgba(107,95,160,0.25)] py-16 text-center">
           <BookOpen className="mb-3 h-12 w-12 text-slate-300" />
           <p className="font-medium text-slate-500">Nenhuma disciplina cadastrada</p>
           {isAdmin && <p className="mt-1 text-sm text-slate-400">Adicione disciplinas ou faca upload do PPC</p>}
@@ -227,8 +227,8 @@ export default function CourseDetailPage() {
       ) : (
         <div className="space-y-4">
           {Object.entries(semesterGroups).sort(([a], [b]) => Number(a) - Number(b)).map(([sem, subs]) => (
-            <div key={sem} className="rounded-xl border border-slate-200 bg-white shadow-sm">
-              <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-3">
+            <div key={sem} className="rounded-xl shadow-sm" style={{ background: "linear-gradient(135deg, rgba(19,19,42,0.97), rgba(26,26,53,0.97))", border: "1px solid rgba(107,95,160,0.22)" }}>
+              <div className="flex items-center gap-3 border-b border-[rgba(107,95,160,0.18)] px-5 py-3">
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100 text-xs font-bold text-green-700">{sem}</span>
                 <h3 className="text-sm font-semibold text-slate-700">{Number(sem)}o Semestre</h3>
                 <span className="ml-auto text-xs font-normal text-slate-400">{subs.reduce((s, d) => s + d.weeklyClasses, 0)} aulas/sem</span>
@@ -240,7 +240,7 @@ export default function CourseDetailPage() {
                   const hasSyllabus = !!(subject as any).syllabus;
                   const hasBibliography = !!(subject as any).bibliography;
                   return (
-                    <div key={subject.id} className="overflow-hidden rounded-lg border border-slate-100 bg-white">
+                    <div key={subject.id} className="overflow-hidden rounded-lg border border-[rgba(107,95,160,0.18)]" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}>
                       <div className="flex cursor-pointer items-center gap-3 p-3 hover:bg-slate-50" onClick={() => setExpandedSubject(isExpanded ? null : subject.id)}>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
@@ -250,7 +250,7 @@ export default function CourseDetailPage() {
                           </div>
                           <div className="mt-1 flex flex-wrap items-center gap-3">
                             <span className="flex items-center gap-1 text-xs text-slate-500"><Clock className="h-3 w-3" />{subject.weeklyClasses} aulas/sem</span>
-                            {(subject as any).totalHours && <span className="text-xs text-slate-500">{(subject as any).totalHours}h total</span>}
+                            {(subject as any).totalHours && <span className="text-xs" style={{ color: "#9e9ab8" }}>{(subject as any).totalHours}h total</span>}
                             {area ? (
                               <span className="flex items-center gap-1 text-xs" style={{ color: area.color ?? "#3B82F6" }}>
                                 <Layers className="h-3 w-3" />{area.name}
@@ -277,11 +277,11 @@ export default function CourseDetailPage() {
                         </div>
                       </div>
                       {isExpanded && (
-                        <div className="space-y-3 border-t border-slate-100 bg-slate-50 px-3 pb-3 pt-3">
+                        <div className="space-y-3 border-t border-[rgba(107,95,160,0.18)] bg-slate-50 px-3 pb-3 pt-3">
                           {hasSyllabus ? (
                             <div>
                               <p className="mb-1 flex items-center gap-1 text-xs font-semibold text-slate-600"><FileText className="h-3 w-3" />Ementa</p>
-                              <p className="whitespace-pre-wrap rounded border border-slate-100 bg-white p-2 text-xs leading-relaxed text-slate-700">{(subject as any).syllabus}</p>
+                              <p className="whitespace-pre-wrap rounded border border-[rgba(107,95,160,0.18)] p-2 text-xs leading-relaxed text-slate-700" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}>{(subject as any).syllabus}</p>
                             </div>
                           ) : (
                             <p className="flex items-center gap-1 text-xs italic text-slate-400"><FileText className="h-3 w-3" />Ementa nao cadastrada{isAdmin ? " — clique no icone de edicao para adicionar." : "."}</p>
@@ -289,7 +289,7 @@ export default function CourseDetailPage() {
                           {hasBibliography ? (
                             <div>
                               <p className="mb-1 flex items-center gap-1 text-xs font-semibold text-slate-600"><Library className="h-3 w-3" />Referencias Bibliograficas</p>
-                              <p className="whitespace-pre-wrap rounded border border-slate-100 bg-white p-2 text-xs leading-relaxed text-slate-700">{(subject as any).bibliography}</p>
+                              <p className="whitespace-pre-wrap rounded border border-[rgba(107,95,160,0.18)] p-2 text-xs leading-relaxed text-slate-700" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}>{(subject as any).bibliography}</p>
                             </div>
                           ) : (
                             <p className="flex items-center gap-1 text-xs italic text-slate-400"><Library className="h-3 w-3" />Referencias nao cadastradas{isAdmin ? " — clique no icone de edicao para adicionar." : "."}</p>

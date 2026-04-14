@@ -67,8 +67,8 @@ export default function DashboardOverview() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-        <p className="mt-1 text-sm text-slate-500">Visao geral do PPC Digital IFMS</p>
+        <h1 className="text-2xl font-bold" style={{ fontFamily: "\'Cinzel\', serif", color: "#e8e6f0", letterSpacing: "0.04em" }}>Dashboard</h1>
+        <p className="mt-1 text-sm" style={{ color: "#9e9ab8" }}>Visao geral do PPC Digital IFMS</p>
       </div>
 
       {/* KPIs */}
@@ -76,7 +76,7 @@ export default function DashboardOverview() {
         {kpis.map(kpi => (
           <Card
             key={kpi.label}
-            className={`cursor-pointer border transition-all hover:shadow-md ${kpi.alert ? "border-orange-200 bg-orange-50/50" : "border-slate-200 bg-white"}`}
+            className={`cursor-pointer border transition-all hover:shadow-md ${kpi.alert ? "border-orange-200 bg-orange-50/50" : "border-[rgba(107,95,160,0.25)] bg-white"}`}
             onClick={() => setLocation(kpi.path)}
           >
             <CardContent className="p-4">
@@ -112,7 +112,7 @@ export default function DashboardOverview() {
 
       {/* Graficos */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="border-slate-200 bg-white">
+        <Card className="border-[rgba(107,95,160,0.25)]" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-800">
               <Layers className="h-4 w-4 text-green-600" />
@@ -142,7 +142,7 @@ export default function DashboardOverview() {
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200 bg-white">
+        <Card className="border-[rgba(107,95,160,0.25)]" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-800">
               <TrendingUp className="h-4 w-4 text-green-600" />
@@ -171,7 +171,7 @@ export default function DashboardOverview() {
 
       {/* Pizza */}
       {byArea && byArea.length > 0 && (
-        <Card className="border-slate-200 bg-white">
+        <Card className="border-[rgba(107,95,160,0.25)]" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-800">
               <Layers className="h-4 w-4 text-purple-600" />

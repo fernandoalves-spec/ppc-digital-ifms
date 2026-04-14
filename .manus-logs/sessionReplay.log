@@ -74,3 +74,4 @@
 [2026-04-07T18:34:01.343Z] {"timestamp":1775586877802,"kind":"network_error","url":"https://3000-ipdrbfdy4j1kj93tt3rgn-61461e01.us1.manus.computer/?from_webdev=1","viewport":{"width":572,"height":679},"payload":{"kind":"fetch","method":"GET","url":"/api/trpc/dashboard.stats?batch=1&input=%7B%220%22%3A%7B%22json%22%3Anull%2C%22meta%22%3A%7B%22values%22%3A%5B%22undefined%22%5D%7D%7D%7D","message":"Failed to fetch"}}
 [2026-04-11T00:11:19.167Z] {"timestamp":1775866278784,"kind":"navigate","url":"http://127.0.0.1:3000/dashboard","viewport":{"width":1280,"height":720},"payload":{"reason":"pushState"}}
 [2026-04-12T21:54:19.676Z] {"timestamp":1776030858296,"kind":"navigate","url":"http://127.0.0.1:3000/dashboard","viewport":{"width":1280,"height":720},"payload":{"reason":"pushState"}}
+[2026-04-13T02:56:15.790Z] {"timestamp":1776048975478,"kind":"navigate","url":"http://127.0.0.1:3000/dashboard","viewport":{"width":1280,"height":720},"payload":{"reason":"pushState"}}

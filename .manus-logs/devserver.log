@@ -1860,3 +1860,50 @@
 [2026-04-13T02:50:17.128Z] 
 [2026-04-13T02:50:18.936Z] [Auth] Manus OAuth ativado
 [2026-04-13T02:50:18.969Z] Server running on http://0.0.0.0:3000/
+[2026-04-13T02:56:11.483Z] [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[2026-04-13T02:57:25.224Z] 10:57:25 PM [vite] (client) hmr update /src/pages/Subjects.tsx, /src/index.css
+[2026-04-13T02:58:08.827Z] 10:58:08 PM [vite] (client) hmr update /src/pages/Approvals.tsx, /src/index.css
+[2026-04-13T02:58:08.829Z] 10:58:08 PM [vite] (client) hmr update /src/pages/Areas.tsx, /src/index.css
+[2026-04-13T02:58:08.833Z] 10:58:08 PM [vite] (client) hmr update /src/pages/Audit.tsx, /src/index.css
+[2026-04-13T02:58:08.835Z] 10:58:08 PM [vite] (client) hmr update /src/pages/Campus.tsx, /src/index.css
+[2026-04-13T02:58:08.837Z] 10:58:08 PM [vite] (client) hmr update /src/pages/Courses.tsx, /src/index.css
+[2026-04-13T02:58:08.839Z] 10:58:08 PM [vite] (client) hmr update /src/pages/MemoryCalc.tsx, /src/index.css
+[2026-04-13T02:58:08.842Z] 10:58:08 PM [vite] (client) hmr update /src/pages/Offerings.tsx, /src/index.css
+[2026-04-13T02:58:08.844Z] 10:58:08 PM [vite] (client) hmr update /src/pages/Reports.tsx, /src/index.css
+[2026-04-13T02:58:08.848Z] 10:58:08 PM [vite] (client) hmr update /src/pages/Users.tsx, /src/index.css
+[2026-04-13T02:58:08.850Z] 10:58:08 PM [vite] (client) hmr update /src/pages/CourseDetail.tsx, /src/index.css
+[2026-04-13T02:58:08.852Z] 10:58:08 PM [vite] (client) hmr update /src/pages/PpcUpload.tsx, /src/index.css
+[2026-04-13T02:58:28.287Z] 10:58:28 PM [vite] (client) hmr update /src/pages/Approvals.tsx, /src/index.css
+[2026-04-13T02:58:28.289Z] 10:58:28 PM [vite] (client) hmr update /src/pages/Areas.tsx, /src/index.css
+[2026-04-13T02:58:28.289Z] 10:58:28 PM [vite] (client) hmr update /src/pages/Audit.tsx, /src/index.css
+[2026-04-13T02:58:28.290Z] 10:58:28 PM [vite] (client) hmr update /src/pages/Campus.tsx, /src/index.css
+[2026-04-13T02:58:28.290Z] 10:58:28 PM [vite] (client) hmr update /src/pages/Courses.tsx, /src/index.css
+[2026-04-13T02:58:28.290Z] 10:58:28 PM [vite] (client) hmr update /src/pages/MemoryCalc.tsx, /src/index.css
+[2026-04-13T02:58:28.291Z] 10:58:28 PM [vite] (client) hmr update /src/pages/Offerings.tsx, /src/index.css
+[2026-04-13T02:58:28.291Z] 10:58:28 PM [vite] (client) hmr update /src/pages/Reports.tsx, /src/index.css
+[2026-04-13T02:58:28.291Z] 10:58:28 PM [vite] (client) hmr update /src/pages/Users.tsx, /src/index.css
+[2026-04-13T02:58:28.292Z] 10:58:28 PM [vite] (client) hmr update /src/pages/CourseDetail.tsx, /src/index.css
+[2026-04-13T02:58:28.292Z] 10:58:28 PM [vite] (client) hmr update /src/pages/PpcUpload.tsx, /src/index.css
+[2026-04-13T02:58:28.293Z] 10:58:28 PM [vite] (client) hmr update /src/pages/DashboardOverview.tsx, /src/index.css
+[2026-04-13T02:58:28.588Z] 10:58:28 PM [vite] (client) hmr update /src/index.css
+[2026-04-13T02:58:45.653Z] 10:58:45 PM [vite] (client) hmr update /src/pages/Approvals.tsx, /src/index.css
+[2026-04-13T02:58:45.657Z] 10:58:45 PM [vite] (client) hmr update /src/pages/Areas.tsx, /src/index.css
+[2026-04-13T02:58:45.658Z] 10:58:45 PM [vite] (client) hmr update /src/pages/Audit.tsx, /src/index.css
+[2026-04-13T02:58:45.661Z] 10:58:45 PM [vite] (client) hmr update /src/pages/Campus.tsx, /src/index.css
+[2026-04-13T02:58:45.663Z] 10:58:45 PM [vite] (client) hmr update /src/pages/Courses.tsx, /src/index.css
+[2026-04-13T02:58:45.666Z] 10:58:45 PM [vite] (client) hmr update /src/pages/MemoryCalc.tsx, /src/index.css
+[2026-04-13T02:58:45.668Z] 10:58:45 PM [vite] (client) hmr update /src/pages/Offerings.tsx, /src/index.css
+[2026-04-13T02:58:45.670Z] 10:58:45 PM [vite] (client) hmr update /src/pages/Reports.tsx, /src/index.css
+[2026-04-13T02:58:45.672Z] 10:58:45 PM [vite] (client) hmr update /src/pages/Users.tsx, /src/index.css
+[2026-04-13T02:58:45.675Z] 10:58:45 PM [vite] (client) hmr update /src/pages/CourseDetail.tsx, /src/index.css
+[2026-04-13T02:58:45.678Z] 10:58:45 PM [vite] (client) hmr update /src/pages/PpcUpload.tsx, /src/index.css
+[2026-04-13T02:58:45.680Z] 10:58:45 PM [vite] (client) hmr update /src/pages/DashboardOverview.tsx, /src/index.css
+[2026-04-13T02:58:45.682Z] 10:58:45 PM [vite] (client) hmr update /src/index.css
+[2026-04-14T01:34:35.148Z] Dev server process group stopped
+[2026-04-14T01:34:38.163Z] Starting dev server with command: pnpm run dev
+[2026-04-14T01:34:38.778Z] 
+[2026-04-14T01:34:38.778Z] > ppc-digital-ifms@1.0.0 dev /home/ubuntu/ppc-digital-ifms
+[2026-04-14T01:34:38.779Z] > NODE_ENV=development tsx watch server/_core/index.ts
+[2026-04-14T01:34:38.779Z] 
+[2026-04-14T01:34:43.003Z] [Auth] Manus OAuth ativado
+[2026-04-14T01:34:43.041Z] Server running on http://0.0.0.0:3000/

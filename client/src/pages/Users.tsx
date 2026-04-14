@@ -24,24 +24,24 @@ export default function UsersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Usuarios</h1>
-        <p className="mt-1 text-sm text-slate-500">Gerencie os perfis e permissoes dos usuarios</p>
+        <h1 className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#e8e6f0", letterSpacing: "0.04em" }}>Usuarios</h1>
+        <p className="mt-1 text-sm" style={{ color: "#9e9ab8" }}>Gerencie os perfis e permissoes dos usuarios</p>
       </div>
 
       {isLoading ? (
         <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-16 animate-pulse rounded-xl bg-slate-100" />)}</div>
       ) : users.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-16 text-center">
+        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[rgba(107,95,160,0.25)] py-16 text-center">
           <Users className="mb-3 h-12 w-12 text-slate-300" />
-          <p className="text-slate-500">Nenhum usuario cadastrado</p>
+          <p className="" style={{ color: "#9e9ab8" }}>Nenhum usuario cadastrado</p>
         </div>
       ) : (
         <div className="space-y-2">
           {users.map(user => {
             const roleCfg = ROLE_CONFIG[user.role] ?? ROLE_CONFIG.user;
             return (
-              <div key={user.id} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                <Avatar className="h-9 w-9 shrink-0 border-2 border-slate-100">
+              <div key={user.id} className="flex items-center gap-3 rounded-xl border border-[rgba(107,95,160,0.25)] p-4 shadow-sm" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}>
+                <Avatar className="h-9 w-9 shrink-0 border-2 border-[rgba(107,95,160,0.18)]">
                   <AvatarFallback className="bg-gradient-to-br from-green-500 to-blue-500 text-xs font-bold text-white">
                     {user.name?.charAt(0).toUpperCase() ?? "U"}
                   </AvatarFallback>

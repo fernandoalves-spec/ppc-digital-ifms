@@ -11,12 +11,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Upload, FileText, Loader2, Sparkles, BookOpen, Clock, Pencil, Check, X, ChevronDown, ChevronUp, Building2, GraduationCap, AlertCircle, CheckCircle2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  pending: { label: "Pendente", color: "bg-slate-100 text-slate-600" },
-  processing: { label: "Processando", color: "bg-blue-100 text-blue-600" },
-  extracted: { label: "Extraido", color: "bg-amber-100 text-amber-700" },
-  approved: { label: "Aplicado", color: "bg-green-100 text-green-700" },
-  rejected: { label: "Erro", color: "bg-red-100 text-red-600" },
+const STATUS_LABELS: Record<string, { label: string; bg: string; fg: string }> = {
+  pending: { label: "Pendente", bg: "rgba(107,95,160,0.15)", fg: "#9e9ab8" },
+  processing: { label: "Processando", bg: "rgba(41,182,212,0.15)", fg: "#29b6d4" },
+  extracted: { label: "Extraido", bg: "rgba(212,160,23,0.15)", fg: "#f0c040" },
+  approved: { label: "Aplicado", bg: "rgba(41,182,100,0.15)", fg: "#4ade80" },
+  rejected: { label: "Erro", bg: "rgba(239,68,68,0.15)", fg: "#f87171" },
 };
 
 type ExtractedSubject = {
@@ -166,15 +166,15 @@ export default function PpcUploadPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Upload de PPC</h1>
-        <p className="mt-1 text-sm text-slate-500">Envie um PDF de PPC para extrair curso, campus, disciplinas e areas com IA.</p>
+        <h1 className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#e8e6f0", letterSpacing: "0.04em" }}>Upload de PPC</h1>
+        <p className="mt-1 text-sm" style={{ color: "#9e9ab8" }}>Envie um PDF de PPC para extrair curso, campus, disciplinas e areas com IA.</p>
       </div>
 
       {/* Campus */}
-      <div className="flex flex-wrap items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <Building2 className="h-5 w-5 shrink-0 text-slate-500" />
+      <div className="flex flex-wrap items-center gap-4 rounded-xl border border-[rgba(107,95,160,0.25)] p-4 shadow-sm" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}>
+        <Building2 className="h-5 w-5 shrink-0" style={{ color: "#8b7ec0" }} />
         <div className="flex-1">
-          <Label className="mb-1.5 block text-sm font-semibold text-slate-700">Campus do PPC *</Label>
+          <Label className="mb-1.5 block text-sm font-semibold" style={{ color: "#c8c4e0" }}>Campus do PPC *</Label>
           <Select value={selectedCampusId ? String(selectedCampusId) : ""} onValueChange={v => setSelectedCampusId(Number(v))}>
             <SelectTrigger className="max-w-sm"><SelectValue placeholder="Selecione o campus..." /></SelectTrigger>
             <SelectContent>{(campuses as any[]).map((c: any) => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}</SelectContent>
@@ -188,12 +188,12 @@ export default function PpcUploadPage() {
       </div>
 
       {/* Upload */}
-      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-4 flex items-center gap-2 text-base font-semibold text-slate-800">
-          <Upload className="h-4 w-4 text-green-600" /> Enviar Documento
+      <div className="rounded-xl p-5 shadow-sm" style={{ background: "linear-gradient(135deg, rgba(19,19,42,0.97), rgba(26,26,53,0.97))", border: "1px solid rgba(107,95,160,0.22)" }}>
+        <h2 className="mb-4 flex items-center gap-2 text-base font-semibold" style={{ color: "#e8e6f0", fontFamily: "'Rajdhani', sans-serif" }}>
+          <Upload className="h-4 w-4" style={{ color: "#4ade80" }} /> Enviar Documento
         </h2>
         <div
-          className={`cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-colors ${isDragging ? "border-green-400 bg-green-50" : "border-slate-200 hover:border-green-300 hover:bg-green-50/50"}`}
+          className={`cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-colors ${isDragging ? "border-green-400 bg-green-50" : "border-[rgba(107,95,160,0.25)] hover:border-green-300 hover:bg-green-50/50"}`}
           onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={e => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFileSelect(f); }}
@@ -205,14 +205,14 @@ export default function PpcUploadPage() {
           {file ? (
             <div className="flex flex-col items-center gap-2">
               <FileText className="h-10 w-10 text-green-600" />
-              <p className="text-sm font-medium text-slate-800">{file.name}</p>
-              <p className="text-xs text-slate-500">{(file.size / 1024 / 1024).toFixed(1)} MB</p>
+              <p className="text-sm font-medium" style={{ color: "#e8e6f0" }}>{file.name}</p>
+              <p className="text-xs" style={{ color: "#9e9ab8" }}>{(file.size / 1024 / 1024).toFixed(1)} MB</p>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2">
-              <Upload className="h-10 w-10 text-slate-300" />
-              <p className="text-sm font-medium text-slate-600">Arraste o PDF aqui ou clique para selecionar</p>
-              <p className="text-xs text-slate-400">Maximo 20MB · Apenas PDF</p>
+              <Upload className="h-10 w-10" style={{ color: "#6b5fa0" }} />
+              <p className="text-sm font-medium" style={{ color: "#c8c4e0" }}>Arraste o PDF aqui ou clique para selecionar</p>
+              <p className="text-xs" style={{ color: "#6a6685" }}>Maximo 20MB · Apenas PDF</p>
             </div>
           )}
         </div>
@@ -224,27 +224,27 @@ export default function PpcUploadPage() {
       </div>
 
       {/* Lista de documentos */}
-      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-4 flex items-center gap-2 text-base font-semibold text-slate-800">
-          <FileText className="h-4 w-4 text-slate-600" /> Documentos Enviados
+      <div className="rounded-xl p-5 shadow-sm" style={{ background: "linear-gradient(135deg, rgba(19,19,42,0.97), rgba(26,26,53,0.97))", border: "1px solid rgba(107,95,160,0.22)" }}>
+        <h2 className="mb-4 flex items-center gap-2 text-base font-semibold" style={{ color: "#e8e6f0", fontFamily: "'Rajdhani', sans-serif" }}>
+          <FileText className="h-4 w-4" style={{ color: "#8b7ec0" }} /> Documentos Enviados
         </h2>
         {isLoading ? (
-          <div className="space-y-2">{[1,2].map(i => <div key={i} className="h-16 animate-pulse rounded-lg bg-slate-100" />)}</div>
+          <div className="space-y-2">{[1,2].map(i => <div key={i} className="animate-pulse rounded-lg" style={{ background: "rgba(26,26,53,0.8)", height: "inherit" }} />)}</div>
         ) : documents.length === 0 ? (
-          <p className="py-8 text-center text-sm text-slate-400">Nenhum documento enviado ainda</p>
+          <p className="py-8 text-center text-sm" style={{ color: "#6a6685" }}>Nenhum documento enviado ainda</p>
         ) : (
           <div className="space-y-2">
             {documents.map(doc => {
               const status = STATUS_LABELS[doc.status] ?? STATUS_LABELS.pending;
               const isExtracting = extractMutation.isPending && applyDocId === doc.id;
               return (
-                <div key={doc.id} className="flex items-center gap-3 rounded-lg bg-slate-50 p-3">
-                  <FileText className="h-8 w-8 shrink-0 text-slate-500" />
+                <div key={doc.id} className="flex items-center gap-3 rounded-lg p-3" style={{ background: "rgba(26,26,53,0.8)", border: "1px solid rgba(107,95,160,0.18)" }}>
+                  <FileText className="h-8 w-8 shrink-0" style={{ color: "#8b7ec0" }} />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-slate-800">{doc.fileName}</p>
-                    <p className="text-xs text-slate-500">{new Date(doc.createdAt).toLocaleDateString("pt-BR")}</p>
+                    <p className="truncate text-sm font-medium" style={{ color: "#e8e6f0" }}>{doc.fileName}</p>
+                    <p className="text-xs" style={{ color: "#9e9ab8" }}>{new Date(doc.createdAt).toLocaleDateString("pt-BR")}</p>
                   </div>
-                  <Badge className={`shrink-0 text-xs ${status.color}`}>{status.label}</Badge>
+                  <Badge className="shrink-0 text-xs" style={{ background: status.bg, color: status.fg, border: `1px solid ${status.fg}40` }}>{status.label}</Badge>
                   {doc.status === "pending" && (
                     <Button size="sm" variant="outline" onClick={() => handleExtract(doc)} disabled={extractMutation.isPending} className="shrink-0">
                       {isExtracting ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Sparkles className="mr-1 h-3 w-3" />Extrair com IA</>}
@@ -274,45 +274,45 @@ export default function PpcUploadPage() {
               <X className="mr-1 h-4 w-4" /> Cancelar
             </Button>
           </div>
-          <p className="mb-4 text-sm text-slate-600">Revise as informacoes extraidas pela IA. Marque/desmarque disciplinas e edite os campos antes de importar.</p>
+          <p className="mb-4 text-sm" style={{ color: "#c8c4e0" }}>Revise as informacoes extraidas pela IA. Marque/desmarque disciplinas e edite os campos antes de importar.</p>
 
           <div className="space-y-4">
             {/* Dados do curso */}
-            <div className="rounded-lg border border-slate-200 bg-white p-4 space-y-3">
-              <h3 className="flex items-center gap-2 text-sm font-bold text-slate-700"><GraduationCap className="h-4 w-4 text-green-600" />Informacoes do Curso</h3>
+            <div className="rounded-lg border border-[rgba(107,95,160,0.25)] p-4 space-y-3" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}>
+              <h3 className="flex items-center gap-2 text-sm font-bold" style={{ color: "#e8e6f0" }}><GraduationCap className="h-4 w-4" style={{ color: "#4ade80" }} />Informacoes do Curso</h3>
               <div className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 p-2.5">
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
                 <p className="text-xs text-blue-800">O <strong>campus foi definido por voce</strong> e nao pode ser alterado. Se o curso nao existir, sera <strong>criado automaticamente</strong>.</p>
               </div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="space-y-1">
-                  <Label className="text-xs text-slate-500">Campus</Label>
+                  <Label className="text-xs" style={{ color: "#9e9ab8" }}>Campus</Label>
                   <Input value={(campuses as any[]).find((c: any) => c.id === selectedCampusId)?.name ?? editedData.campusName} readOnly className="h-9 cursor-not-allowed border-green-200 bg-green-50 font-medium text-green-800" />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs text-slate-500">Curso</Label>
+                  <Label className="text-xs" style={{ color: "#9e9ab8" }}>Curso</Label>
                   <Input value={editedData.courseName} onChange={e => setEditedData({ ...editedData, courseName: e.target.value })} className="h-9" />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs text-slate-500">Tipo</Label>
+                  <Label className="text-xs" style={{ color: "#9e9ab8" }}>Tipo</Label>
                   <Select value={editedData.courseType} onValueChange={v => setEditedData({ ...editedData, courseType: v })}>
                     <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                     <SelectContent>{["Tecnico", "Subsequente", "Graduacao", "FIC", "Pos-graduacao"].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs text-slate-500">Duracao (sem.)</Label>
+                  <Label className="text-xs" style={{ color: "#9e9ab8" }}>Duracao (sem.)</Label>
                   <Input type="number" min={1} max={12} value={editedData.duration} onChange={e => setEditedData({ ...editedData, duration: Number(e.target.value) })} className="h-9" />
                 </div>
               </div>
             </div>
 
             {/* Disciplinas */}
-            <div className="rounded-lg border border-slate-200 bg-white p-4 space-y-3">
+            <div className="rounded-lg border border-[rgba(107,95,160,0.25)] p-4 space-y-3" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}>
               <div className="flex items-center justify-between">
-                <h3 className="flex items-center gap-2 text-sm font-bold text-slate-700"><BookOpen className="h-4 w-4 text-green-600" />Disciplinas Extraidas</h3>
+                <h3 className="flex items-center gap-2 text-sm font-bold" style={{ color: "#e8e6f0" }}><BookOpen className="h-4 w-4" style={{ color: "#4ade80" }} />Disciplinas Extraidas</h3>
                 <div className="flex items-center gap-3">
-                  <span className="text-xs text-slate-500">{selectedSubjects.size} de {editedData.subjects.length} selecionadas</span>
+                  <span className="text-xs" style={{ color: "#9e9ab8" }}>{selectedSubjects.size} de {editedData.subjects.length} selecionadas</span>
                   <Button variant="outline" size="sm" className="h-7 text-xs" onClick={toggleAll}>
                     {selectedSubjects.size === editedData.subjects.length ? "Desmarcar Todas" : "Selecionar Todas"}
                   </Button>
@@ -322,10 +322,10 @@ export default function PpcUploadPage() {
                 <div className="space-y-4">
                   {Object.entries(semesterGroups).sort(([a], [b]) => Number(a) - Number(b)).map(([sem, subs]) => (
                     <div key={sem}>
-                      <div className="sticky top-0 z-10 mb-2 flex items-center gap-2 bg-white py-1">
-                        <div className="h-px flex-1 bg-slate-200" />
+                      <div className="sticky top-0 z-10 mb-2 flex items-center gap-2 py-1" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}>
+                        <div className="h-px flex-1" style={{ background: "rgba(107,95,160,0.2)" }} />
                         <span className="bg-white px-2 text-xs font-bold text-slate-500">{sem}o SEMESTRE</span>
-                        <div className="h-px flex-1 bg-slate-200" />
+                        <div className="h-px flex-1" style={{ background: "rgba(107,95,160,0.2)" }} />
                       </div>
                       <div className="space-y-1">
                         {subs.map(s => {
@@ -333,7 +333,7 @@ export default function PpcUploadPage() {
                           const isEditing = editingIdx === s._idx;
                           const isExpanded = expandedSubject === s._idx;
                           return (
-                            <div key={s._idx} className={`overflow-hidden rounded-lg border transition-all ${isSelected ? "border-green-200 bg-green-50/50" : "border-slate-100 bg-slate-50/50 opacity-60"}`}>
+                            <div key={s._idx} className={`overflow-hidden rounded-lg border transition-all ${isSelected ? "border-green-200 bg-green-50/50" : "border-[rgba(107,95,160,0.18)] bg-slate-50/50 opacity-60"}`}>
                               <div className="flex items-center gap-3 px-3 py-2.5">
                                 <Checkbox checked={isSelected} onCheckedChange={() => toggleSubject(s._idx)} className="shrink-0" />
                                 <div className="min-w-0 flex-1 cursor-pointer" role="button" tabIndex={0} onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setExpandedSubject(isExpanded ? null : s._idx); } }} onClick={() => setExpandedSubject(isExpanded ? null : s._idx)}>
@@ -350,10 +350,10 @@ export default function PpcUploadPage() {
                                   </div>
                                 </div>
                                 <div className="flex shrink-0 items-center gap-1">
-                                  <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-blue-600" onClick={() => setEditingIdx(isEditing ? null : s._idx)}>
+                                  <Button variant="ghost" size="icon" className="h-7 w-7" style={{ color: "#6a6685" }} onClick={() => setEditingIdx(isEditing ? null : s._idx)}>
                                     <Pencil className="h-3.5 w-3.5" />
                                   </Button>
-                                  <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-red-600" onClick={() => removeSubject(s._idx)}>
+                                  <Button variant="ghost" size="icon" className="h-7 w-7" style={{ color: "#6a6685" }} onClick={() => removeSubject(s._idx)}>
                                     <Trash2 className="h-3.5 w-3.5" />
                                   </Button>
                                   <button onClick={() => setExpandedSubject(isExpanded ? null : s._idx)} className="p-1 text-slate-400 hover:text-slate-700">
@@ -362,7 +362,7 @@ export default function PpcUploadPage() {
                                 </div>
                               </div>
                               {isEditing && (
-                                <div className="space-y-3 border-t border-slate-100 bg-white px-3 pb-3 pt-2">
+                                <div className="space-y-3 border-t border-[rgba(107,95,160,0.18)] px-3 pb-3 pt-2" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}>
                                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                                     <div className="space-y-1"><Label className="text-[11px] text-slate-500">Nome</Label><Input value={s.name} onChange={e => updateSubjectField(s._idx, "name", e.target.value)} className="h-8 text-sm" /></div>
                                     <div className="space-y-1"><Label className="text-[11px] text-slate-500">Semestre</Label><Input type="number" min={1} max={12} value={s.semester} onChange={e => updateSubjectField(s._idx, "semester", Number(e.target.value))} className="h-8 text-sm" /></div>
@@ -395,9 +395,9 @@ export default function PpcUploadPage() {
                                 </div>
                               )}
                               {isExpanded && !isEditing && (
-                                <div className="space-y-2 border-t border-slate-100 bg-slate-50/50 px-3 pb-3 pt-2">
-                                  {s.syllabus ? <div><p className="mb-0.5 text-[11px] font-semibold text-slate-500">Ementa</p><p className="whitespace-pre-wrap rounded border border-slate-100 bg-white p-2 text-xs text-slate-700">{s.syllabus}</p></div> : <p className="text-xs italic text-slate-400">Ementa nao extraida</p>}
-                                  {s.bibliography ? <div><p className="mb-0.5 text-[11px] font-semibold text-slate-500">Referencias</p><p className="whitespace-pre-wrap rounded border border-slate-100 bg-white p-2 text-xs text-slate-700">{s.bibliography}</p></div> : <p className="text-xs italic text-slate-400">Referencias nao extraidas</p>}
+                                <div className="space-y-2 border-t border-[rgba(107,95,160,0.18)] bg-slate-50/50 px-3 pb-3 pt-2">
+                                  {s.syllabus ? <div><p className="mb-0.5 text-[11px] font-semibold text-slate-500">Ementa</p><p className="whitespace-pre-wrap rounded border border-[rgba(107,95,160,0.18)] p-2 text-xs text-slate-700" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}>{s.syllabus}</p></div> : <p className="text-xs italic text-slate-400">Ementa nao extraida</p>}
+                                  {s.bibliography ? <div><p className="mb-0.5 text-[11px] font-semibold text-slate-500">Referencias</p><p className="whitespace-pre-wrap rounded border border-[rgba(107,95,160,0.18)] p-2 text-xs text-slate-700" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}>{s.bibliography}</p></div> : <p className="text-xs italic text-slate-400">Referencias nao extraidas</p>}
                                 </div>
                               )}
                             </div>
@@ -411,8 +411,8 @@ export default function PpcUploadPage() {
             </div>
 
             {/* Botao aplicar */}
-            <div className="flex items-center justify-between rounded-lg border border-green-200 bg-white p-4 shadow-lg">
-              <div className="text-sm text-slate-600">
+            <div className="flex items-center justify-between rounded-lg border border-green-200 p-4 shadow-lg" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}>
+              <div className="text-sm" style={{ color: "#9e9ab8" }}>
                 <strong className="text-green-700">{selectedSubjects.size}</strong> disciplinas selecionadas para importacao
               </div>
               <div className="flex gap-2">

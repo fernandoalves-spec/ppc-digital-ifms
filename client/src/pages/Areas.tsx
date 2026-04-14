@@ -56,8 +56,8 @@ export default function AreasPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Areas de Ensino</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#e8e6f0", letterSpacing: "0.04em" }}>Areas de Ensino</h1>
+          <p className="mt-1 text-sm" style={{ color: "#9e9ab8" }}>
             Areas sao globais — cadastre aqui e depois vincule cada area aos campi em <strong>Campus</strong>.
           </p>
         </div>
@@ -68,18 +68,18 @@ export default function AreasPage() {
 
       {isLoading ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {[1,2,3,4].map(i => <div key={i} className="h-28 animate-pulse rounded-xl bg-slate-100" />)}
+          {[1,2,3,4].map(i => <div key={i} className="animate-pulse rounded-xl" style={{ background: "rgba(26,26,53,0.8)", height: "inherit" }} />)}
         </div>
       ) : areas.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-16 text-center">
-          <Layers className="mb-3 h-12 w-12 text-slate-300" />
-          <p className="font-medium text-slate-500">Nenhuma area cadastrada</p>
-          <p className="mt-1 text-sm text-slate-400">Clique em "Nova Area" para comecar</p>
+        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[rgba(107,95,160,0.25)] py-16 text-center">
+          <Layers className="mb-3 h-12 w-12" style={{ color: "#6b5fa0" }} />
+          <p className="font-medium" style={{ color: "#9e9ab8" }}>Nenhuma area cadastrada</p>
+          <p className="mt-1 text-sm" style={{ color: "#6a6685" }}>Clique em "Nova Area" para comecar</p>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {areas.map((area) => (
-            <div key={area.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
+            <div key={area.id} className="overflow-hidden rounded-xl border border-[rgba(107,95,160,0.25)] shadow-sm transition-all hover:shadow-md" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}>
               <div className="h-1.5" style={{ backgroundColor: area.color ?? DEFAULT_COLOR }} />
               <div className="p-4">
                 <div className="mb-2 flex items-start justify-between">
@@ -87,16 +87,16 @@ export default function AreasPage() {
                     <Layers className="h-4 w-4" style={{ color: area.color ?? DEFAULT_COLOR }} />
                   </div>
                   <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-blue-600" onClick={() => handleEdit(area)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" style={{ color: "#6a6685" }} onClick={() => handleEdit(area)}>
                       <Pencil className="h-3 w-3" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-red-600" onClick={() => deleteMutation.mutate({ id: area.id })}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" style={{ color: "#6a6685" }} onClick={() => deleteMutation.mutate({ id: area.id })}>
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
                 </div>
-                <h3 className="text-sm font-semibold leading-tight text-slate-900">{area.name}</h3>
-                {area.description && <p className="mt-1 line-clamp-2 text-xs text-slate-500">{area.description}</p>}
+                <h3 className="text-sm font-semibold leading-tight" style={{ color: "#e8e6f0" }}>{area.name}</h3>
+                {area.description && <p className="mt-1 line-clamp-2 text-xs" style={{ color: "#9e9ab8" }}>{area.description}</p>}
               </div>
             </div>
           ))}
@@ -120,7 +120,7 @@ export default function AreasPage() {
             <div className="space-y-1.5">
               <Label>Cor de Identificacao</Label>
               <div className="flex items-center gap-3">
-                <input type="color" value={form.color} onChange={e => setForm({ ...form, color: e.target.value })} className="h-10 w-10 cursor-pointer rounded-lg border border-slate-200" />
+                <input type="color" value={form.color} onChange={e => setForm({ ...form, color: e.target.value })} className="h-10 w-10 cursor-pointer rounded-lg border border-[rgba(107,95,160,0.25)]" />
                 <div className="flex flex-wrap gap-2">
                   {PRESET_COLORS.map(c => (
                     <button key={c} onClick={() => setForm({ ...form, color: c })} className={`h-6 w-6 rounded-full transition-transform hover:scale-110 ${form.color === c ? "ring-2 ring-slate-400 ring-offset-1 scale-110" : ""}`} style={{ backgroundColor: c }} />

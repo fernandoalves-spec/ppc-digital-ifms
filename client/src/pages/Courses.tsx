@@ -100,8 +100,8 @@ export default function CoursesPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Cursos</h1>
-          <p className="mt-1 text-sm text-slate-500">Gerencie os cursos ofertados pelo IFMS</p>
+          <h1 className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#e8e6f0", letterSpacing: "0.04em" }}>Cursos</h1>
+          <p className="mt-1 text-sm" style={{ color: "#9e9ab8" }}>Gerencie os cursos ofertados pelo IFMS</p>
         </div>
         <Button onClick={openCreate} className="bg-green-600 hover:bg-green-700">
           <Plus className="mr-2 h-4 w-4" /> Novo Curso
@@ -110,33 +110,33 @@ export default function CoursesPage() {
 
       <div className="flex flex-wrap items-center gap-3">
         <Select value={filterCampus} onValueChange={setFilterCampus}>
-          <SelectTrigger className="w-44 bg-white"><SelectValue placeholder="Todos os campus" /></SelectTrigger>
+          <SelectTrigger className="w-44" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}><SelectValue placeholder="Todos os campus" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos os campus</SelectItem>
             {campuses.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={filterType} onValueChange={setFilterType}>
-          <SelectTrigger className="w-40 bg-white"><SelectValue placeholder="Todos os tipos" /></SelectTrigger>
+          <SelectTrigger className="w-40" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}><SelectValue placeholder="Todos os tipos" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos os tipos</SelectItem>
             {COURSE_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
           </SelectContent>
         </Select>
-        <span className="text-sm text-slate-500">{filtered.length} curso(s)</span>
+        <span className="text-sm" style={{ color: "#9e9ab8" }}>{filtered.length} curso(s)</span>
       </div>
 
       {isLoading ? (
         <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-20 animate-pulse rounded-xl bg-slate-100" />)}</div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-16 text-center">
+        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[rgba(107,95,160,0.25)] py-16 text-center">
           <GraduationCap className="mb-3 h-12 w-12 text-slate-300" />
           <p className="font-medium text-slate-500">Nenhum curso encontrado</p>
         </div>
       ) : (
         <div className="space-y-2">
           {filtered.map(course => (
-            <div key={course.id} className="flex cursor-pointer items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:shadow-md" onClick={() => setLocation(`/courses/${course.id}`)}>
+            <div key={course.id} className="flex cursor-pointer items-center gap-4 rounded-xl border border-[rgba(107,95,160,0.25)] p-4 shadow-sm transition-all hover:shadow-md" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }} onClick={() => setLocation(`/courses/${course.id}`)}>
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-green-50">
                 <GraduationCap className="h-5 w-5 text-green-600" />
               </div>

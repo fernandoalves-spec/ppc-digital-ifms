@@ -210,7 +210,7 @@ export default function MemoryCalc() {
               <BarChart3 className="w-4 h-4 text-green-700" />
             </div>
             <div className="min-w-0">
-              <p className="text-xl font-bold text-slate-900">{totals.totalAreas}</p>
+              <p className="text-xl font-bold" style={{ fontFamily: "\'Cinzel\', serif", color: "#e8e6f0", letterSpacing: "0.04em" }}>{totals.totalAreas}</p>
               <p className="text-[11px] text-slate-500 leading-tight">Áreas</p>
             </div>
           </CardContent>
@@ -221,7 +221,7 @@ export default function MemoryCalc() {
               <GraduationCap className="w-4 h-4 text-blue-700" />
             </div>
             <div className="min-w-0">
-              <p className="text-xl font-bold text-slate-900">{totals.totalCourses}</p>
+              <p className="text-xl font-bold" style={{ fontFamily: "\'Cinzel\', serif", color: "#e8e6f0", letterSpacing: "0.04em" }}>{totals.totalCourses}</p>
               <p className="text-[11px] text-slate-500 leading-tight">Cursos ativos</p>
             </div>
           </CardContent>
@@ -232,7 +232,7 @@ export default function MemoryCalc() {
               <Clock className="w-4 h-4 text-blue-700" />
             </div>
             <div className="min-w-0">
-              <p className="text-xl font-bold text-slate-900">{totals.totalFirst}</p>
+              <p className="text-xl font-bold" style={{ fontFamily: "\'Cinzel\', serif", color: "#e8e6f0", letterSpacing: "0.04em" }}>{totals.totalFirst}</p>
               <p className="text-[11px] text-slate-500 leading-tight">Aulas 1º Sem/{targetYear}</p>
             </div>
           </CardContent>
@@ -243,7 +243,7 @@ export default function MemoryCalc() {
               <Clock className="w-4 h-4 text-purple-700" />
             </div>
             <div className="min-w-0">
-              <p className="text-xl font-bold text-slate-900">{totals.totalSecond}</p>
+              <p className="text-xl font-bold" style={{ fontFamily: "\'Cinzel\', serif", color: "#e8e6f0", letterSpacing: "0.04em" }}>{totals.totalSecond}</p>
               <p className="text-[11px] text-slate-500 leading-tight">Aulas 2º Sem/{targetYear}</p>
             </div>
           </CardContent>
@@ -308,7 +308,7 @@ export default function MemoryCalc() {
                       const isCampusExpanded = expandedCampuses.has(campusKey);
 
                       return (
-                        <div key={campus.campusId} className="border border-slate-200 rounded-lg overflow-hidden">
+                        <div key={campus.campusId} className="border border-[rgba(107,95,160,0.25)] rounded-lg overflow-hidden">
                           {/* Cabeçalho do Campus */}
                           <button
                             className="w-full text-left bg-slate-800 text-white px-3 md:px-4 py-2.5 flex items-center justify-between gap-2"
@@ -339,7 +339,7 @@ export default function MemoryCalc() {
 
                           {/* Cursos do Campus */}
                           {isCampusExpanded && (
-                            <div className="divide-y divide-slate-100">
+                            <div className="divide-y" style={{ borderColor: "rgba(107,95,160,0.18)" }}>
                               {campus.courses.map(course => {
                                 const courseKey = `${area.areaId}-${campus.campusId}-${course.courseId}`;
                                 const isCourseExpanded = expandedCourses.has(courseKey);
@@ -373,12 +373,12 @@ export default function MemoryCalc() {
 
                                     {/* Detalhamento por Edital */}
                                     {isCourseExpanded && (
-                                      <div className="px-3 md:px-4 pb-3 pt-2 space-y-3 bg-white">
+                                      <div className="px-3 md:px-4 pb-3 pt-2 space-y-3" style={{ background: "rgba(19,19,42,0.97)", border: "1px solid rgba(107,95,160,0.35)", color: "#e8e6f0" }}>
                                         {course.offerings.length === 0 ? (
                                           <p className="text-xs text-slate-400 italic py-2">Nenhum edital ativo para este curso no ano {targetYear}.</p>
                                         ) : (
                                           course.offerings.map(off => (
-                                            <div key={off.offeringId} className="border border-slate-200 rounded-lg overflow-hidden">
+                                            <div key={off.offeringId} className="border border-[rgba(107,95,160,0.25)] rounded-lg overflow-hidden">
                                               {/* Cabeçalho do Edital */}
                                               <div
                                                 className="px-3 py-2 flex items-center gap-2 flex-wrap"
@@ -423,7 +423,7 @@ export default function MemoryCalc() {
                                                           <th className="text-center px-2 py-1.5 font-semibold text-slate-600 whitespace-nowrap hidden sm:table-cell">Tipo</th>
                                                         </tr>
                                                       </thead>
-                                                      <tbody className="divide-y divide-slate-100">
+                                                      <tbody className="divide-y" style={{ borderColor: "rgba(107,95,160,0.18)" }}>
                                                         {off.subjects1st.map((sub, idx) => (
                                                           <tr key={sub.id} className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/50"}>
                                                             <td className="px-3 py-1.5 text-slate-800">{sub.name}</td>
@@ -462,7 +462,7 @@ export default function MemoryCalc() {
                                                           <th className="text-center px-2 py-1.5 font-semibold text-slate-600 whitespace-nowrap hidden sm:table-cell">Tipo</th>
                                                         </tr>
                                                       </thead>
-                                                      <tbody className="divide-y divide-slate-100">
+                                                      <tbody className="divide-y" style={{ borderColor: "rgba(107,95,160,0.18)" }}>
                                                         {off.subjects2nd.map((sub, idx) => (
                                                           <tr key={sub.id} className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/50"}>
                                                             <td className="px-3 py-1.5 text-slate-800">{sub.name}</td>

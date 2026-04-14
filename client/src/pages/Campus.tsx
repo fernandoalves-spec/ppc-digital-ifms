@@ -90,8 +90,8 @@ export default function CampusPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Campus / Unidades</h1>
-          <p className="mt-1 text-sm text-slate-500">Gerencie as unidades e vincule areas de ensino a cada campus.</p>
+          <h1 className="text-2xl font-bold" style={{ fontFamily: "'Cinzel', serif", color: "#e8e6f0", letterSpacing: "0.04em" }}>Campus / Unidades</h1>
+          <p className="mt-1 text-sm" style={{ color: "#9e9ab8" }}>Gerencie as unidades e vincule areas de ensino a cada campus.</p>
         </div>
         {isAdmin && (
           <Button onClick={() => { setForm({ name: "", city: "", state: "" }); setEditingId(null); setShowForm(true); }} className="bg-green-600 hover:bg-green-700">
@@ -102,36 +102,36 @@ export default function CampusPage() {
 
       {isLoading ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3].map(i => <div key={i} className="h-40 animate-pulse rounded-xl bg-slate-100" />)}
+          {[1, 2, 3].map(i => <div key={i} className="animate-pulse rounded-xl" style={{ background: "rgba(26,26,53,0.8)", height: "inherit" }} />)}
         </div>
       ) : campuses.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-16 text-center">
-          <Building2 className="mb-3 h-12 w-12 text-slate-300" />
-          <p className="font-medium text-slate-500">Nenhum campus cadastrado</p>
-          {isAdmin && <p className="mt-1 text-sm text-slate-400">Clique em "Novo Campus" para comecar</p>}
+        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[rgba(107,95,160,0.25)] py-16 text-center">
+          <Building2 className="mb-3 h-12 w-12" style={{ color: "#6b5fa0" }} />
+          <p className="font-medium" style={{ color: "#9e9ab8" }}>Nenhum campus cadastrado</p>
+          {isAdmin && <p className="mt-1 text-sm" style={{ color: "#6a6685" }}>Clique em "Novo Campus" para comecar</p>}
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {campuses.map((campus: any) => (
-            <div key={campus.id} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:shadow-md">
+            <div key={campus.id} className="rounded-xl p-5 shadow-sm transition-all hover:shadow-md" style={{ background: "linear-gradient(135deg, rgba(19,19,42,0.97), rgba(26,26,53,0.97))", border: "1px solid rgba(107,95,160,0.22)" }}>
               <div className="mb-3 flex items-start justify-between">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
                   <Building2 className="h-5 w-5 text-blue-600" />
                 </div>
                 {isAdmin && (
                   <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-blue-600" onClick={() => handleEdit(campus)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" style={{ color: "#6a6685" }} onClick={() => handleEdit(campus)}>
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600" onClick={() => deleteMutation.mutate({ id: campus.id })}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" style={{ color: "#6a6685" }} onClick={() => deleteMutation.mutate({ id: campus.id })}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 )}
               </div>
-              <h3 className="font-semibold leading-tight text-slate-900">{campus.name}</h3>
+              <h3 className="font-semibold leading-tight" style={{ color: "#e8e6f0" }}>{campus.name}</h3>
               {(campus.city || campus.state) && (
-                <p className="mt-1 flex items-center gap-1 text-sm text-slate-500">
+                <p className="mt-1 flex items-center gap-1 text-sm" style={{ color: "#9e9ab8" }}>
                   <MapPin className="h-3 w-3" />
                   {[campus.city, campus.state].filter(Boolean).join(", ")}
                 </p>
@@ -184,29 +184,29 @@ export default function CampusPage() {
               <Tags className="h-5 w-5 text-green-600" />
               Areas — {managingAreas?.name}
             </DialogTitle>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm" style={{ color: "#9e9ab8" }}>
               Marque as areas disponiveis neste campus. A IA usara apenas estas areas ao importar PPCs.
             </p>
           </DialogHeader>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: "#6a6685" }} />
             <Input placeholder="Buscar area..." value={areaSearch} onChange={e => setAreaSearch(e.target.value)} className="pl-9" />
           </div>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm" style={{ color: "#9e9ab8" }}>
             <strong className="text-green-700">{campusAreaIds.size}</strong> de {allAreas.length} areas vinculadas
           </p>
           <ScrollArea className="h-[320px] rounded-lg border">
             <div className="p-1">
               {filteredAreas.length === 0 ? (
-                <p className="py-8 text-center text-sm text-slate-400">Nenhuma area encontrada</p>
+                <p className="py-8 text-center text-sm" style={{ color: "#6a6685" }}>Nenhuma area encontrada</p>
               ) : (
                 filteredAreas.map((area: any) => {
                   const isLinked = campusAreaIds.has(area.id);
                   return (
-                    <label key={area.id} className={`flex cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 transition-colors hover:bg-slate-50 ${isLinked ? "bg-green-50/70" : ""}`}>
+                    <label key={area.id} className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 transition-colors" style={isLinked ? { background: "rgba(41,182,100,0.1)" } : {}}>
                       <Checkbox checked={isLinked} onCheckedChange={() => handleToggleArea(area.id)} disabled={!isAdmin} />
                       <div className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: area.color ?? "#6366f1" }} />
-                      <span className={`text-sm ${isLinked ? "font-medium text-slate-800" : "text-slate-600"}`}>{area.name}</span>
+                      <span className="text-sm" style={isLinked ? { color: "#e8e6f0", fontWeight: 600 } : { color: "#9e9ab8" }}>{area.name}</span>
                       {isLinked && <Badge variant="outline" className="ml-auto border-green-200 bg-green-50 text-[10px] text-green-700">Vinculada</Badge>}
                     </label>
                   );
